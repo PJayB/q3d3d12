@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|Durango">
+			<Configuration>Debug</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Profile|Durango">
+			<Configuration>Profile</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|Durango">
+			<Configuration>Release</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{1C256A63-C968-4D11-A23E-0CFB1D67E481}</ProjectGuid>
+		<DefaultLanguage>en-US</DefaultLanguage>
+		<RootNamespace>q3_ui</RootNamespace>
+		<MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
+		<ApplicationEnvironment>Title</ApplicationEnvironment>
+		<Keyword>Win32Proj</Keyword>
+		<TargetRuntime>Native</TargetRuntime>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	<PropertyGroup>
+		<_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>uixbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\baseq3\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>uixbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\baseq3\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>uixbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\baseq3\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;DEBUG;_DEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;Q3_UI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>Disabled</Optimization>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<DisableOptimizations>true</DisableOptimizations>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<ModuleDefinitionFile>..\..\code\q3_ui\ui.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;NDEBUG;PROFILE;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;Q3_UI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+			<ModuleDefinitionFile>..\..\code\q3_ui\ui.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;NDEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;Q3_UI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+			<TreatWarningAsError>true</TreatWarningAsError>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+			<ModuleDefinitionFile>..\..\code\q3_ui\ui.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\q3_ui\ui_addbots.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_atoms.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_cinematics.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_confirm.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_connect.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_controls2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_credits.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_demo2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_display.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_gameinfo.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_ingame.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_loadconfig.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_login.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_main.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_menu.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_mfield.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_mods.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_network.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_options.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_playermodel.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_players.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_playersettings.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_preferences.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_qmenu.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_rankings.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_rankstatus.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_removebots.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_saveconfig.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_serverinfo.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_servers2.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_setup.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_signup.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_sound.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_sparena.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_specifyleague.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_specifyserver.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_splevel.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_sppostgame.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_spreset.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_spskill.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_start.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_startserver.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_team.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_teamorders.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\q3_ui\ui_video.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\ui\ui_syscalls.c">
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\q3_ui\keycodes.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\q3_ui\ui_local.h">
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\q3_ui\ui.def">
+		</Text>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets" />
+</Project>

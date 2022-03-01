@@ -202,7 +202,7 @@ int AAS_AlternativeRouteGoals(vec3_t start, int startareanum, vec3_t goal, int g
 		if (numaltroutegoals >= maxaltroutegoals) break;
 	} //end for
 #ifdef ALTROUTE_DEBUG
-	botimport.Print(PRT_MESSAGE, "alternative route goals in %d msec\n", Sys_MilliSeconds() - startmillisecs);
+	BotImport_Print(PRT_MESSAGE, "alternative route goals in %d msec\n", Sys_MilliSeconds() - startmillisecs);
 #endif
 	return numaltroutegoals;
 #endif

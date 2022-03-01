@@ -80,7 +80,17 @@ static void MainMenu_ExitAction( qboolean result ) {
 		return;
 	}
 	UI_PopMenu();
-	UI_CreditMenu();
+
+    if (UI_AccountEnabled())
+    {
+        // @pjb: sign the user out
+        trap_Account_SignOut();
+
+        // @pjb: go to start screen
+        UI_StartScreen();
+    } else {
+        UI_CreditMenu();
+    }
 }
 
 
@@ -126,7 +136,11 @@ void Main_MenuEvent (void* ptr, int event) {
 		break;
 
 	case ID_EXIT:
-		UI_ConfirmMenu( "EXIT GAME?", NULL, MainMenu_ExitAction );
+        if (UI_AccountEnabled()) {
+            UI_ConfirmMenu( "LOG OUT?", NULL, MainMenu_ExitAction );
+        } else {
+            UI_ConfirmMenu( "REALLY QUIT?", NULL, MainMenu_ExitAction );
+        }
 		break;
 	}
 }
@@ -246,7 +260,7 @@ static qboolean UI_TeamArenaExists( void ) {
 	numdirs = trap_FS_GetFileList( "$modlist", "", dirlist, sizeof(dirlist) );
 	dirptr  = dirlist;
 	for( i = 0; i < numdirs; i++ ) {
-		dirlen = strlen( dirptr ) + 1;
+		dirlen = (int) strlen( dirptr ) + 1;
     descptr = dirptr + dirlen;
 		if (Q_stricmp(dirptr, "missionpack") == 0) {
 			return qtrue;
@@ -259,30 +273,21 @@ static qboolean UI_TeamArenaExists( void ) {
 
 /*
 ===============
-UI_MainMenu
+@pjb: a user is logged in
+UI_MainMenu_LoggedIn 
 
 The main menu only comes up when not in a game,
 so make sure that the attract loop server is down
 and that local cinematics are killed
 ===============
 */
-void UI_MainMenu( void ) {
+void UI_MainMenu_LoggedIn( void ) {
 	int		y;
 	qboolean teamArena = qfalse;
 	int		style = UI_CENTER | UI_DROPSHADOW;
 
 	trap_Cvar_Set( "sv_killserver", "1" );
 
-	if( !uis.demoversion && !ui_cdkeychecked.integer ) {
-		char	key[17];
-
-		trap_GetCDKey( key, sizeof(key) );
-		if( trap_VerifyCDKey( key, NULL ) == qfalse ) {
-			UI_CDKeyMenu();
-			return;
-		}
-	}
-	
 	memset( &s_main, 0 ,sizeof(mainmenu_t) );
 	memset( &s_errorMessage, 0 ,sizeof(errorMessage_t) );
 
@@ -397,7 +402,11 @@ void UI_MainMenu( void ) {
 	s_main.exit.generic.y					= y;
 	s_main.exit.generic.id					= ID_EXIT;
 	s_main.exit.generic.callback			= Main_MenuEvent; 
-	s_main.exit.string						= "EXIT";
+    if (UI_AccountEnabled()) {
+        s_main.exit.string					= "SWITCH ACCOUNT";
+    } else {
+        s_main.exit.string					= "QUIT";
+    }
 	s_main.exit.color						= color_red;
 	s_main.exit.style						= style;
 
@@ -416,4 +425,27 @@ void UI_MainMenu( void ) {
 	uis.menusp = 0;
 	UI_PushMenu ( &s_main.menu );
 		
+}
+
+/*
+===============
+@pjb: a user is logged in
+UI_MainMenu_LoggedIn 
+
+The main menu only comes up when not in a game,
+so make sure that the attract loop server is down
+and that local cinematics are killed
+===============
+*/
+void UI_MainMenu( void ) {
+    // @pjb: Is any user logged in? If not, go to the start screen instead
+    if (UI_AccountEnabled()) {
+        if (trap_Account_IsUserSignedIn()) {
+            UI_MainMenu_LoggedIn();
+        } else {
+            UI_StartScreen();
+        }
+    } else {
+        UI_MainMenu_LoggedIn();
+    }
 }

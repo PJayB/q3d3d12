@@ -1,0 +1,1 @@
++set r_driver proxy +set r_fullscreen 0 +set d3d_debug 1 +set fs_basepath "$(OutDir)" +set fs_cdpath "$(Q3INSTALLDIR)" +set fs_homepath "$(SolutionDir).."

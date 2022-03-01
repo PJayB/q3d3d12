@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{0FE0FA25-2F53-4E82-A08A-C380A76D4B0C}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{D62B8AE1-4C3F-4045-970F-FEA3AB7ACF8C}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\gamethread\gt_msgq.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\gamethread\gt_shared.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\gamethread\gt_msgq.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\gamethread\gt_shared.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+</Project>

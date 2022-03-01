@@ -35,7 +35,6 @@ typedef struct bot_debugpoly_s
 static bot_debugpoly_t *debugpolygons;
 int bot_maxdebugpolys;
 
-extern botlib_export_t	*botlib_export;
 int	bot_enable;
 
 
@@ -115,8 +114,8 @@ void BotDrawDebugPolygons(void (*drawPoly)(int color, int numPoints, float *poin
 		if (svs.clients[0].lastUsercmd.buttons & BUTTON_ATTACK) parm0 |= 1;
 		if (bot_reachability->integer) parm0 |= 2;
 		if (bot_groundonly->integer) parm0 |= 4;
-		botlib_export->BotLibVarSet("bot_highlightarea", bot_highlightarea->string);
-		botlib_export->Test(parm0, NULL, svs.clients[0].gentity->r.currentOrigin, 
+		Export_BotLibVarSet("bot_highlightarea", bot_highlightarea->string);
+		BotExportTest(parm0, NULL, svs.clients[0].gentity->r.currentOrigin, 
 			svs.clients[0].gentity->r.currentAngles);
 	} //end if
 	//draw all debug polys
@@ -281,7 +280,7 @@ void BotImport_BSPModelMinsMaxsOrigin(int modelnum, vec3_t angles, vec3_t outmin
 BotImport_GetMemory
 ==================
 */
-void *BotImport_GetMemory(int size) {
+void *BotImport_GetMemory(size_t size) {
 	void *ptr;
 
 	ptr = Z_TagMalloc( size, TAG_BOTLIB );
@@ -302,11 +301,20 @@ void BotImport_FreeMemory(void *ptr) {
 BotImport_HunkAlloc
 =================
 */
-void *BotImport_HunkAlloc( int size ) {
+void *BotImport_HunkAlloc( size_t size ) {
 	if( Hunk_CheckMark() ) {
 		Com_Error( ERR_DROP, "SV_Bot_HunkAlloc: Alloc with marks already set\n" );
 	}
 	return Hunk_Alloc( size, h_high );
+}
+
+/*
+=================
+BotImport_AvailableMemory
+=================
+*/
+int BotImport_AvailableMemory( void ) {
+	return (int) Z_AvailableMemory();
 }
 
 /*
@@ -420,7 +428,7 @@ void BotImport_DebugLineShow(int line, vec3_t start, vec3_t end, int color) {
 SV_BotClientCommand
 ==================
 */
-void BotClientCommand( int client, char *command ) {
+void BotImport_BotClientCommand( int client, char *command ) {
 	SV_ExecuteClientCommand( &svs.clients[client], command, qtrue );
 }
 
@@ -433,7 +441,7 @@ void SV_BotFrame( int time ) {
 	if (!bot_enable) return;
 	//NOTE: maybe the game is already shutdown
 	if (!gvm) return;
-	VM_Call( gvm, BOTAI_START_FRAME, time );
+	GVM_BotAIStartFrame( time );
 }
 
 /*
@@ -446,12 +454,7 @@ int SV_BotLibSetup( void ) {
 		return 0;
 	}
 
-	if ( !botlib_export ) {
-		Com_Printf( S_COLOR_RED "Error: SV_BotLibSetup without SV_BotInitBotLib\n" );
-		return -1;
-	}
-
-	return botlib_export->BotLibSetup();
+	return Export_BotLibSetup();
 }
 
 /*
@@ -463,12 +466,7 @@ it is changing to a different game directory.
 ===============
 */
 int SV_BotLibShutdown( void ) {
-
-	if ( !botlib_export ) {
-		return -1;
-	}
-
-	return botlib_export->BotLibShutdown();
+	return Export_BotLibShutdown();
 }
 
 /*
@@ -516,7 +514,6 @@ SV_BotInitBotLib
 ==================
 */
 void SV_BotInitBotLib(void) {
-	botlib_import_t	botlib_import;
 
 	if ( !Cvar_VariableValue("fs_restrict") && !Sys_CheckCD() ) {
 		Com_Error( ERR_NEED_CD, "Game CD not in drive" );
@@ -525,40 +522,6 @@ void SV_BotInitBotLib(void) {
 	if (debugpolygons) Z_Free(debugpolygons);
 	bot_maxdebugpolys = Cvar_VariableIntegerValue("bot_maxdebugpolys");
 	debugpolygons = Z_Malloc(sizeof(bot_debugpoly_t) * bot_maxdebugpolys);
-
-	botlib_import.Print = BotImport_Print;
-	botlib_import.Trace = BotImport_Trace;
-	botlib_import.EntityTrace = BotImport_EntityTrace;
-	botlib_import.PointContents = BotImport_PointContents;
-	botlib_import.inPVS = BotImport_inPVS;
-	botlib_import.BSPEntityData = BotImport_BSPEntityData;
-	botlib_import.BSPModelMinsMaxsOrigin = BotImport_BSPModelMinsMaxsOrigin;
-	botlib_import.BotClientCommand = BotClientCommand;
-
-	//memory management
-	botlib_import.GetMemory = BotImport_GetMemory;
-	botlib_import.FreeMemory = BotImport_FreeMemory;
-	botlib_import.AvailableMemory = Z_AvailableMemory;
-	botlib_import.HunkAlloc = BotImport_HunkAlloc;
-
-	// file system access
-	botlib_import.FS_FOpenFile = FS_FOpenFileByMode;
-	botlib_import.FS_Read = FS_Read2;
-	botlib_import.FS_Write = FS_Write;
-	botlib_import.FS_FCloseFile = FS_FCloseFile;
-	botlib_import.FS_Seek = FS_Seek;
-
-	//debug lines
-	botlib_import.DebugLineCreate = BotImport_DebugLineCreate;
-	botlib_import.DebugLineDelete = BotImport_DebugLineDelete;
-	botlib_import.DebugLineShow = BotImport_DebugLineShow;
-
-	//debug polygons
-	botlib_import.DebugPolygonCreate = BotImport_DebugPolygonCreate;
-	botlib_import.DebugPolygonDelete = BotImport_DebugPolygonDelete;
-
-	botlib_export = (botlib_export_t *)GetBotLibAPI( BOTLIB_API_VERSION, &botlib_import );
-	assert(botlib_export); 	// bk001129 - somehow we end up with a zero import.
 }
 
 

@@ -987,8 +987,8 @@ typedef struct {
 // all clients to begin playing instantly
 typedef struct {
 	gameState_t		gameState;			// gamestate from server
-	glconfig_t		glconfig;			// rendering configuration
-	float			screenXScale;		// derived from glconfig
+	vdconfig_t		vdconfig;			// rendering configuration
+	float			screenXScale;		// derived from vdconfig
 	float			screenYScale;
 	float			screenXBias;
 
@@ -1493,8 +1493,8 @@ void		trap_Args( char *buffer, int bufferLength );
 // filesystem access
 // returns length of file
 int			trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void		trap_FS_Read( void *buffer, int len, fileHandle_t f );
-void		trap_FS_Write( const void *buffer, int len, fileHandle_t f );
+int 		trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int 		trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void		trap_FS_FCloseFile( fileHandle_t f );
 int			trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
 
@@ -1584,10 +1584,10 @@ int			trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int 
 					   float frac, const char *tagName );
 void		trap_R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
 
-// The glconfig_t will not change during the life of a cgame.
+// The vdconfig_t will not change during the life of a cgame.
 // If it needs to change, the entire cgame will be restarted, because
 // all the qhandle_t are then invalid.
-void		trap_GetGlconfig( glconfig_t *glconfig );
+void		trap_GetVideoConfig( vdconfig_t *vdconfig ); // @pjb driver agnostic
 
 // the gamestate should be grabbed at startup, and whenever a
 // configstring changes

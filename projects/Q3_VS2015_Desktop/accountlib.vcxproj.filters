@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{BEA96DA1-51B5-4128-BD23-8C2467BEE0EE}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Source Files\null">
+			<UniqueIdentifier>{5A070A8C-E17D-48B9-8718-CFEE39C46C0B}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\account\null\null_account.c">
+			<Filter>Source Files\null</Filter>
+		</ClCompile>
+	</ItemGroup>
+</Project>

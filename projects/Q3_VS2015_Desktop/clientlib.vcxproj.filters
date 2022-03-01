@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{CBF076E6-23BC-42E6-AA01-0AC855D9A32E}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{1510D5D4-C186-4F2F-918F-782E5675BFE6}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\client\cl_cgame.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_cin.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_console.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_input.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_keys.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_main.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_net_chan.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_parse.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_scrn.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\cl_ui.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_adpcm.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_api.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_dma.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_mem.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_mix.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\client\snd_wavelet.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\client\client.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\client\keys.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\client\snd_local.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\client\snd_public.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+</Project>

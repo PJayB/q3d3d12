@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{A313D538-6EDF-4923-AD7D-F8C6A4CF5B62}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{82DA7346-69A7-49E1-9C76-57B33B54F744}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files\DirectXTK">
+			<UniqueIdentifier>{707B59B0-F4CB-4BD1-BD20-692B1BD8DA7B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Include Files\DirectXTK">
+			<UniqueIdentifier>{8F997B15-0F26-4DF5-B2AB-AF6AAA0D7219}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{0C548969-CF4A-4183-B407-DD1AF52036B4}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+		<Filter Include="Resources\DirectXTK">
+			<UniqueIdentifier>{DFD18EE1-26C0-42A5-8197-DAC04932C0EB}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources\DirectXTK">
+			<UniqueIdentifier>{38AE4A05-1103-4712-BBC9-C478E1219A82}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\d3d\Direct3DCommon.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\d3d\Direct3DCommon.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d\DirectXTK\dds.h">
+			<Filter>Include Files\DirectXTK</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d\DirectXTK\PlatformHelpers.h">
+			<Filter>Include Files\DirectXTK</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\d3d\DirectXTK\MIT.txt">
+			<Filter>Resources\DirectXTK</Filter>
+		</Text>
+		<Text Include="..\..\code\d3d\DirectXTK\Readme.txt">
+			<Filter>Resources\DirectXTK</Filter>
+		</Text>
+	</ItemGroup>
+</Project>

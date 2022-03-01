@@ -142,7 +142,7 @@ typedef enum {
 typedef struct {
 	netadrtype_t	type;
 
-	byte	ip[4];
+	byte	ip[16];    // @pjb: IPv6 support
 	byte	ipx[10];
 
 	unsigned short	port;
@@ -310,20 +310,20 @@ typedef enum {
 } sharedTraps_t;
 
 void	VM_Init( void );
-vm_t	*VM_Create( const char *module, int (*systemCalls)(int *), 
-				   vmInterpret_t interpret );
+vm_t	*VM_Create( const char *module, size_t (*systemCalls)(vmArg_t *), vmInterpret_t interpret );
+
 // module should be bare: "cgame", not "cgame.dll" or "vm/cgame.qvm"
 
 void	VM_Free( vm_t *vm );
 void	VM_Clear(void);
 vm_t	*VM_Restart( vm_t *vm );
 
-int		QDECL VM_Call( vm_t *vm, int callNum, ... );
+int 	QDECL VM_CallA( vm_t *vm, vmArg_t* args );
 
 void	VM_Debug( int level );
 
-void	*VM_ArgPtr( int intValue );
-void	*VM_ExplicitArgPtr( vm_t *vm, int intValue );
+void	*VM_ArgPtr( size_t intValue );
+void	*VM_ExplicitArgPtr( vm_t *vm, size_t intValue );
 
 /*
 ==============================================================
@@ -696,6 +696,7 @@ void		Com_BeginRedirect (char *buffer, int buffersize, void (*flush)(char *));
 void		Com_EndRedirect( void );
 void 		QDECL Com_Printf( const char *fmt, ... );
 void 		QDECL Com_DPrintf( const char *fmt, ... );
+void        QDECL Com_Print( const char* msg );
 void 		QDECL Com_Error( int code, const char *fmt, ... );
 void 		Com_Quit_f( void );
 int			Com_EventLoop( void );
@@ -780,17 +781,17 @@ temp file loading
 #define Z_TagMalloc(size, tag)			Z_TagMallocDebug(size, tag, #size, __FILE__, __LINE__)
 #define Z_Malloc(size)					Z_MallocDebug(size, #size, __FILE__, __LINE__)
 #define S_Malloc(size)					S_MallocDebug(size, #size, __FILE__, __LINE__)
-void *Z_TagMallocDebug( int size, int tag, char *label, char *file, int line );	// NOT 0 filled memory
-void *Z_MallocDebug( int size, char *label, char *file, int line );			// returns 0 filled memory
-void *S_MallocDebug( int size, char *label, char *file, int line );			// returns 0 filled memory
+void *Z_TagMallocDebug( size_t size, int tag, char *label, char *file, int line );	// NOT 0 filled memory
+void *Z_MallocDebug( size_t size, char *label, char *file, int line );			// returns 0 filled memory
+void *S_MallocDebug( size_t size, char *label, char *file, int line );			// returns 0 filled memory
 #else
-void *Z_TagMalloc( int size, int tag );	// NOT 0 filled memory
-void *Z_Malloc( int size );			// returns 0 filled memory
-void *S_Malloc( int size );			// NOT 0 filled memory only for small allocations
+void *Z_TagMalloc( size_t size, int tag );	// NOT 0 filled memory
+void *Z_Malloc( size_t size );			// returns 0 filled memory
+void *S_Malloc( size_t size );			// NOT 0 filled memory only for small allocations
 #endif
 void Z_Free( void *ptr );
 void Z_FreeTags( int tag );
-int Z_AvailableMemory( void );
+size_t Z_AvailableMemory( void );
 void Z_LogHeap( void );
 
 void Hunk_Clear( void );
@@ -798,9 +799,9 @@ void Hunk_ClearToMark( void );
 void Hunk_SetMark( void );
 qboolean Hunk_CheckMark( void );
 void Hunk_ClearTempMemory( void );
-void *Hunk_AllocateTempMemory( int size );
+void *Hunk_AllocateTempMemory( size_t size );
 void Hunk_FreeTempMemory( void *buf );
-int	Hunk_MemoryRemaining( void );
+size_t	Hunk_MemoryRemaining( void );
 void Hunk_Log( void);
 void Hunk_Trash( void );
 
@@ -832,14 +833,17 @@ void CL_Disconnect( qboolean showMainMenu );
 void CL_Shutdown( void );
 void CL_Frame( int msec );
 qboolean CL_GameCommand( void );
-void CL_KeyEvent (int key, qboolean down, unsigned time);
 
-void CL_CharEvent( int key );
+void CL_KeyEvent ( int userIndex, int key, qboolean down, unsigned time );
+
+void CL_CharEvent( int userIndex, int key );
 // char events are for field typing, not game control
 
-void CL_MouseEvent( int dx, int dy, int time );
+void CL_MouseEvent( int userIndex, int dx, int dy, int time );
 
-void CL_JoystickEvent( int axis, int value, int time );
+void CL_JoystickEvent( int userIndex, int axis, int value, int time );
+
+void CL_GamepadEvent( int userIndex, int axis, int value, int time ); // @pjb
 
 void CL_PacketEvent( netadr_t from, msg_t *msg );
 
@@ -885,7 +889,7 @@ void SV_Shutdown( char *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( netadr_t from, msg_t *msg );
 qboolean SV_GameCommand( void );
-
+qboolean SV_IsMultiplayerSession( void ); // @pjb: added this to check the state of play
 
 //
 // UI interface
@@ -918,6 +922,7 @@ typedef enum {
 	SE_CHAR,	// evValue is an ascii char
 	SE_MOUSE,	// evValue and evValue2 are reletive signed x / y moves
 	SE_JOYSTICK_AXIS,	// evValue is an axis number and evValue2 is the current state (-127 to 127)
+	SE_GAMEPAD_AXIS,	// @pjb: evValue is an axis number and evValue2 is the current state (-127 to 127)
 	SE_CONSOLE,	// evPtr is a char*
 	SE_PACKET	// evPtr is a netadr_t followed by data bytes to evPtrLength
 } sysEventType_t;
@@ -926,9 +931,13 @@ typedef struct {
 	int				evTime;
 	sysEventType_t	evType;
 	int				evValue, evValue2;
+	int				evUserID;		// @pjb: who triggered this event? -1 for all.
 	int				evPtrLength;	// bytes of data pointed to by evPtr, for journaling
 	void			*evPtr;			// this must be manually freed if not NULL
 } sysEvent_t;
+
+typedef vmCall_t vmEntryPoint_t;
+typedef vmCall_t vmSystemCall_t;
 
 sysEvent_t	Sys_GetEvent( void );
 
@@ -936,8 +945,7 @@ void	Sys_Init (void);
 
 // general development dll loading for virtual machine testing
 // fqpath param added 7/20/02 by T.Ray - Sys_LoadDll is only called in vm.c at this time
-void	* QDECL Sys_LoadDll( const char *name, char *fqpath , int (QDECL **entryPoint)(int, ...),
-				  int (QDECL *systemcalls)(int, ...) );
+void *  QDECL Sys_LoadDll( const char *name, char *fqpath, vmEntryPoint_t* entryPoint, vmSystemCall_t systemCall );
 void	Sys_UnloadDll( void *dllHandle );
 
 void	Sys_UnloadGame( void );
@@ -952,8 +960,6 @@ void	*Sys_GetUIAPI( void );
 //bot libraries
 void	Sys_UnloadBotLib( void );
 void	*Sys_GetBotLibAPI( void *parms );
-
-char	*Sys_GetCurrentUser( void );
 
 void	QDECL Sys_Error( const char *error, ...);
 void	Sys_Quit (void);
@@ -992,6 +998,12 @@ qboolean	Sys_CheckCD( void );
 
 void	Sys_Mkdir( const char *path );
 char	*Sys_Cwd( void );
+
+// @pjb: for writable folders
+#ifdef Q_WINRT_PLATFORM
+char	*Sys_UserDir( void );
+#endif
+
 void	Sys_SetDefaultCDPath(const char *path);
 char	*Sys_DefaultCDPath(void);
 void	Sys_SetDefaultInstallPath(const char *path);

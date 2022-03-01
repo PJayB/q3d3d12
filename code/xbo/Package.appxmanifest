@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest"
+         xmlns:mx="http://schemas.microsoft.com/appx/2013/xbox/manifest"
+         IgnorableNamespaces="mx">
+  
+  <Identity Name="Quake-III-Arena"
+            Publisher="CN=Publisher"
+            Version="1.0.0.0" />
+  
+  <Properties>
+    <DisplayName>Quake 3: Arena</DisplayName>
+    <PublisherDisplayName>Pete Lewis</PublisherDisplayName>
+    <Logo>xbo\Assets\logo50.png</Logo>
+    <Description>Quake 3: Arena</Description>
+  </Properties>
+  
+  <Prerequisites>
+    <OSMinVersion>6.2</OSMinVersion>
+    <OSMaxVersionTested>6.2</OSMaxVersionTested>
+  </Prerequisites>
+  
+  <Resources>
+    <Resource Language="en-us"/>
+  </Resources>
+  
+  <Applications>
+    <Application Id="App" 
+        Executable="$targetnametoken$.exe" 
+        EntryPoint="Quake3XBO_VS2012.App">
+        <VisualElements 
+            DisplayName="Quake3XBO_VS2012"
+            Logo="Assets\Logo208.png"
+            SmallLogo="Assets\SmallLogo100.png"
+            Description="Quake3XBO_VS2012"
+            ForegroundText="light"
+            BackgroundColor="#000000">
+            <SplashScreen Image="Assets\SplashScreen1080.png" />
+        </VisualElements>
+      <Extensions>
+        <mx:Extension Category="xbox.live">
+          <mx:XboxLive TitleId="533BC970" PrimaryServiceConfigId="db600100-d89a-48cc-9165-e79d533bc970" RequireXboxLive="true" />
+        </mx:Extension>
+        <mx:Extension Category="windows.xbox.networking">
+          <mx:XboxNetworkingManifest>
+            <mx:SocketDescriptions>
+              <mx:SocketDescription Name="MasterPortUdp" SecureIpProtocol="Udp" BoundPort="27950">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceSocketUsage Type="Initiate" />
+                  <!-- connection will send initial packet -->
+                  <mx:SecureDeviceSocketUsage Type="Accept" />
+                  <!-- connection will accept packets -->
+                  <mx:SecureDeviceSocketUsage Type="SendDebug" />
+                  <!-- connection will only send packets (UDP) -->
+                  <mx:SecureDeviceSocketUsage Type="ReceiveDebug" />
+                  <!-- connection will only receive packets (UDP) -->
+                </mx:AllowedUsages>
+              </mx:SocketDescription>
+              <mx:SocketDescription Name="UpdatePortUdp" SecureIpProtocol="Udp" BoundPort="27951">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceSocketUsage Type="Initiate" />
+                  <!-- connection will send initial packet -->
+                  <mx:SecureDeviceSocketUsage Type="Accept" />
+                  <!-- connection will accept packets -->
+                  <mx:SecureDeviceSocketUsage Type="SendDebug" />
+                  <!-- connection will only send packets (UDP) -->
+                  <mx:SecureDeviceSocketUsage Type="ReceiveDebug" />
+                  <!-- connection will only receive packets (UDP) -->
+                </mx:AllowedUsages>
+              </mx:SocketDescription>
+              <mx:SocketDescription Name="ServerPortUdp" SecureIpProtocol="Udp" BoundPort="27960">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceSocketUsage Type="Initiate" />
+                  <!-- connection will send initial packet -->
+                  <mx:SecureDeviceSocketUsage Type="Accept" />
+                  <!-- connection will accept packets -->
+                  <mx:SecureDeviceSocketUsage Type="SendDebug" />
+                  <!-- connection will only send packets (UDP) -->
+                  <mx:SecureDeviceSocketUsage Type="ReceiveDebug" />
+                  <!-- connection will only receive packets (UDP) -->
+                </mx:AllowedUsages>
+              </mx:SocketDescription>
+            </mx:SocketDescriptions>
+            <mx:SecureDeviceAssociationTemplates>
+              <mx:SecureDeviceAssociationTemplate Name="MasterTrafficUdp" InitiatorSocketDescription="MasterPortUdp" AcceptorSocketDescription="MasterPortUdp" MultiplayerSessionRequirement="None">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceAssociationUsage Type="Default" />
+                </mx:AllowedUsages>
+              </mx:SecureDeviceAssociationTemplate>
+              <mx:SecureDeviceAssociationTemplate Name="UpdateTrafficUdp" InitiatorSocketDescription="UpdatePortUdp" AcceptorSocketDescription="UpdatePortUdp" MultiplayerSessionRequirement="None">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceAssociationUsage Type="Default" />
+                </mx:AllowedUsages>
+              </mx:SecureDeviceAssociationTemplate>
+              <mx:SecureDeviceAssociationTemplate Name="ServerTrafficUdp" InitiatorSocketDescription="ServerPortUdp" AcceptorSocketDescription="ServerPortUdp" MultiplayerSessionRequirement="None">
+                <mx:AllowedUsages>
+                  <mx:SecureDeviceAssociationUsage Type="Default" />
+                </mx:AllowedUsages>
+              </mx:SecureDeviceAssociationTemplate>
+            </mx:SecureDeviceAssociationTemplates>
+          </mx:XboxNetworkingManifest>
+        </mx:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClientServer" />
+  </Capabilities>
+  <Extensions>
+    <mx:PackageExtension Category="windows.kinect">
+      <mx:Kinect IsVersionLocked="false">
+        <mx:AudioPipeline Version="1.0.0" />
+        <mx:SpeechPipeline Version="1.1.0" />
+        <mx:VisionPipeline Version="1.0.0" />
+      </mx:Kinect>
+    </mx:PackageExtension>
+  </Extensions>
+</Package>

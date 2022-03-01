@@ -90,12 +90,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
+#if defined(_MSC_VER) && !defined(WIN32)
+#   define WIN32
+#endif
+
 #ifdef _WIN32
 
 //#pragma intrinsic( memset, memcpy )
 
 #endif
-
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__
@@ -126,7 +129,7 @@ float	FloatSwap (const float *f);
 
 //======================= WIN32 DEFINES =================================
 
-#ifdef WIN32
+#if defined(WIN32) || defined(WIN8) || defined(WIN10)
 
 #define	MAC_STATIC
 
@@ -137,12 +140,18 @@ float	FloatSwap (const float *f);
 #ifdef NDEBUG
 #ifdef _M_IX86
 #define	CPUSTRING	"win-x86"
+// @pjb: x64
+#elif defined _M_X64
+#define CPUSTRING   "win-x64"
 #elif defined _M_ALPHA
 #define	CPUSTRING	"win-AXP"
 #endif
 #else
 #ifdef _M_IX86
 #define	CPUSTRING	"win-x86-debug"
+// @pjb: x64
+#elif defined _M_X64
+#define CPUSTRING   "win-x64-debug"
 #elif defined _M_ALPHA
 #define	CPUSTRING	"win-AXP-debug"
 #endif
@@ -447,9 +456,9 @@ typedef enum {
 
 #ifdef HUNK_DEBUG
 #define Hunk_Alloc( size, preference )				Hunk_AllocDebug(size, preference, #size, __FILE__, __LINE__)
-void *Hunk_AllocDebug( int size, ha_pref preference, char *label, char *file, int line );
+void *Hunk_AllocDebug( size_t size, ha_pref preference, char *label, char *file, int line );
 #else
-void *Hunk_Alloc( int size, ha_pref preference );
+void *Hunk_Alloc( size_t size, ha_pref preference );
 #endif
 
 #ifdef __linux__
@@ -918,7 +927,7 @@ void Info_NextPair( const char **s, char *key, char *value );
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void	QDECL Com_Error( int level, const char *error, ... );
 void	QDECL Com_Printf( const char *msg, ... );
-
+void    QDECL Com_Print( const char* msg );
 
 /*
 ==========================================================
@@ -948,7 +957,8 @@ default values.
 #define	CVAR_USER_CREATED	128	// created by a set command
 #define	CVAR_TEMP			256	// can be set even when cheats are disabled, but is not archived
 #define CVAR_CHEAT			512	// can not be changed if cheats are disabled
-#define CVAR_NORESTART		1024	// do not clear when a cvar_restart is issued
+#define CVAR_NORESTART		1024 // do not clear when a cvar_restart is issued
+#define CVAR_SYSTEM_SET     2048 // @pjb: do not save in the user configuration file
 
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s {
@@ -978,6 +988,19 @@ typedef struct {
 	int			integer;
 	char		string[MAX_CVAR_VALUE_STRING];
 } vmCvar_t;
+
+// @pjb: word-width vm argument
+typedef union vmArg_s
+{
+	size_t p;
+	int i;
+    unsigned u;
+    float f;
+} vmArg_t;
+
+#define QABI_PTR(x) ((void*)(size_t)x)
+
+typedef size_t (QDECL * vmCall_t)( vmArg_t* );
 
 /*
 ==============================================================
@@ -1054,7 +1077,7 @@ typedef struct {
 #define	KEYCATCH_UI					0x0002
 #define	KEYCATCH_MESSAGE		0x0004
 #define	KEYCATCH_CGAME			0x0008
-
+#define KEYCATCH_VOID			0x0010 // @pjb: pipe input to nowhere. Used to show the bubble icon with no UI.
 
 // sound channels
 // channel 0 never willingly overrides
@@ -1428,5 +1451,16 @@ typedef enum _flag_status {
 #define CDKEY_LEN 16
 #define CDCHKSUM_LEN 2
 
+
+#define Q_USER_ALL -1 // @pjb: for sysEvent_t::evUserID
+#define Q_USER_NONE -1 // @pjb: tracking who's signed in
+#define Q_MAX_USERS 16 // @pjb: maximum number of users
+
+// @pjb: Account user defines
+typedef enum accountSignInState_e {
+    ACCOUNT_IS_GUEST,
+    ACCOUNT_PENDING,
+    ACCOUNT_SIGNED_IN
+} accountSignInState_t;
 
 #endif	// __Q_SHARED_H

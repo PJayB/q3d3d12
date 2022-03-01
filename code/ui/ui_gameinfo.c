@@ -157,7 +157,7 @@ void UI_LoadArenas( void ) {
 	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
+		dirlen = (int) strlen(dirptr);
 		strcpy(filename, "scripts/");
 		strcat(filename, dirptr);
 		UI_LoadArenasFromFile(filename);
@@ -268,7 +268,7 @@ void UI_LoadBots( void ) {
 	numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, 1024 );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
+		dirlen = (int) strlen(dirptr);
 		strcpy(filename, "scripts/");
 		strcat(filename, dirptr);
 		UI_LoadBotsFromFile(filename);

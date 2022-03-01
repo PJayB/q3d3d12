@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{3D25899D-E5B7-4339-B074-6122F90E333B}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{377E2DC4-C70B-4C11-897F-D2997DC40233}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Images">
+			<UniqueIdentifier>{4E8A4CF4-AE36-4B9E-9541-AD372F71396C}</UniqueIdentifier>
+			<Extensions>png;ico;tga;bmp</Extensions>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{4EDC4A62-5798-4C6D-BFF8-9C5575F8C75B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{B7E26F95-BEC7-428E-97ED-2636EDAFE39B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{D9BE827D-D197-4E11-A29F-AD311B830868}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{A07312BB-ECA8-4CC3-86B5-1B777ACFFA45}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{5453A161-044F-4150-BEE2-F9C56450D76A}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{20EAAC48-9A0D-4E59-90F3-60A30425EBB9}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{5ED0FA6D-08DF-4BCD-BA71-D2CB66A15590}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{47E2EB75-E1A2-4BE0-AAA8-361F26FAC50B}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{2F66F87F-EF90-4959-B447-B6266EC92F7A}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{CE3562DB-89BA-4E3A-99F2-DE483EBACBFA}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{A8B29F36-823F-40F5-83F1-AB2B15D2BC8C}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\winrt\winrt_d3d.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_shared.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_utils.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_view.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_app.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_buffer.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_input.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_net.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_storage.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_sys.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\xbo\xbo_user.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\winrt\winrt_d3d.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_shared.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_utils.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_view.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_app.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_buffer.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_common.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_msgs.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_net.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xbo\xbo_user.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Image Include="Assets\logo150.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo150wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\Logo208.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo30.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo300wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo310.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo50.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo70.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\SmallLogo100.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\SplashScreen1080.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+	</ItemGroup>
+	<ItemGroup>
+		<AppxManifest Include="..\..\code\xbo\Package.appxmanifest">
+			<Filter>Resources</Filter>
+		</AppxManifest>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\xbo\MappingFile.xml">
+			<Filter>Resources</Filter>
+		</Text>
+	</ItemGroup>
+</Project>

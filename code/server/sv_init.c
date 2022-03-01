@@ -64,7 +64,7 @@ void SV_SetConfigstring (int index, const char *val) {
 				continue;
 			}
 
-			len = strlen( val );
+			len = (int) strlen( val );
 			if( len >= maxChunkSize ) {
 				int		sent = 0;
 				int		remaining = len;
@@ -439,7 +439,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	// run a few frames to allow everything to settle
 	for ( i = 0 ;i < 3 ; i++ ) {
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+		GVM_RunFrame( svs.time );
 		SV_BotFrame( svs.time );
 		svs.time += 100;
 	}
@@ -464,7 +464,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 			}
 
 			// connect the client again
-			denied = VM_ExplicitArgPtr( gvm, VM_Call( gvm, GAME_CLIENT_CONNECT, i, qfalse, isBot ) );	// firstTime = qfalse
+			denied = VM_ExplicitArgPtr( gvm, (size_t) GVM_ClientConnect( i, qfalse, isBot ) );	// firstTime = qfalse
 			if ( denied ) {
 				// this generally shouldn't happen, because the client
 				// was connected before the level change
@@ -488,14 +488,14 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 					client->deltaMessage = -1;
 					client->nextSnapshotTime = svs.time;	// generate a snapshot immediately
 
-					VM_Call( gvm, GAME_CLIENT_BEGIN, i );
+					GVM_ClientBegin( i );
 				}
 			}
 		}
 	}	
 
 	// run another frame to allow things to look at all the players
-	VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+	GVM_RunFrame( svs.time );
 	SV_BotFrame( svs.time );
 	svs.time += 100;
 
@@ -590,6 +590,12 @@ void SV_Init (void) {
 	Cvar_Get ("sv_referencedPaks", "", CVAR_SYSTEMINFO | CVAR_ROM );
 	Cvar_Get ("sv_referencedPakNames", "", CVAR_SYSTEMINFO | CVAR_ROM );
 
+    // @pjb: force sv_pure 0 on debug builds
+    // @pjb: also force it off on WinRT
+#if defined(_DEBUG) || defined(Q_WINRT_PLATFORM) || defined(PRIORITIZE_LOOSE_FILES)
+    Cvar_Set( "sv_pure", "0" );
+#endif
+
 	// server vars
 	sv_rconPassword = Cvar_Get ("rconPassword", "", CVAR_TEMP );
 	sv_privatePassword = Cvar_Get ("sv_privatePassword", "", CVAR_TEMP );
@@ -600,17 +606,17 @@ void SV_Init (void) {
 
 	sv_allowDownload = Cvar_Get ("sv_allowDownload", "0", CVAR_SERVERINFO);
 	sv_master[0] = Cvar_Get ("sv_master1", MASTER_SERVER_NAME, 0 );
-	sv_master[1] = Cvar_Get ("sv_master2", "", CVAR_ARCHIVE );
-	sv_master[2] = Cvar_Get ("sv_master3", "", CVAR_ARCHIVE );
-	sv_master[3] = Cvar_Get ("sv_master4", "", CVAR_ARCHIVE );
-	sv_master[4] = Cvar_Get ("sv_master5", "", CVAR_ARCHIVE );
+	sv_master[1] = Cvar_Get ("sv_master2", "", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
+	sv_master[2] = Cvar_Get ("sv_master3", "", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
+	sv_master[3] = Cvar_Get ("sv_master4", "", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
+	sv_master[4] = Cvar_Get ("sv_master5", "", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
 	sv_reconnectlimit = Cvar_Get ("sv_reconnectlimit", "3", 0);
 	sv_showloss = Cvar_Get ("sv_showloss", "0", 0);
 	sv_padPackets = Cvar_Get ("sv_padPackets", "0", 0);
 	sv_killserver = Cvar_Get ("sv_killserver", "0", 0);
 	sv_mapChecksum = Cvar_Get ("sv_mapChecksum", "", CVAR_ROM);
-	sv_lanForceRate = Cvar_Get ("sv_lanForceRate", "1", CVAR_ARCHIVE );
-	sv_strictAuth = Cvar_Get ("sv_strictAuth", "1", CVAR_ARCHIVE );
+	sv_lanForceRate = Cvar_Get ("sv_lanForceRate", "1", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
+	sv_strictAuth = Cvar_Get ("sv_strictAuth", "1", CVAR_ARCHIVE | CVAR_SYSTEM_SET );
 
 	// initialize bot cvars so they are listed and can be set before loading the botlib
 	SV_BotInitCvars();

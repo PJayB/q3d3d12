@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{C49D98B7-982E-4CB2-8757-7820ED5D1239}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{1ED9817A-3FF8-4ACE-BDB4-B4E04523C0B3}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\xaudio\xaudio_main.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\xaudio\xaudio_local.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\xaudio\xaudio_public.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+</Project>

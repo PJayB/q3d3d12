@@ -40,8 +40,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "be_aas_funcs.h"
 #include "be_aas_def.h"
 
-extern botlib_import_t botimport;
-
 //#define TRACE_DEBUG
 
 #define ON_EPSILON		0.005
@@ -131,7 +129,7 @@ void PrintContents(int contents)
 	{
 		if (contents & contentnames[i].value)
 		{
-			botimport.Print(PRT_MESSAGE, "%s\n", contentnames[i].name);
+			BotImport_Print(PRT_MESSAGE, "%s\n", contentnames[i].name);
 		} //end if
 	} //end for
 } //end of the function PrintContents
@@ -147,7 +145,7 @@ void PrintContents(int contents)
 bsp_trace_t AAS_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int passent, int contentmask)
 {
 	bsp_trace_t bsptrace;
-	botimport.Trace(&bsptrace, start, mins, maxs, end, passent, contentmask);
+	BotImport_Trace(&bsptrace, start, mins, maxs, end, passent, contentmask);
 	return bsptrace;
 } //end of the function AAS_Trace
 //===========================================================================
@@ -159,7 +157,7 @@ bsp_trace_t AAS_Trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int pa
 //===========================================================================
 int AAS_PointContents(vec3_t point)
 {
-	return botimport.PointContents(point);
+	return BotImport_PointContents(point);
 } //end of the function AAS_PointContents
 //===========================================================================
 //
@@ -173,7 +171,7 @@ qboolean AAS_EntityCollision(int entnum,
 {
 	bsp_trace_t enttrace;
 
-	botimport.EntityTrace(&enttrace, start, boxmins, boxmaxs, end, entnum, contentmask);
+	BotImport_EntityTrace(&enttrace, start, boxmins, boxmaxs, end, entnum, contentmask);
 	if (enttrace.fraction < trace->fraction)
 	{
 		Com_Memcpy(trace, &enttrace, sizeof(bsp_trace_t));
@@ -190,7 +188,7 @@ qboolean AAS_EntityCollision(int entnum,
 //===========================================================================
 qboolean AAS_inPVS(vec3_t p1, vec3_t p2)
 {
-	return botimport.inPVS(p1, p2);
+	return BotImport_inPVS(p1, p2);
 } //end of the function AAS_InPVS
 //===========================================================================
 // returns true if in Potentially Visible Set
@@ -211,7 +209,7 @@ qboolean AAS_inPHS(vec3_t p1, vec3_t p2)
 //===========================================================================
 void AAS_BSPModelMinsMaxsOrigin(int modelnum, vec3_t angles, vec3_t mins, vec3_t maxs, vec3_t origin)
 {
-	botimport.BSPModelMinsMaxsOrigin(modelnum, angles, mins, maxs, origin);
+	BotImport_BSPModelMinsMaxsOrigin(modelnum, angles, mins, maxs, origin);
 } //end of the function AAS_BSPModelMinsMaxs
 //===========================================================================
 // unlinks the entity from all leaves
@@ -265,7 +263,7 @@ int AAS_BSPEntityInRange(int ent)
 {
 	if (ent <= 0 || ent >= bspworld.numentities)
 	{
-		botimport.Print(PRT_MESSAGE, "bsp entity out of range\n");
+		BotImport_Print(PRT_MESSAGE, "bsp entity out of range\n");
 		return qfalse;
 	} //end if
 	return qtrue;
@@ -399,7 +397,7 @@ void AAS_ParseBSPEntities(void)
 		} //end if
 		if (bspworld.numentities >= MAX_BSPENTITIES)
 		{
-			botimport.Print(PRT_MESSAGE, "too many entities in BSP file\n");
+			BotImport_Print(PRT_MESSAGE, "too many entities in BSP file\n");
 			break;
 		} //end if
 		ent = &bspworld.entities[bspworld.numentities];
@@ -419,7 +417,7 @@ void AAS_ParseBSPEntities(void)
 				return;
 			} //end if
 			StripDoubleQuotes(token.string);
-			epair->key = (char *) GetHunkMemory(strlen(token.string) + 1);
+			epair->key = (char *) GetHunkMemory((unsigned long) strlen(token.string) + 1);
 			strcpy(epair->key, token.string);
 			if (!PS_ExpectTokenType(script, TT_STRING, 0, &token))
 			{
@@ -428,7 +426,7 @@ void AAS_ParseBSPEntities(void)
 				return;
 			} //end if
 			StripDoubleQuotes(token.string);
-			epair->value = (char *) GetHunkMemory(strlen(token.string) + 1);
+			epair->value = (char *) GetHunkMemory((unsigned long) strlen(token.string) + 1);
 			strcpy(epair->value, token.string);
 		} //end while
 		if (strcmp(token.string, "}"))
@@ -478,9 +476,9 @@ void AAS_DumpBSPData(void)
 int AAS_LoadBSPFile(void)
 {
 	AAS_DumpBSPData();
-	bspworld.entdatasize = strlen(botimport.BSPEntityData()) + 1;
+	bspworld.entdatasize = (int) strlen(BotImport_BSPEntityData()) + 1;
 	bspworld.dentdata = (char *) GetClearedHunkMemory(bspworld.entdatasize);
-	Com_Memcpy(bspworld.dentdata, botimport.BSPEntityData(), bspworld.entdatasize);
+	Com_Memcpy(bspworld.dentdata, BotImport_BSPEntityData(), bspworld.entdatasize);
 	AAS_ParseBSPEntities();
 	bspworld.loaded = qtrue;
 	return BLERR_NOERROR;

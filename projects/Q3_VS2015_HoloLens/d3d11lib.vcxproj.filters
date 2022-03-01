@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{0D17F2FC-A5A0-4CF7-8E9B-6753D4F2B0E0}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{76D2C81F-B10D-4E74-A4BF-74DC2B335274}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files\DirectXTK">
+			<UniqueIdentifier>{0A2C7BBD-CBA2-49E7-9945-E9F5D69E247E}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{26CF4836-027E-455B-8783-E3045C8D5DAC}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+		<Filter Include="Resources\DirectXTK">
+			<UniqueIdentifier>{992EAECD-30BB-457D-8D9A-787933BEC884}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources\DirectXTK">
+			<UniqueIdentifier>{271D39C4-3BD0-40DE-86B4-F2E35C3CCBED}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\d3d11\D3D11Core.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11Device.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11Draw.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11DrawData.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11Driver.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11Image.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11Shaders.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\D3D11State.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\d3d11\pch.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\d3d11\D3D11Core.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11Device.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11Draw.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11DrawData.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11Driver.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11Image.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11Shaders.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\D3D11State.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\pch.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\d3d11\DirectXTK\DirectXHelpers.h">
+			<Filter>Include Files\DirectXTK</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\d3d11\DirectXTK\MIT.txt">
+			<Filter>Resources\DirectXTK</Filter>
+		</Text>
+		<Text Include="..\..\code\d3d11\DirectXTK\Readme.txt">
+			<Filter>Resources\DirectXTK</Filter>
+		</Text>
+	</ItemGroup>
+</Project>

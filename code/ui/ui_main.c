@@ -32,6 +32,7 @@ USER INTERFACE MAIN
 //#define PRE_RELEASE_TADEMO
 
 #include "ui_local.h"
+#include "ui.shared.h"
 
 uiInfo_t uiInfo;
 
@@ -159,59 +160,34 @@ vmCvar_t  ui_debug;
 vmCvar_t  ui_initialized;
 vmCvar_t  ui_teamArenaFirstRun;
 
-void _UI_Init( qboolean );
-void _UI_Shutdown( void );
-void _UI_KeyEvent( int key, qboolean down );
-void _UI_MouseEvent( int dx, int dy );
-void _UI_Refresh( int realtime );
-qboolean _UI_IsFullscreen( void );
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
-  switch ( command ) {
-	  case UI_GETAPIVERSION:
-		  return UI_API_VERSION;
+void UI_Init( qboolean );
+void UI_Shutdown( void );
+void UI_KeyEvBent( int userIndex, int key, qboolean down );
+void UI_MouseEvent( int userIndex, int dx, int dy );
+void UI_GamepadEvent( int userIndex, int dx, int dy ); // @pjb: gamepad for menu nav
+void UI_Refresh( int realtime );
+qboolean UI_IsFullscreen( void );
 
-	  case UI_INIT:
-		  _UI_Init(arg0);
-		  return 0;
-
-	  case UI_SHUTDOWN:
-		  _UI_Shutdown();
-		  return 0;
-
-	  case UI_KEY_EVENT:
-		  _UI_KeyEvent( arg0, arg1 );
-		  return 0;
-
-	  case UI_MOUSE_EVENT:
-		  _UI_MouseEvent( arg0, arg1 );
-		  return 0;
-
-	  case UI_REFRESH:
-		  _UI_Refresh( arg0 );
-		  return 0;
-
-	  case UI_IS_FULLSCREEN:
-		  return _UI_IsFullscreen();
-
-	  case UI_SET_ACTIVE_MENU:
-		  _UI_SetActiveMenu( arg0 );
-		  return 0;
-
-	  case UI_CONSOLE_COMMAND:
-		  return UI_ConsoleCommand(arg0);
-
-	  case UI_DRAW_CONNECT_SCREEN:
-		  UI_DrawConnectScreen( arg0 );
-		  return 0;
-	  case UI_HASUNIQUECDKEY: // mod authors need to observe this
-	    return qtrue; // bk010117 - change this to qfalse for mods!
-
-	}
-
-	return -1;
+int UI_GetApiVersion() {
+    return UI_API_VERSION;
 }
 
+// @pjb: auto-generated vm syscalls
+#include "ui.jumpdefs.h"
 
+// @pjb: auto-generated vm syscall indices
+static const vmCall_t uiJumpTable[] = {
+#include "ui.jumptable.h"
+};
+
+int vmMainA( vmArg_t* args ) {
+	vmCall_t func = uiJumpTable[args[0].i];
+	if (args[0].i > _countof(uiJumpTable)) {
+		trap_Error( va("Out-of-bounds ABI call to VM_CallA: 0x%X\n", args[0].i) );
+		return -1;
+	}
+	return func(args+1);
+}
 
 void AssetCache() {
 	int n;
@@ -288,7 +264,7 @@ int Text_Width(const char *text, float scale, int limit) {
 	useScale = scale * font->glyphScale;
   out = 0;
   if (text) {
-    len = strlen(text);
+    len = (int) strlen(text);
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}
@@ -323,7 +299,7 @@ int Text_Height(const char *text, float scale, int limit) {
 	useScale = scale * font->glyphScale;
   max = 0;
   if (text) {
-    len = strlen(text);
+    len = (int) strlen(text);
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}
@@ -369,7 +345,7 @@ void Text_Paint(float x, float y, float scale, vec4_t color, const char *text, f
     const char *s = text; // bk001206 - unsigned
 		trap_R_SetColor( color );
 		memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-    len = strlen(text);
+    len = (int) strlen(text);
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}
@@ -438,7 +414,7 @@ void Text_PaintWithCursor(float x, float y, float scale, vec4_t color, const cha
     const char *s = text; // bk001206 - unsigned
 		trap_R_SetColor( color );
 		memcpy(&newColor[0], &color[0], sizeof(vec4_t));
-    len = strlen(text);
+    len = (int) strlen(text);
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}
@@ -536,7 +512,7 @@ static void Text_Paint_Limit(float *maxX, float x, float y, float scale, vec4_t 
 		}
 		useScale = scale * font->glyphScale;
 		trap_R_SetColor( color );
-    len = strlen(text);					 
+    len = (int) strlen(text);					 
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}
@@ -581,7 +557,7 @@ void UI_ShowPostGame(qboolean newHigh) {
 	trap_Cvar_Set("cg_thirdPerson", "0");
 	trap_Cvar_Set( "sv_killserver", "1" );
 	uiInfo.soundHighScore = newHigh;
-  _UI_SetActiveMenu(UIMENU_POSTGAME);
+    UI_SetActiveMenu(UIMENU_POSTGAME);
 }
 /*
 =================
@@ -600,7 +576,7 @@ int frameCount = 0;
 int startTime;
 
 #define	UI_FPS_FRAMES	4
-void _UI_Refresh( int realtime )
+void UI_Refresh( int realtime )
 {
 	static int index;
 	static int	previousTimes[UI_FPS_FRAMES];
@@ -645,7 +621,25 @@ void _UI_Refresh( int realtime )
 	// draw cursor
 	UI_SetColor( NULL );
 	if (Menu_Count() > 0) {
-		UI_DrawHandlePic( uiInfo.uiDC.cursorx-16, uiInfo.uiDC.cursory-16, 32, 32, uiInfo.uiDC.Assets.cursor);
+
+        // @pjb: hack: todo: remove me!
+        if ( ui_debugMenuNav.integer != 0 )
+        {
+            int i;
+            extern menuDef_t Menus[];
+            extern int menuCount;
+            for (i = 0; i < menuCount; i++) {
+                if (Menus[i].window.flags & WINDOW_HASFOCUS && Menus[i].window.flags & WINDOW_VISIBLE) {
+                    UI_DrawHandlePic( 
+                        Menus[i].window.rect.x + Menus[i].focusPoint[0] - 16, 
+                        Menus[i].window.rect.y + Menus[i].focusPoint[1] - 16, 
+                        32, 32, 
+                        uiInfo.uiDC.Assets.cursor);
+                }
+            }
+        }
+
+        UI_DrawHandlePic( uiInfo.uiDC.cursorx-16, uiInfo.uiDC.cursory-16, 32, 32, uiInfo.uiDC.Assets.cursor);
 	}
 
 #ifndef NDEBUG
@@ -664,7 +658,7 @@ void _UI_Refresh( int realtime )
 _UI_Shutdown
 =================
 */
-void _UI_Shutdown( void ) {
+void UI_Shutdown( void ) {
 	trap_LAN_SaveCachedServers();
 }
 
@@ -1929,15 +1923,17 @@ static void UI_DrawKeyBindStatus(rectDef_t *rect, float scale, vec4_t color, int
 }
 
 static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textStyle) {
-	char * eptr;
-	char buff[1024];
-	const char *lines[64];
-	int y, numLines, i;
+	//char * eptr;
+	//char buff[1024];
+	//const char *lines[64];
+	//int y, numLines, i;
 
 	Text_Paint(rect->x + 2, rect->y, scale, color, va("VENDOR: %s", uiInfo.uiDC.glconfig.vendor_string), 0, 30, textStyle);
 	Text_Paint(rect->x + 2, rect->y + 15, scale, color, va("VERSION: %s: %s", uiInfo.uiDC.glconfig.version_string,uiInfo.uiDC.glconfig.renderer_string), 0, 30, textStyle);
 	Text_Paint(rect->x + 2, rect->y + 30, scale, color, va ("PIXELFORMAT: color(%d-bits) Z(%d-bits) stencil(%d-bits)", uiInfo.uiDC.glconfig.colorBits, uiInfo.uiDC.glconfig.depthBits, uiInfo.uiDC.glconfig.stencilBits), 0, 30, textStyle);
 
+    /*
+    @pjb: todo: hacked out for now
 	// build null terminated extension strings
   // TTimo: https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=399
   // in TA this was not directly crashing, but displaying a nasty broken shader right in the middle
@@ -1971,6 +1967,8 @@ static void UI_DrawGLInfo(rectDef_t *rect, float scale, vec4_t color, int textSt
 			break;
 		}
 	}
+
+    */
 
 
 }
@@ -2825,7 +2823,7 @@ static void UI_LoadMods() {
 	numdirs = trap_FS_GetFileList( "$modlist", "", dirlist, sizeof(dirlist) );
 	dirptr  = dirlist;
 	for( i = 0; i < numdirs; i++ ) {
-		dirlen = strlen( dirptr ) + 1;
+		dirlen = (int) strlen( dirptr ) + 1;
     descptr = dirptr + dirlen;
 		uiInfo.modList[uiInfo.modCount].modName = String_Alloc(dirptr);
 		uiInfo.modList[uiInfo.modCount].modDescr = String_Alloc(descptr);
@@ -2854,7 +2852,7 @@ static void UI_LoadTeams() {
 	if (count) {
 		teamName = teamList;
 		for ( i = 0; i < count; i++ ) {
-			len = strlen( teamName );
+			len = (int) strlen( teamName );
 			UI_ParseTeamInfo(teamName);
 			teamName += len + 1;
 		}
@@ -2881,7 +2879,7 @@ static void UI_LoadMovies() {
 		}
 		moviename = movielist;
 		for ( i = 0; i < uiInfo.movieCount; i++ ) {
-			len = strlen( moviename );
+			len = (int) strlen( moviename );
 			if (!Q_stricmp(moviename +  len - 4,".roq")) {
 				moviename[len-4] = '\0';
 			}
@@ -2918,7 +2916,7 @@ static void UI_LoadDemos() {
 		}
 		demoname = demolist;
 		for ( i = 0; i < uiInfo.demoCount; i++ ) {
-			len = strlen( demoname );
+			len = (int) strlen( demoname );
 			if (!Q_stricmp(demoname +  len - strlen(demoExt), demoExt)) {
 				demoname[len-strlen(demoExt)] = '\0';
 			}
@@ -3229,36 +3227,11 @@ static void UI_RunMenuScript(char **args) {
 			trap_Cvar_Set("com_introPlayed", "1" );
 			trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
 		} else if (Q_stricmp(name, "getCDKey") == 0) {
-			char out[17];
-			trap_GetCDKey(buff, 17);
-			trap_Cvar_Set("cdkey1", "");
-			trap_Cvar_Set("cdkey2", "");
-			trap_Cvar_Set("cdkey3", "");
-			trap_Cvar_Set("cdkey4", "");
-			if (strlen(buff) == CDKEY_LEN) {
-				Q_strncpyz(out, buff, 5);
-				trap_Cvar_Set("cdkey1", out);
-				Q_strncpyz(out, buff + 4, 5);
-				trap_Cvar_Set("cdkey2", out);
-				Q_strncpyz(out, buff + 8, 5);
-				trap_Cvar_Set("cdkey3", out);
-				Q_strncpyz(out, buff + 12, 5);
-				trap_Cvar_Set("cdkey4", out);
-			}
-
+            // @pjb:
+			buff[0] = '\0';
 		} else if (Q_stricmp(name, "verifyCDKey") == 0) {
 			buff[0] = '\0';
-			Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey1")); 
-			Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey2")); 
-			Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey3")); 
-			Q_strcat(buff, 1024, UI_Cvar_VariableString("cdkey4")); 
-			trap_Cvar_Set("cdkey", buff);
-			if (trap_VerifyCDKey(buff, UI_Cvar_VariableString("cdkeychecksum"))) {
-				trap_Cvar_Set("ui_cdkeyvalid", "CD Key Appears to be valid.");
-				trap_SetCDKey(buff);
-			} else {
-				trap_Cvar_Set("ui_cdkeyvalid", "CD Key does not appear to be valid.");
-			}
+			trap_Cvar_Set("ui_cdkeyvalid", "CD Key Appears to be valid.");
 		} else if (Q_stricmp(name, "loadArenas") == 0) {
 			UI_LoadArenas();
 			UI_MapCountByGameType(qfalse);
@@ -3527,9 +3500,6 @@ static void UI_RunMenuScript(char **args) {
 				UI_Update(name2);
 			}
 		} else if (Q_stricmp(name, "setPbClStatus") == 0) {
-			int stat;
-			if ( Int_Parse( args, &stat ) )
-				trap_SetPbClStatus( stat );
 		}
 		else {
 			Com_Printf("unknown UI script %s\n", name);
@@ -3744,10 +3714,10 @@ static void UI_BuildServerDisplayList(qboolean force) {
 
 	// do motd updates here too
 	trap_Cvar_VariableStringBuffer( "cl_motdString", uiInfo.serverStatus.motd, sizeof(uiInfo.serverStatus.motd) );
-	len = strlen(uiInfo.serverStatus.motd);
+	len = (int) strlen(uiInfo.serverStatus.motd);
 	if (len == 0) {
 		strcpy(uiInfo.serverStatus.motd, "Welcome to Team Arena!");
-		len = strlen(uiInfo.serverStatus.motd);
+		len = (int) strlen(uiInfo.serverStatus.motd);
 	} 
 	if (len != uiInfo.serverStatus.motdLen) {
 		uiInfo.serverStatus.motdLen = len;
@@ -3974,7 +3944,7 @@ static int UI_GetServerStatusInfo( const char *serverAddress, serverStatusInfo_t
 				name = p;
 				Com_sprintf(&info->pings[len], sizeof(info->pings)-len, "%d", i);
 				info->lines[info->numLines][0] = &info->pings[len];
-				len += strlen(&info->pings[len]) + 1;
+				len += (int) strlen(&info->pings[len]) + 1;
 				info->lines[info->numLines][1] = score;
 				info->lines[info->numLines][2] = ping;
 				info->lines[info->numLines][3] = name;
@@ -4974,7 +4944,7 @@ static void UI_BuildQ3Model_List( void )
 	dirptr  = dirlist;
 	for (i=0; i<numdirs && uiInfo.q3HeadCount < MAX_PLAYERMODELS; i++,dirptr+=dirlen+1)
 	{
-		dirlen = strlen(dirptr);
+		dirlen = (int) strlen(dirptr);
 		
 		if (dirlen && dirptr[dirlen-1]=='/') dirptr[dirlen-1]='\0';
 
@@ -4986,7 +4956,7 @@ static void UI_BuildQ3Model_List( void )
 		fileptr  = filelist;
 		for (j=0; j<numfiles && uiInfo.q3HeadCount < MAX_PLAYERMODELS;j++,fileptr+=filelen+1)
 		{
-			filelen = strlen(fileptr);
+			filelen = (int) strlen(fileptr);
 
 			COM_StripExtension(fileptr,skinname);
 
@@ -5023,7 +4993,7 @@ static void UI_BuildQ3Model_List( void )
 UI_Init
 =================
 */
-void _UI_Init( qboolean inGameLoad ) {
+void UI_Init( qboolean inGameLoad ) {
 	const char *menuSet;
 	int start;
 
@@ -5033,7 +5003,7 @@ void _UI_Init( qboolean inGameLoad ) {
 	UI_InitMemory();
 
 	// cache redundant calulations
-	trap_GetGlconfig( &uiInfo.uiDC.glconfig );
+	trap_GetVideoConfig( &uiInfo.uiDC.glconfig );
 
 	// for 640x480 virtualized screen
 	uiInfo.uiDC.yscale = uiInfo.uiDC.glconfig.vidHeight * (1.0/480.0);
@@ -5172,12 +5142,14 @@ void _UI_Init( qboolean inGameLoad ) {
 UI_KeyEvent
 =================
 */
-void _UI_KeyEvent( int key, qboolean down ) {
+void UI_KeyEvent( int userIndex, int key, qboolean down ) {
 
   if (Menu_Count() > 0) {
     menuDef_t *menu = Menu_GetFocused();
 		if (menu) {
-			if (key == K_ESCAPE && down && !Menus_AnyFullScreenVisible()) {
+            // @pjb: quit out of menus on start pressed
+			if ((key == K_ESCAPE || key == K_GAMEPAD_START)                
+                    && down && !Menus_AnyFullScreenVisible()) {
 				Menus_CloseAll();
 			} else {
 				Menu_HandleKey(menu, key, down );
@@ -5199,7 +5171,7 @@ void _UI_KeyEvent( int key, qboolean down ) {
 UI_MouseEvent
 =================
 */
-void _UI_MouseEvent( int dx, int dy )
+void UI_MouseEvent( int userIndex, int dx, int dy )
 {
 	// update mouse screen position
 	uiInfo.uiDC.cursorx += dx;
@@ -5222,6 +5194,45 @@ void _UI_MouseEvent( int dx, int dy )
 
 }
 
+/*
+=================
+@pjbL UI_GamepadEvent
+=================
+*/
+void UI_GamepadEvent( int userIndex, int axis, int value  )
+{
+	// @pjb: TODO: controller index filtering
+
+    if ( axis == 1 )
+    {
+        int threshold = ui_thumbstickThreshold.value;
+
+        if ( value >= threshold && uiInfo.lthumbstickY < threshold )
+            UI_KeyEvent( userIndex, K_UPARROW, qtrue );
+        if ( value < threshold && uiInfo.lthumbstickY >= threshold )
+            UI_KeyEvent( userIndex, K_UPARROW, qfalse );
+        if ( value <= -threshold && uiInfo.lthumbstickY > -threshold )
+            UI_KeyEvent( userIndex, K_DOWNARROW, qtrue );
+        if ( value > -threshold && uiInfo.lthumbstickY <= -threshold )
+            UI_KeyEvent( userIndex, K_DOWNARROW, qfalse );
+        uiInfo.lthumbstickY = value;
+    }
+    else if ( axis == 0 )
+    {
+        int threshold = ui_thumbstickThreshold.value;
+
+        if ( value >= threshold && uiInfo.lthumbstickX < threshold )
+            UI_KeyEvent( userIndex, K_RIGHTARROW, qtrue );
+        if ( value < threshold && uiInfo.lthumbstickX >= threshold )
+            UI_KeyEvent( userIndex, K_RIGHTARROW, qfalse );
+        if ( value <= -threshold && uiInfo.lthumbstickX > -threshold )
+            UI_KeyEvent( userIndex, K_LEFTARROW, qtrue );
+        if ( value > -threshold && uiInfo.lthumbstickX <= -threshold )
+            UI_KeyEvent( userIndex, K_LEFTARROW, qfalse );
+        uiInfo.lthumbstickX = value;
+    }
+}
+
 void UI_LoadNonIngame() {
 	const char *menuSet = UI_Cvar_VariableString("ui_menuFiles");
 	if (menuSet == NULL || menuSet[0] == '\0') {
@@ -5231,7 +5242,7 @@ void UI_LoadNonIngame() {
 	uiInfo.inGameLoad = qfalse;
 }
 
-void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
+void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 	char buf[256];
 
 	// this should be the ONLY way the menu system is brought up
@@ -5303,7 +5314,7 @@ void _UI_SetActiveMenu( uiMenuCommand_t menu ) {
   }
 }
 
-qboolean _UI_IsFullscreen( void ) {
+qboolean UI_IsFullscreen( void ) {
 	return Menus_AnyFullScreenVisible();
 }
 
@@ -5316,11 +5327,11 @@ static void UI_ReadableSize ( char *buf, int bufsize, int value )
 {
 	if (value > 1024*1024*1024 ) { // gigs
 		Com_sprintf( buf, bufsize, "%d", value / (1024*1024*1024) );
-		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d GB", 
+		Com_sprintf( buf+strlen(buf), bufsize-(int) strlen(buf), ".%02d GB", 
 			(value % (1024*1024*1024))*100 / (1024*1024*1024) );
 	} else if (value > 1024*1024 ) { // megs
 		Com_sprintf( buf, bufsize, "%d", value / (1024*1024) );
-		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d MB", 
+		Com_sprintf( buf+strlen(buf), bufsize-(int) strlen(buf), ".%02d MB", 
 			(value % (1024*1024))*100 / (1024*1024) );
 	} else if (value > 1024 ) { // kilos
 		Com_sprintf( buf, bufsize, "%d KB", value / 1024 );
@@ -5605,6 +5616,9 @@ vmCvar_t	ui_spAwards;
 vmCvar_t	ui_spVideos;
 vmCvar_t	ui_spSkill;
 
+// @pjb: thumbstick sensitivity when navigating
+vmCvar_t	ui_thumbstickThreshold;
+
 vmCvar_t	ui_spSelection;
 
 vmCvar_t	ui_browserMaster;
@@ -5698,6 +5712,13 @@ vmCvar_t	ui_realCaptureLimit;
 vmCvar_t	ui_realWarmUp;
 vmCvar_t	ui_serverStatusTimeOut;
 
+// @pjb: for debugging ui menu keyboard nav
+vmCvar_t    ui_debugMenuNav;
+// @pjb: is the account system enabled?
+vmCvar_t    ui_accountEnabled;
+// @pjb: is the graphics hardware fixed?
+vmCvar_t    ui_fixedGfxHW;
+
 
 // bk001129 - made static to avoid aliasing
 static cvarTable_t		cvarTable[] = {
@@ -5725,6 +5746,9 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_spAwards, "g_spAwards", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spVideos, "g_spVideos", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spSkill, "g_spSkill", "2", CVAR_ARCHIVE },
+
+    // @pjb: thumbstick sensitivity when navigating
+    { &ui_thumbstickThreshold, "ui_thumbstickThreshold", "50", CVAR_ARCHIVE },
 
 	{ &ui_spSelection, "ui_spSelection", "", CVAR_ROM },
 
@@ -5820,6 +5844,12 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_realCaptureLimit, "capturelimit", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART},
 	{ &ui_serverStatusTimeOut, "ui_serverStatusTimeOut", "7000", CVAR_ARCHIVE},
 
+    // @pjb: for debugging menu keyboard navigation
+    { &ui_debugMenuNav, "ui_debugMenuNav", "0", CVAR_ARCHIVE },
+    // @pjb: is the account system enabled?
+	{ &ui_accountEnabled, "ua_enabled", "0", CVAR_INIT },
+    // @pjb: is the graphics hardware fixed?
+	{ &ui_fixedGfxHW, "r_fixedhw", "0", CVAR_LATCH },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -5995,3 +6025,22 @@ static void UI_StartServerRefresh(qboolean full)
 	}
 }
 
+
+
+/*
+=================
+@pjb: Is the account system enabled?
+=================
+*/
+qboolean UI_AccountEnabled( void ) {
+    return ui_accountEnabled.integer;
+}
+
+/*
+=================
+@pjb: Is the graphics hardware fixed?
+=================
+*/
+qboolean UI_IsFixedGraphicsHardware( void ) {
+    return ui_fixedGfxHW.integer;
+}

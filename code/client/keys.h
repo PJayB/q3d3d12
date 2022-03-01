@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	MAX_KEYS		256
 
+// @pjb: maximum number of controllers
+#define MAX_GAMEPADS Q_MAX_USERS
+
 typedef struct {
 	qboolean	down;
 	int			repeats;		// if > 1, it is autorepeating

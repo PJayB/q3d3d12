@@ -29,6 +29,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SCROLL_TIME_ADJUSTOFFSET	40
 #define SCROLL_TIME_FLOOR					20
 
+// @pjb: zero this to disable cross-menu auto-nav
+#define AUTONAV_ACROSS_MENUS 0
+
+// @pjb: navigation directions
+typedef enum {
+    NAV_UP,
+    NAV_DOWN,
+    NAV_LEFT,
+    NAV_RIGHT
+} NAV_DIRECTION;
+
 typedef struct scrollInfo_s {
 	int nextScrollTime;
 	int nextAdjustTime;
@@ -49,7 +60,6 @@ static itemDef_t *itemCapture = NULL;   // item that has the mouse captured ( if
 displayContextDef_t *DC = NULL;
 
 static qboolean g_waitingForKey = qfalse;
-static qboolean g_editingField = qfalse;
 
 static itemDef_t *g_bindItem = NULL;
 static itemDef_t *g_editItem = NULL;
@@ -74,6 +84,15 @@ itemDef_t *Menu_SetPrevCursorItem(menuDef_t *menu);
 itemDef_t *Menu_SetNextCursorItem(menuDef_t *menu);
 static qboolean Menu_OverActiveItem(menuDef_t *menu, float x, float y);
 
+// @pjb
+static void MenuItem_ClipFocusPoint( itemDef_t* item );
+static void MenuItem_FocusOnCenter( itemDef_t* item );
+static itemDef_t *Menu_GetFocusedItem(menuDef_t *menu);
+static void MenuItem_GetCenter( itemDef_t* item, float center[] );
+static qboolean Item_SetFocus(itemDef_t *item, float x, float y);
+static rectDef_t *Item_CorrectedTextRect(itemDef_t *item);
+static void Menu_CloseCinematics(menuDef_t *menu);
+
 #ifdef CGAME
 #define MEM_POOL_SIZE  128 * 1024
 #else
@@ -89,7 +108,7 @@ static int		allocPoint, outOfMemory;
 UI_Alloc
 ===============
 */				  
-void *UI_Alloc( int size ) {
+void *UI_Alloc( size_t size ) {
 	char	*p; 
 
 	if ( allocPoint + size > MEM_POOL_SIZE ) {
@@ -184,7 +203,7 @@ const char *String_Alloc(const char *p) {
 		str = str->next;
 	}
 
-	len = strlen(p);
+	len = (int) strlen(p);
 	if (len + strPoolIndex + 1 < STRING_POOL_SIZE) {
 		int ph = strPoolIndex;
 		strcpy(&strPool[strPoolIndex], p);
@@ -888,8 +907,6 @@ void Script_SetBackground(itemDef_t *item, char **args) {
 }
 
 
-
-
 itemDef_t *Menu_FindItemByName(menuDef_t *menu, const char *p) {
   int i;
   if (menu == NULL || p == NULL) {
@@ -903,6 +920,22 @@ itemDef_t *Menu_FindItemByName(menuDef_t *menu, const char *p) {
   }
 
   return NULL;
+}
+
+// @pjb: searches the current menu, but if the item isn't found, it tries all 
+// other visible menus.
+itemDef_t *Menu_FindItemByNameGlobal(menuDef_t* startingPoint, const char* p) {
+    int m;
+    itemDef_t* item = Menu_FindItemByName( startingPoint, p );
+    
+    // Try all other menus if item == NULL.
+    for (m = 0; item == NULL && m < menuCount; m++) {
+        if (&Menus[m] != startingPoint && Menus[m].window.flags & WINDOW_VISIBLE) {
+          item = Menu_FindItemByName( &Menus[m], p );
+        }
+    }
+
+    return item;
 }
 
 void Script_SetTeamColor(itemDef_t *item, char **args) {
@@ -1170,22 +1203,36 @@ void Script_Orbit(itemDef_t *item, char **args) {
 
 
 void Script_SetFocus(itemDef_t *item, char **args) {
-  const char *name;
-  itemDef_t *focusItem;
+    const char *name;
+    itemDef_t *focusItem;
+    menuDef_t *menu = (menuDef_t*)item->parent;
 
-  if (String_Parse(args, &name)) {
-    focusItem = Menu_FindItemByName(item->parent, name);
-    if (focusItem && !(focusItem->window.flags & WINDOW_DECORATION) && !(focusItem->window.flags & WINDOW_HASFOCUS)) {
-      Menu_ClearFocus(item->parent);
-      focusItem->window.flags |= WINDOW_HASFOCUS;
-      if (focusItem->onFocus) {
-        Item_RunScript(focusItem, focusItem->onFocus);
-      }
-      if (DC->Assets.itemFocusSound) {
-        DC->startLocalSound( DC->Assets.itemFocusSound, CHAN_LOCAL_SOUND );
-      }
+    if (String_Parse(args, &name)) {
+        focusItem = Menu_FindItemByName(item->parent, name);
+        if (focusItem && !(focusItem->window.flags & WINDOW_DECORATION) && !(focusItem->window.flags & WINDOW_HASFOCUS)) {
+            Menu_ClearFocus(item->parent);
+
+            // @pjb: handle simulated mouse movement and set focus
+            if (menu)
+            {
+                MenuItem_GetCenter( focusItem, menu->focusPoint );
+                if (Item_SetFocus( focusItem, menu->focusPoint[0], menu->focusPoint[1] ) )
+                {
+                    Menu_HandleMouseMove( menu, menu->focusPoint[0], menu->focusPoint[1] );
+                    return;
+                }
+            }
+
+            focusItem->window.flags |= WINDOW_HASFOCUS;
+
+            if (focusItem->onFocus) {
+                Item_RunScript(focusItem, focusItem->onFocus);
+            }
+            if (DC->Assets.itemFocusSound) {
+                DC->startLocalSound(DC->Assets.itemFocusSound, CHAN_LOCAL_SOUND);
+            }
+        }
     }
-  }
 }
 
 void Script_SetPlayerModel(itemDef_t *item, char **args) {
@@ -1265,7 +1312,10 @@ void Item_RunScript(itemDef_t *item, const char *s) {
   char script[1024], *p;
   int i;
   qboolean bRan;
+  menuDef_t* parent = (menuDef_t*) item->parent;
+
   memset(script, 0, sizeof(script));
+
   if (item && s && s[0]) {
     Q_strcat(script, 1024, s);
     p = script;
@@ -1288,6 +1338,17 @@ void Item_RunScript(itemDef_t *item, const char *s) {
           break;
         }
       }
+
+      // @pjb: is it a menu macro?
+      for (i = 0; parent && i < parent->macroCount; ++i) {
+          if (Q_stricmp(command, parent->macros[i].name) == 0) {
+              // Run the script as if it was our own
+              Item_RunScript( item, parent->macros[i].script );
+              bRan = qtrue;
+              break;
+          }
+      }
+
       // not in our auto list, pass to handler
       if (!bRan) {
         DC->runScript(&p);
@@ -1335,22 +1396,23 @@ qboolean Item_EnableShowViaCvar(itemDef_t *item, int flag) {
 	return qtrue;
 }
 
-
-// will optionaly set focus to this item 
-qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
-	int i;
-	itemDef_t *oldFocus;
-	sfxHandle_t *sfx = &DC->Assets.itemFocusSound;
-	qboolean playSound = qfalse;
-	menuDef_t *parent; // bk001206: = (menuDef_t*)item->parent;
+// @pjb: tests whether an item CAN be made focused
+qboolean Item_CanFocus(itemDef_t* item) {
 	// sanity check, non-null, not a decoration and does not already have the focus
-	if (item == NULL || item->window.flags & WINDOW_DECORATION || item->window.flags & WINDOW_HASFOCUS || !(item->window.flags & WINDOW_VISIBLE)) {
+	if (item == NULL || !(item->window.flags & WINDOW_VISIBLE)) {
 		return qfalse;
 	}
 
-	// bk001206 - this can be NULL.
-	parent = (menuDef_t*)item->parent; 
-      
+    // Items with a focused handler should always be considered
+    if ( item->onFocus != NULL ) {
+        return qtrue;
+    }
+
+    // ignore decorations by default
+    if ( item->window.flags & WINDOW_DECORATION ) {
+        return qfalse;
+    }
+
 	// items can be enabled and disabled based on cvars
 	if (item->cvarFlags & (CVAR_ENABLE | CVAR_DISABLE) && !Item_EnableShowViaCvar(item, CVAR_ENABLE)) {
 		return qfalse;
@@ -1360,40 +1422,62 @@ qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
 		return qfalse;
 	}
 
-	oldFocus = Menu_ClearFocus(item->parent);
+    return qtrue;
+}
 
-	if (item->type == ITEM_TYPE_TEXT) {
-		rectDef_t r;
-		r = item->textRect;
-		r.y -= r.h;
-		if (Rect_ContainsPoint(&r, x, y)) {
-			item->window.flags |= WINDOW_HASFOCUS;
-			if (item->focusSound) {
-				sfx = &item->focusSound;
-			}
-			playSound = qtrue;
-		} else {
-			if (oldFocus) {
-				oldFocus->window.flags |= WINDOW_HASFOCUS;
-				if (oldFocus->onFocus) {
-					Item_RunScript(oldFocus, oldFocus->onFocus);
-				}
-			}
-		}
-	} else {
-	    item->window.flags |= WINDOW_HASFOCUS;
-		if (item->onFocus) {
-			Item_RunScript(item, item->onFocus);
-		}
-		if (item->focusSound) {
-			sfx = &item->focusSound;
-		}
-		playSound = qtrue;
-	}
+// will optionaly set focus to this item 
+qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
+	int i;
+	itemDef_t *oldFocus;
+	sfxHandle_t *sfx = &DC->Assets.itemFocusSound;
+	qboolean playSound = qfalse;
+	menuDef_t *parent; // bk001206: = (menuDef_t*)item->parent;
 
-	if (playSound && sfx) {
-		DC->startLocalSound( *sfx, CHAN_LOCAL_SOUND );
-	}
+    // @pjb: test focus first
+    if ( !Item_CanFocus( item ) )
+        return qfalse;
+
+	// bk001206 - this can be NULL.
+	parent = (menuDef_t*)item->parent; 
+      
+    // @pjb: don't do this if it's already GOT the focus
+    if ( !( item->window.flags & WINDOW_HASFOCUS ) ) {
+
+	    oldFocus = Menu_ClearFocus(item->parent);
+
+	    if (item->type == ITEM_TYPE_TEXT) {
+		    rectDef_t r;
+		    r = item->textRect;
+		    r.y -= r.h;
+		    if (Rect_ContainsPoint(&r, x, y)) {
+			    item->window.flags |= WINDOW_HASFOCUS;
+			    if (item->focusSound) {
+				    sfx = &item->focusSound;
+			    }
+			    playSound = qtrue;
+		    } else {
+			    if (oldFocus) {
+				    oldFocus->window.flags |= WINDOW_HASFOCUS;
+				    if (oldFocus->onFocus) {
+					    Item_RunScript(oldFocus, oldFocus->onFocus);
+				    }
+			    }
+		    }
+	    } else {
+	        item->window.flags |= WINDOW_HASFOCUS;
+		    if (item->onFocus) {
+			    Item_RunScript(item, item->onFocus);
+		    }
+		    if (item->focusSound) {
+			    sfx = &item->focusSound;
+		    }
+		    playSound = qtrue;
+	    }
+
+	    if (playSound && sfx) {
+		    DC->startLocalSound( *sfx, CHAN_LOCAL_SOUND );
+	    }
+    }
 
 	for (i = 0; i < parent->itemCount; i++) {
 		if (parent->items[i] == item) {
@@ -1402,7 +1486,9 @@ qboolean Item_SetFocus(itemDef_t *item, float x, float y) {
 		}
 	}
 
-	return qtrue;
+    MenuItem_ClipFocusPoint( item );
+
+    return qtrue;
 }
 
 int Item_ListBox_MaxScroll(itemDef_t *item) {
@@ -1610,12 +1696,14 @@ void Item_ListBox_MouseEnter(itemDef_t *item, float x, float y)
 				r.y = item->window.rect.y;
 				r.h = item->window.rect.h - SCROLLBAR_SIZE;
 				r.w = item->window.rect.w - listPtr->drawPadding;
-				if (Rect_ContainsPoint(&r, x, y)) {
-					listPtr->cursorPos =  (int)((x - r.x) / listPtr->elementWidth)  + listPtr->startPos;
-					if (listPtr->cursorPos >= listPtr->endPos) {
-						listPtr->cursorPos = listPtr->endPos;
-					}
-				}
+
+                // @pjb: this causes a bug with keyboard nav
+				//if (Rect_ContainsPoint(&r, x, y)) {
+				//	listPtr->cursorPos =  (int)((x - r.x) / listPtr->elementWidth)  + listPtr->startPos;
+				//	if (listPtr->cursorPos >= listPtr->endPos) {
+				//		listPtr->cursorPos = listPtr->endPos;
+				//	}
+				//}
 			} else {
 				// text hit.. 
 			}
@@ -1625,12 +1713,14 @@ void Item_ListBox_MouseEnter(itemDef_t *item, float x, float y)
 		r.y = item->window.rect.y;
 		r.w = item->window.rect.w - SCROLLBAR_SIZE;
 		r.h = item->window.rect.h - listPtr->drawPadding;
-		if (Rect_ContainsPoint(&r, x, y)) {
-			listPtr->cursorPos =  (int)((y - 2 - r.y) / listPtr->elementHeight)  + listPtr->startPos;
-			if (listPtr->cursorPos > listPtr->endPos) {
-				listPtr->cursorPos = listPtr->endPos;
-			}
-		}
+
+        // @pjb: this causes a bug with keyboard nav
+		//if (Rect_ContainsPoint(&r, x, y)) {
+		//	listPtr->cursorPos =  (int)((y - 2 - r.y) / listPtr->elementHeight)  + listPtr->startPos;
+		//	if (listPtr->cursorPos > listPtr->endPos) {
+		//		listPtr->cursorPos = listPtr->endPos;
+		//	}
+		//}
 	}
 }
 
@@ -1686,7 +1776,8 @@ void Item_MouseLeave(itemDef_t *item) {
       item->window.flags &= ~WINDOW_MOUSEOVERTEXT;
     }
     Item_RunScript(item, item->mouseExit);
-    item->window.flags &= ~(WINDOW_LB_RIGHTARROW | WINDOW_LB_LEFTARROW);
+    // @pjb: disable key exclusivity
+    item->window.flags &= ~(WINDOW_LB_RIGHTARROW | WINDOW_LB_LEFTARROW | WINDOW_CAPTURE_KEYS);
   }
 }
 
@@ -1723,10 +1814,67 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 	int count = DC->feederCount(item->special);
 	int max, viewmax;
 
-	if (force || (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && item->window.flags & WINDOW_HASFOCUS)) {
+	if (force || (item->window.flags & WINDOW_HASFOCUS)) {
+
 		max = Item_ListBox_MaxScroll(item);
-		if (item->window.flags & WINDOW_HORIZONTAL) {
+		if (item->window.flags & WINDOW_HORIZONTAL)
 			viewmax = (item->window.rect.w / listPtr->elementWidth);
+        else
+			viewmax = (item->window.rect.h / listPtr->elementHeight);
+
+		// mouse hit
+		if ( Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && 
+            (key == K_MOUSE1 || key == K_MOUSE2)) {
+
+    		if (item->window.flags & WINDOW_HORIZONTAL)
+	    		listPtr->cursorPos = (int)((DC->cursorx - item->window.rect.x) / listPtr->elementWidth) + listPtr->startPos;
+            else
+	    		listPtr->cursorPos = (int)((DC->cursory - 2 - item->window.rect.y) / listPtr->elementHeight) + listPtr->startPos;
+
+			if (listPtr->cursorPos >= listPtr->endPos) {
+				listPtr->cursorPos = listPtr->endPos;
+			}
+            
+            if (item->window.flags & WINDOW_LB_LEFTARROW) {
+				listPtr->startPos--;
+				if (listPtr->startPos < 0) {
+					listPtr->startPos = 0;
+				}
+			} else if (item->window.flags & WINDOW_LB_RIGHTARROW) {
+				// one down
+				listPtr->startPos++;
+				if (listPtr->startPos > max) {
+					listPtr->startPos = max;
+				}
+			} else if (item->window.flags & WINDOW_LB_PGUP) {
+				// page up
+				listPtr->startPos -= viewmax;
+				if (listPtr->startPos < 0) {
+					listPtr->startPos = 0;
+				}
+			} else if (item->window.flags & WINDOW_LB_PGDN) {
+				// page down
+				listPtr->startPos += viewmax;
+				if (listPtr->startPos > max) {
+					listPtr->startPos = max;
+				}
+			} else if (item->window.flags & WINDOW_LB_THUMB) {
+				// Display_SetCaptureItem(item);
+			} else {
+				// select an item
+				if (DC->realTime < lastListBoxClickTime && listPtr->doubleClick) {
+					Item_RunScript(item, listPtr->doubleClick);
+				}
+				lastListBoxClickTime = DC->realTime + DOUBLE_CLICK_DELAY;
+				if (item->cursorPos != listPtr->cursorPos) {
+					item->cursorPos = listPtr->cursorPos;
+					DC->feederSelection(item->special, item->cursorPos);
+				}
+			}
+			return qtrue;
+		}
+
+		if (item->window.flags & WINDOW_HORIZONTAL) {
 			if ( key == K_LEFTARROW || key == K_KP_LEFTARROW ) 
 			{
 				if (!listPtr->notselectable) {
@@ -1775,7 +1923,6 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 			}
 		}
 		else {
-			viewmax = (item->window.rect.h / listPtr->elementHeight);
 			if ( key == K_UPARROW || key == K_KP_UPARROW ) 
 			{
 				if (!listPtr->notselectable) {
@@ -1822,46 +1969,6 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 				}
 				return qtrue;
 			}
-		}
-		// mouse hit
-		if (key == K_MOUSE1 || key == K_MOUSE2) {
-			if (item->window.flags & WINDOW_LB_LEFTARROW) {
-				listPtr->startPos--;
-				if (listPtr->startPos < 0) {
-					listPtr->startPos = 0;
-				}
-			} else if (item->window.flags & WINDOW_LB_RIGHTARROW) {
-				// one down
-				listPtr->startPos++;
-				if (listPtr->startPos > max) {
-					listPtr->startPos = max;
-				}
-			} else if (item->window.flags & WINDOW_LB_PGUP) {
-				// page up
-				listPtr->startPos -= viewmax;
-				if (listPtr->startPos < 0) {
-					listPtr->startPos = 0;
-				}
-			} else if (item->window.flags & WINDOW_LB_PGDN) {
-				// page down
-				listPtr->startPos += viewmax;
-				if (listPtr->startPos > max) {
-					listPtr->startPos = max;
-				}
-			} else if (item->window.flags & WINDOW_LB_THUMB) {
-				// Display_SetCaptureItem(item);
-			} else {
-				// select an item
-				if (DC->realTime < lastListBoxClickTime && listPtr->doubleClick) {
-					Item_RunScript(item, listPtr->doubleClick);
-				}
-				lastListBoxClickTime = DC->realTime + DOUBLE_CLICK_DELAY;
-				if (item->cursorPos != listPtr->cursorPos) {
-					item->cursorPos = listPtr->cursorPos;
-					DC->feederSelection(item->special, item->cursorPos);
-				}
-			}
-			return qtrue;
 		}
 		if ( key == K_HOME || key == K_KP_HOME) {
 			// home
@@ -1927,10 +2034,13 @@ qboolean Item_ListBox_HandleKey(itemDef_t *item, int key, qboolean down, qboolea
 
 qboolean Item_YesNo_HandleKey(itemDef_t *item, int key) {
 
-  if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && item->window.flags & WINDOW_HASFOCUS && item->cvar) {
-		if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 || key == K_MOUSE3) {
-	    DC->setCVar(item->cvar, va("%i", !DC->getCVarValue(item->cvar)));
-		  return qtrue;
+  if (item->window.flags & WINDOW_HASFOCUS && item->cvar) {
+      if ( ( Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) ) 
+          || key == K_ENTER 
+          || key == K_KP_ENTER 
+          || key == K_GAMEPAD_A ) {
+	        DC->setCVar(item->cvar, va("%i", !DC->getCVarValue(item->cvar)));
+		    return qtrue;
 		}
   }
 
@@ -2001,8 +2111,9 @@ const char *Item_Multi_Setting(itemDef_t *item) {
 qboolean Item_Multi_HandleKey(itemDef_t *item, int key) {
 	multiDef_t *multiPtr = (multiDef_t*)item->typeData;
 	if (multiPtr) {
-	  if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && item->window.flags & WINDOW_HASFOCUS && item->cvar) {
-			if (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 || key == K_MOUSE3) {
+	  if (item->window.flags & WINDOW_HASFOCUS && item->cvar) {
+          qboolean mouseKey = Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && (key == K_MOUSE1 || key == K_ENTER || key == K_MOUSE2 || key == K_MOUSE3);
+			if (mouseKey || key == K_ENTER || key == K_KP_ENTER || key == K_GAMEPAD_A ) {
 				int current = Item_Multi_FindCvarByValue(item) + 1;
 				int max = Item_Multi_CountSettings(item);
 				if ( current < 0 || current >= max ) {
@@ -2036,7 +2147,7 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
 
 		memset(buff, 0, sizeof(buff));
 		DC->getCVarString(item->cvar, buff, sizeof(buff));
-		len = strlen(buff);
+		len = (int) strlen(buff);
 		if (editPtr->maxChars && len > editPtr->maxChars) {
 			len = editPtr->maxChars;
 		}
@@ -2160,7 +2271,8 @@ qboolean Item_TextField_HandleKey(itemDef_t *item, int key) {
 			}
 		}
 
-		if ( key == K_ENTER || key == K_KP_ENTER || key == K_ESCAPE)  {
+        // @pjb
+		if ( key == K_ENTER || key == K_KP_ENTER || key == K_ESCAPE || key == K_GAMEPAD_B )  {
 			return qfalse;
 		}
 
@@ -2276,6 +2388,10 @@ static void Scroll_Slider_ThumbFunc(void *p) {
 
 void Item_StartCapture(itemDef_t *item, int key) {
 	int flags;
+
+    // @pjb: set the keyboard exclusivity state
+    item->window.flags |= WINDOW_CAPTURE_KEYS;
+
 	switch (item->type) {
     case ITEM_TYPE_EDITFIELD:
     case ITEM_TYPE_NUMERICFIELD:
@@ -2323,6 +2439,7 @@ void Item_StartCapture(itemDef_t *item, int key) {
 
 void Item_StopCapture(itemDef_t *item) {
 
+    item->window.flags &= ~WINDOW_CAPTURE_KEYS;
 }
 
 qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
@@ -2365,6 +2482,12 @@ qboolean Item_Slider_HandleKey(itemDef_t *item, int key, qboolean down) {
 	return qfalse;
 }
 
+// @pjb: returns true if the item requires explicit keyboard capture
+qboolean Item_RequiresExplicitKeyboardCapture( const itemDef_t* item ) {
+    return  item->type == ITEM_TYPE_LISTBOX ||
+            item->type == ITEM_TYPE_SLIDER ||
+            item->type == ITEM_TYPE_EDITFIELD;
+}
 
 qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
 
@@ -2384,6 +2507,42 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
 		return qfalse;
 	}
 
+    if ( !( key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3 || key == K_MOUSE4 || key == K_MOUSE5 ) && 
+         Item_RequiresExplicitKeyboardCapture( item ) )
+    {
+        // @pjb: only scroll if we're explicitly capturing this kind of input.
+        if ( !( item->window.flags & WINDOW_CAPTURE_KEYS ) ) {
+            // Only accept an ENTER or GAMEPAD_A key
+            if ( key == K_ENTER || key == K_KP_ENTER || key == K_GAMEPAD_A ) {
+                item->window.flags |= WINDOW_CAPTURE_KEYS;
+
+				if (item->type == ITEM_TYPE_EDITFIELD || item->type == ITEM_TYPE_NUMERICFIELD) {
+					item->cursorPos = 0;
+					DC->setOverstrikeMode(qtrue);
+				}
+
+                // Play a sound
+		        DC->startLocalSound( DC->Assets.menuEnterSound, CHAN_LOCAL_SOUND );
+                return qtrue;
+            }
+
+            return qfalse;
+        }
+
+        // @pjb: back out if we're capturing keys
+        if ( key == K_ESCAPE || key == K_GAMEPAD_B ) {
+            item->window.flags &= ~WINDOW_CAPTURE_KEYS;
+
+			if (item->type == ITEM_TYPE_EDITFIELD || item->type == ITEM_TYPE_NUMERICFIELD) {
+				item->cursorPos = 0;
+				DC->setOverstrikeMode(qfalse);
+			}
+            
+            DC->startLocalSound( DC->Assets.menuExitSound, CHAN_LOCAL_SOUND );
+            return qtrue;
+        }
+    }    
+
   switch (item->type) {
     case ITEM_TYPE_BUTTON:
       return qfalse;
@@ -2396,8 +2555,7 @@ qboolean Item_HandleKey(itemDef_t *item, int key, qboolean down) {
       break;
     case ITEM_TYPE_EDITFIELD:
     case ITEM_TYPE_NUMERICFIELD:
-      //return Item_TextField_HandleKey(item, key);
-      return qfalse;
+      return Item_TextField_HandleKey(item, key);
       break;
     case ITEM_TYPE_COMBO:
       return qfalse;
@@ -2437,60 +2595,572 @@ void Item_Action(itemDef_t *item) {
   }
 }
 
+// @pjb: Clip the focus point to the new box
+static void MenuItem_ClipFocusPoint( itemDef_t* item )
+{
+	menuDef_t *parent = (menuDef_t*)item->parent; 
+
+    if ( parent )
+    {
+        float right = item->window.rectClient.x + item->window.rectClient.w;
+        float bottom = item->window.rectClient.y + item->window.rectClient.h;
+        if ( parent->focusPoint[0] < item->window.rectClient.x )
+            parent->focusPoint[0] = item->window.rectClient.x;
+        if ( parent->focusPoint[0] > right )
+            parent->focusPoint[0] = right;
+        if ( parent->focusPoint[1] < item->window.rectClient.y )
+            parent->focusPoint[1] = item->window.rectClient.y;
+        if ( parent->focusPoint[1] > bottom )
+            parent->focusPoint[1] = bottom;
+    }
+}
+
+// @pjb: get the center of an item
+static void MenuItem_GetCenter( itemDef_t* item, float center[] )
+{
+    // Prefer the text rect if possible
+    const rectDef_t* screenRect = &item->window.rectClient;
+    center[0] = screenRect->x + 0.5f * screenRect->w;
+    center[1] = screenRect->y + 0.5f * screenRect->h;
+}
+
+// @pjb: Clip the focus point to the new box
+static void MenuItem_FocusOnCenter( itemDef_t* item )
+{
+	menuDef_t *parent = (menuDef_t*)item->parent; 
+
+    if ( parent )
+    {
+        MenuItem_GetCenter( item, parent->focusPoint );
+    }
+}
+
+// @pjb: return the screen space coordinates of a client point
+static void Menu_GetScreenPosition( const menuDef_t* menu, const float* clientPoint, float* screenPoint )
+{
+    screenPoint[0] = clientPoint[0] + menu->window.rect.x;
+    screenPoint[1] = clientPoint[1] + menu->window.rect.y;
+}
+
+// @pjb: return two points that represent the side of the bounding box
+static void MenuItem_GetEdge( const rectDef_t* screenRect, int edge, float p0[2], float p1[2] )
+{
+    switch ( edge )
+    {
+    case NAV_UP:    
+        p0[0] = screenRect->x; p0[1] = screenRect->y;
+        p1[0] = screenRect->x + screenRect->w; p1[1] = screenRect->y;
+        break;
+    case NAV_DOWN:  
+        p0[0] = screenRect->x + screenRect->w; p0[1] = screenRect->y + screenRect->h;
+        p1[0] = screenRect->x; p1[1] = screenRect->y + screenRect->h;
+        break;
+    case NAV_LEFT:  
+        p0[0] = screenRect->x; p0[1] = screenRect->y + screenRect->h;
+        p1[0] = screenRect->x; p1[1] = screenRect->y;
+        break;
+    case NAV_RIGHT: 
+        p0[0] = screenRect->x + screenRect->w; p0[1] = screenRect->y;
+        p1[0] = screenRect->x + screenRect->w; p1[1] = screenRect->y + screenRect->h;
+        break;
+    default: return;
+    }
+}
+
+// @pjb: returns true if this is a good navigation candidate
+qboolean Menu_GoodNavCandidate( itemDef_t* item )
+{
+    if ( item->onFocus == NULL && item->action == NULL )
+    {
+        // Only consider certain types of control if the item hasn't been 
+        // explictly given something to do in the case of focus/activate
+        switch ( item->type )
+        {
+        case ITEM_TYPE_BUTTON:
+        case ITEM_TYPE_RADIOBUTTON:
+        case ITEM_TYPE_CHECKBOX:
+        case ITEM_TYPE_EDITFIELD:
+        case ITEM_TYPE_COMBO:
+        case ITEM_TYPE_LISTBOX:
+        case ITEM_TYPE_NUMERICFIELD:
+        case ITEM_TYPE_SLIDER:
+        case ITEM_TYPE_YESNO:
+        case ITEM_TYPE_MULTI:
+        case ITEM_TYPE_BIND:
+            break;
+        default:
+            return qfalse;
+        };
+    }
+
+    return Item_CanFocus( item );
+}
+
+// @pjb: test a ray against all the controls to see if that hits anything
+itemDef_t* Menu_NavigatePrecise( itemDef_t* originator, NAV_DIRECTION direction, float focus[2] )
+{
+    int i;
+    float d[2];
+    itemDef_t* nextItem = NULL;
+    float nextItemDist = 9999999;
+    float newFocusPoint[2];
+
+#if AUTONAV_ACROSS_MENUS
+    int m;
+    menuDef_t* originatorMenu = (menuDef_t*) originator->parent;
+#else 
+    menuDef_t* menu = (menuDef_t*) originator->parent;
+#endif
+
+    switch ( direction )
+    {
+    case NAV_UP:    d[0] =  0; d[1] = -1; break;
+    case NAV_DOWN:  d[0] =  0; d[1] =  1; break;
+    case NAV_LEFT:  d[0] = -1; d[1] =  0; break;
+    case NAV_RIGHT: d[0] =  1; d[1] =  0; break;
+    default: return NULL;
+    }
+
+    // @pjb: if there's no valid focus point, create one from the center of the active object
+    if ( focus[0] < 0 || focus[1] < 0 )
+    {
+        MenuItem_GetCenter( originator, focus );
+    }
+
+#if AUTONAV_ACROSS_MENUS
+    // Cast a ray out in the direction and see if we hit anything
+    for ( m = 0; m < menuCount; ++m )
+    { 
+        menuDef_t* menu = &Menus[m];
+        if ( !( menu->window.flags & WINDOW_VISIBLE ) )
+            continue;
+#endif
+        for ( i = 0; i < menu->itemCount; ++i )
+        {
+            float center2[2];
+            float dist;
+            itemDef_t* item = menu->items[i];
+
+            if ( item == originator || !Menu_GoodNavCandidate( item ) || (item->window.flags & WINDOW_HASFOCUS ) )
+            {
+                continue;
+            }
+
+            // Get the center in our menu space
+            MenuItem_GetCenter( item, center2 );
+#if AUTONAV_ACROSS_MENUS
+            center2[0] += menu->window.rect.x - originatorMenu->window.rect.x;
+            center2[1] += menu->window.rect.y - originatorMenu->window.rect.y;
+#endif
+
+            // What's the distance?
+            dist = d[0] * (center2[0] - focus[0]) + d[1] * (center2[1] - focus[1]);
+            if ( dist > 0 && dist < nextItemDist )
+            {
+                // Clip the point against the target's box
+                float fp[] = { 
+                    focus[0] + d[0] * dist,
+                    focus[1] + d[1] * dist
+                };
+
+                if ( Rect_ContainsPoint( 
+#if AUTONAV_ACROSS_MENUS
+                    &item->window.rect, 
+                    fp[0] + originatorMenu->window.rect.x, 
+                    fp[1] + originatorMenu->window.rect.y
+#else
+                     &item->window.rectClient, fp[0], fp[1]
+#endif
+                ))
+                {
+                    newFocusPoint[0] = fp[0];
+                    newFocusPoint[1] = fp[1];
+                    nextItem = item;
+                    nextItemDist = dist;
+                }
+            }
+#if AUTONAV_ACROSS_MENUS
+        }
+#endif
+    }
+
+    if ( nextItem != NULL )
+    {
+        focus[0] = newFocusPoint[0];
+        focus[1] = newFocusPoint[1];
+    }
+
+    return nextItem;
+}
+
+typedef struct {
+    float px;
+    float py;
+    float nx;
+    float ny;
+} halfSpace_t;
+
+static float PointToPlaneDistance( const halfSpace_t* plane, const float p[2] )
+{
+    return (p[0] - plane->px) * plane->nx + (p[1] - plane->py) * plane->ny;
+}
+
+// @pjb: returns positive results if the edge intersected or is on the right of the plane
+static qboolean OnRightOfPlane( const halfSpace_t* plane, const float p0[2], const float p1[2] )
+{
+    float a = PointToPlaneDistance( plane, p0 );
+    float b = PointToPlaneDistance( plane, p1 );
+    return (a > 0 || b > 0) ? qtrue : qfalse;
+}
+
+// @pjb: returns positive results if the edge intersected or is on the right of the plane
+static float LineSegmentToPlaneDistance( const halfSpace_t* plane, const float p0[2], const float p1[2] )
+{
+    float a = PointToPlaneDistance( plane, p0 );
+    float b = PointToPlaneDistance( plane, p1 );
+    if ( a >= 0 && b >= 0 )
+        return min( a, b ); // Closest point on right of the plane
+    else if ( a < 0 && b < 0 )
+        return max( a, b ); // Closest point on left of the plane
+    else if ( a < 0 || b < 0 )
+        return 0; // Closest point is *on* the plane
+
+    assert(0);
+    // "Warning: Not all control paths return a value". Erm.
+    return -1;
+}
+
+/* 
+    @pjb: This works by defining two planes. If testing horizontally, the
+    planes are defined as parallel to the top and bottom of the bounding box.
+    If testing vertically, they are parallel to the left and right sides.
+    If there is a threshold < 1, the planes are angled to cover more area.
+    If the threshold is < 0.1, there is only one plane, which defines a
+    halfspace on that side of the object.
+*/
+itemDef_t* Menu_NavigateImprecise( itemDef_t* originator, NAV_DIRECTION direction, float focus[2] )
+{
+    static const float pushoff = 0.05f;
+    static const float confusion_zone = 100.0f; // if it's within 100 units we'll give it the benefit of the doubt
+
+    itemDef_t* nextItem = NULL;
+
+#if AUTONAV_ACROSS_MENUS
+    int m;
+    menuDef_t* originatorMenu = (menuDef_t*) originator->parent;
+#else 
+    menuDef_t* menu = (menuDef_t*) originator->parent;
+#endif
+
+    float d[2], p0[2], p1[2], p2[2], n[2], r[2], center[2], newFocus[2];
+    float sinTheta;
+    float cosTheta;
+
+    switch ( direction )
+    {
+    case NAV_UP:    d[0] =  0; d[1] = -1; cosTheta = 1 - originator->verticalNavThreshold;   break;
+    case NAV_DOWN:  d[0] =  0; d[1] =  1; cosTheta = 1 - originator->verticalNavThreshold;   break;
+    case NAV_LEFT:  d[0] = -1; d[1] =  0; cosTheta = 1 - originator->horizontalNavThreshold; break;
+    case NAV_RIGHT: d[0] =  1; d[1] =  0; cosTheta = 1 - originator->horizontalNavThreshold; break;
+    default: return NULL;
+    }
+
+    MenuItem_GetEdge( &originator->window.rectClient, direction, p0, p1 );
+    MenuItem_GetCenter( originator, center );
+
+    // Snap the threshold
+    if ( cosTheta < 0.1f ) { cosTheta = 0; }
+    if ( cosTheta > 0.9f ) { cosTheta = 1; }
+
+    // Rotate the direction vector by the threshold
+    sinTheta = sinf(acosf(cosTheta));
+    n[0] = d[0] * cosTheta - d[1] * sinTheta;
+    n[1] = d[0] * sinTheta + d[1] * cosTheta;
+
+    // Reflect the plane normal
+    r[0] = 2 * d[0] * cosTheta - n[0];
+    r[1] = 2 * d[1] * cosTheta - n[1];
+
+    p2[0] = p0[0] + pushoff * d[0];
+    p2[1] = p0[1] + pushoff * d[1];
+
+    // The three halfspaces are now defined by:
+    // { p2, d }
+    // { p0, n }
+    // { p1, r }
+    // For each edge of each item for each halfspace, make sure it intersects
+    {
+        halfSpace_t halfSpaces[3] = 
+        { 
+            { p2[0], p2[1], d[0], d[1] },
+            { p0[0], p0[1], n[0], n[1] },
+            { p1[0], p1[1], r[0], r[1] }
+        };
+     
+        int i;
+        int edge;
+        float maxDist = 9999999;
+        float bestDot = 0;
+
+#if AUTONAV_ACROSS_MENUS
+        for ( m = 0; m < menuCount; ++m )
+        { 
+            menuDef_t* menu = &Menus[m];
+            if ( !( menu->window.flags & WINDOW_VISIBLE ) )
+                continue;
+#endif
+
+            for ( i = 0; i < menu->itemCount; ++i )
+            {
+                itemDef_t* item = menu->items[i];
+                float c[2];
+                float dot;
+                float myDist = maxDist;
+                qboolean passes = qfalse;
+
+                if ( item == originator || !Menu_GoodNavCandidate( item ) || (item->window.flags & WINDOW_HASFOCUS ) )
+                {
+                    continue;
+                }
+
+                // Get the vector between their centers
+                MenuItem_GetCenter( item, c );
+#if AUTONAV_ACROSS_MENUS
+                c[0] += menu->window.rect.x - originatorMenu->window.rect.x - center[0];
+                c[1] += menu->window.rect.y - originatorMenu->window.rect.y - center[1];
+#else
+                c[0] -= center[0];
+                c[1] -= center[1];
+#endif
+
+                dot = c[0] * c[0] + c[1] * c[1];
+                
+                // If the centers are the same, reject
+                if ( dot == 0 )
+                    continue;
+
+                // Test each edge
+                for ( edge = 0; edge < 4; ++edge )
+                {
+                    float dist;
+                    float e0[2], e1[2];
+
+                    MenuItem_GetEdge( &item->window.rectClient, edge, e0, e1 );
+
+#if AUTONAV_ACROSS_MENUS
+                    // Get the edge into our menu space
+                    e0[0] += menu->window.rect.x - originatorMenu->window.rect.x;
+                    e0[1] += menu->window.rect.y - originatorMenu->window.rect.y;
+                    e1[0] += menu->window.rect.x - originatorMenu->window.rect.x;
+                    e1[1] += menu->window.rect.y - originatorMenu->window.rect.y;
+#endif
+
+                    // Intersect the edges with the secondary planes
+                    if ( !OnRightOfPlane( &halfSpaces[1], e0, e1 ) )
+                        continue;
+                    if ( !OnRightOfPlane( &halfSpaces[2], e0, e1 ) )
+                        continue;
+
+                    // Find the line segment closest to the primary plane
+                    dist = LineSegmentToPlaneDistance( &halfSpaces[0], e0, e1 );
+                    if ( dist < 0 || dist > maxDist + confusion_zone )//  @pjb: still want to consider stuff further away but with better directionality
+                        break;
+
+                    myDist = min( dist, myDist );
+                    passes = qtrue;
+                }
+
+                if ( passes == qtrue )
+                {
+                    // Prefer items with better dot products
+                    dot = sqrtf(dot);
+
+                    // Normalize
+                    c[0] /= dot;
+                    c[1] /= dot;
+
+                    dot = c[0] * d[0] + c[1] * d[1];
+
+                    if ( dot < bestDot )
+                        continue;
+                
+                    // Use distance as a tiebreaker
+                    if ( fabs( dot - bestDot ) < 0.1f && myDist > maxDist )
+                        continue;
+
+                    nextItem = item;
+                    maxDist = myDist;
+                    bestDot = dot;
+
+                    MenuItem_GetCenter( item, newFocus );
+                }
+            }
+#if AUTONAV_ACROSS_MENUS
+        }
+#endif
+    }
+
+    if ( nextItem )
+    {
+        focus[0] = newFocus[0];
+        focus[1] = newFocus[1];
+    }
+
+    return nextItem;
+}
+
+// @pjb: navigate to the nearest item from a given origin item
+itemDef_t* Menu_AutoNavigate( menuDef_t* menu, itemDef_t* originator, NAV_DIRECTION direction )
+{
+    float focusPoint[] = { menu->focusPoint[0], menu->focusPoint[1] };
+
+    itemDef_t* nextItem = Menu_NavigatePrecise( 
+        originator,
+        direction,
+        focusPoint );
+
+    // If we didn't hit something, we'll have to do broader tests
+    if ( nextItem == NULL )
+    {
+        nextItem = Menu_NavigateImprecise( 
+            originator,
+            direction,
+            focusPoint );
+    }
+
+    // If there was an item, remember set it as the focused object
+    if ( nextItem != NULL ) 
+    {
+        //menu->focusPoint[0] = focusPoint[0];
+        //menu->focusPoint[1] = focusPoint[1];
+    }
+
+    return nextItem;
+}
+
+itemDef_t* Menu_Navigate( menuDef_t* menu, itemDef_t* originator, NAV_DIRECTION direction )
+{
+    const char* navOverride = NULL;
+    itemDef_t* navItem = NULL;
+
+    // @pjb: if there's an override for the direction, do that. Else, auto-nav.
+    switch ( direction )
+    {
+    case NAV_UP:    navOverride = originator->navUp; break;
+    case NAV_DOWN:  navOverride = originator->navDown; break;
+    case NAV_LEFT:  navOverride = originator->navLeft; break;
+    case NAV_RIGHT: navOverride = originator->navRight; break;
+    }
+
+    // If we need to look something up...
+    if ( navOverride )
+    {
+        navItem = Menu_FindItemByNameGlobal( menu, navOverride );
+    }
+
+    // If we failed to find it, auto-navigate instead
+    if ( navItem == NULL )
+    {
+        navItem = Menu_AutoNavigate( menu, originator, direction );
+    }
+
+    // If there was an item, remember set it as the focused object
+    if ( navItem != NULL ) 
+    {
+        if ( navItem->parent != menu )
+        {
+            menuDef_t* oldMenu = menu;
+            menu = (menuDef_t*) navItem->parent;
+         
+            if ( oldMenu->window.flags & WINDOW_OOB_CLICK )
+			    oldMenu->window.flags &= ~WINDOW_VISIBLE;
+
+			Menu_RunCloseScript(oldMenu);
+			oldMenu->window.flags &= ~WINDOW_HASFOCUS;
+			Menus_Activate(menu);
+        }
+
+        //menu->focusPoint[0] = focusPoint[0];
+        //menu->focusPoint[1] = focusPoint[1];
+        MenuItem_GetCenter( navItem, menu->focusPoint );
+
+        {
+            float virtualCursor[2];
+            Menu_GetScreenPosition( menu, menu->focusPoint, virtualCursor );
+
+            if (Item_SetFocus( navItem, virtualCursor[0], virtualCursor[1] ) ) 
+            {
+                Menu_HandleMouseMove( menu, virtualCursor[0], virtualCursor[1] );
+            }
+        }
+    }
+
+    return navItem;
+}
+
 itemDef_t *Menu_SetPrevCursorItem(menuDef_t *menu) {
-  qboolean wrapped = qfalse;
-	int oldCursor = menu->cursorItem;
-  
-  if (menu->cursorItem < 0) {
-    menu->cursorItem = menu->itemCount-1;
-    wrapped = qtrue;
-  } 
+    qboolean wrapped = qfalse;
+    int oldCursor = menu->cursorItem;
+    float virtualCursor[2];
 
-  while (menu->cursorItem > -1) {
-    
-    menu->cursorItem--;
-    if (menu->cursorItem < 0 && !wrapped) {
-      wrapped = qtrue;
-      menu->cursorItem = menu->itemCount -1;
+    if (menu->cursorItem < 0) {
+        menu->cursorItem = menu->itemCount - 1;
+        wrapped = qtrue;
     }
 
-		if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursorx, DC->cursory)) {
-			Menu_HandleMouseMove(menu, menu->items[menu->cursorItem]->window.rect.x + 1, menu->items[menu->cursorItem]->window.rect.y + 1);
-      return menu->items[menu->cursorItem];
+    while (menu->cursorItem > -1) {
+
+        menu->cursorItem--;
+        if (menu->cursorItem < 0 && !wrapped) {
+            wrapped = qtrue;
+            menu->cursorItem = menu->itemCount - 1;
+        }
+
+        MenuItem_GetCenter(menu->items[menu->cursorItem], menu->focusPoint);
+        Menu_GetScreenPosition( menu, menu->focusPoint, virtualCursor );
+
+        if (Item_SetFocus(menu->items[menu->cursorItem], virtualCursor[0], virtualCursor[1])) {
+            Menu_HandleMouseMove(menu, virtualCursor[0], virtualCursor[1]);
+            return menu->items[menu->cursorItem];
+        }
     }
-  }
-	menu->cursorItem = oldCursor;
-	return NULL;
+    menu->cursorItem = oldCursor;
+    return NULL;
 
 }
 
 itemDef_t *Menu_SetNextCursorItem(menuDef_t *menu) {
 
-  qboolean wrapped = qfalse;
-	int oldCursor = menu->cursorItem;
+    qboolean wrapped = qfalse;
+    int oldCursor = menu->cursorItem;
+    float virtualCursor[2];
 
 
-  if (menu->cursorItem == -1) {
-    menu->cursorItem = 0;
-    wrapped = qtrue;
-  }
-
-  while (menu->cursorItem < menu->itemCount) {
-
-    menu->cursorItem++;
-    if (menu->cursorItem >= menu->itemCount && !wrapped) {
-      wrapped = qtrue;
-      menu->cursorItem = 0;
+    if (menu->cursorItem == -1) {
+        menu->cursorItem = 0;
+        wrapped = qtrue;
     }
-		if (Item_SetFocus(menu->items[menu->cursorItem], DC->cursorx, DC->cursory)) {
-			Menu_HandleMouseMove(menu, menu->items[menu->cursorItem]->window.rect.x + 1, menu->items[menu->cursorItem]->window.rect.y + 1);
-      return menu->items[menu->cursorItem];
-    }
-    
-  }
 
-	menu->cursorItem = oldCursor;
-	return NULL;
+    while (menu->cursorItem < menu->itemCount) {
+
+        menu->cursorItem++;
+        if (menu->cursorItem >= menu->itemCount && !wrapped) {
+            wrapped = qtrue;
+            menu->cursorItem = 0;
+        }
+
+        MenuItem_GetCenter(menu->items[menu->cursorItem], menu->focusPoint);
+        Menu_GetScreenPosition( menu, menu->focusPoint, virtualCursor );
+
+        if (Item_SetFocus(menu->items[menu->cursorItem], virtualCursor[0], virtualCursor[1])) {
+            Menu_HandleMouseMove(menu, virtualCursor[0], virtualCursor[1]);
+            return menu->items[menu->cursorItem];
+        }
+
+    }
+
+    menu->cursorItem = oldCursor;
+    return NULL;
 }
 
 static void Window_CloseCinematic(windowDef_t *window) {
@@ -2520,10 +3190,37 @@ static void Display_CloseCinematics() {
 	}
 }
 
+// @pjb: force a mouse-leave event on other menus
+void  Menus_Deactivate(menuDef_t *newMenu) {
+    int i, m;
+    for (m = 0; m < menuCount; ++m)
+    {
+        const menuDef_t* menu = &Menus[m];
+        if ( menu == newMenu || !(menu->window.flags & WINDOW_VISIBLE) )
+            continue;
+
+        for (i = 0; i < menu->itemCount; ++i ) {
+            if (menu->items[i]->window.flags & WINDOW_MOUSEOVER) {
+                Item_MouseLeave(menu->items[i]);
+                Item_SetMouseOver(menu->items[i], qfalse);
+            }
+        }
+    }
+}
+
 void  Menus_Activate(menuDef_t *menu) {
-	menu->window.flags |= (WINDOW_HASFOCUS | WINDOW_VISIBLE);
+    itemDef_t* selected = NULL;
+    int i;
+
+    Menus_Deactivate(menu);
+
+    // @pjb: reset the focus point
+    menu->focusPoint[0] = menu->focusPoint[1] = -1;
+
+    menu->window.flags |= (WINDOW_HASFOCUS | WINDOW_VISIBLE);
 	if (menu->onOpen) {
 		itemDef_t item;
+        memset( &item, 0, sizeof( item ) ); // @pjb: fix a crash when running scripts on this item
 		item.parent = menu;
 		Item_RunScript(&item, menu->onOpen);
 	}
@@ -2535,6 +3232,27 @@ void  Menus_Activate(menuDef_t *menu) {
 
 	Display_CloseCinematics();
 
+    // @pjb: always select something
+    selected = Menu_GetFocusedItem( menu );
+    if ( selected == NULL )
+    {
+        float y = 999999;
+        for (i = 0; i < menu->itemCount; i++) {
+          if ( Menu_GoodNavCandidate( menu->items[i] ) && menu->items[i]->window.rect.y < y ) {
+              selected = menu->items[i];
+              y = menu->items[i]->window.rect.y;
+          }
+        }
+    }
+
+    if ( selected != NULL ) {
+        float virtualCursor[2];
+        MenuItem_GetCenter( selected, menu->focusPoint );
+        Menu_GetScreenPosition( menu, menu->focusPoint, virtualCursor );
+
+        if ( Item_SetFocus( selected, virtualCursor[0], virtualCursor[1] ) )
+            Menu_HandleMouseMove( menu, virtualCursor[0], virtualCursor[1] );
+    }
 }
 
 int Display_VisibleMenuCount() {
@@ -2606,21 +3324,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 		return;
 	}
 
-	if (g_editingField && down) {
-		if (!Item_TextField_HandleKey(g_editItem, key)) {
-			g_editingField = qfalse;
-			g_editItem = NULL;
-			inHandler = qfalse;
-			return;
-		} else if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3) {
-			g_editingField = qfalse;
-			g_editItem = NULL;
-			Display_MouseMove(NULL, DC->cursorx, DC->cursory);
-		} else if (key == K_TAB || key == K_UPARROW || key == K_DOWNARROW) {
-			return;
-		}
-	}
-
 	if (menu == NULL) {
 		inHandler = qfalse;
 		return;
@@ -2675,20 +3378,45 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 			break;
 		case K_KP_UPARROW:
 		case K_UPARROW:
-			Menu_SetPrevCursorItem(menu);
+        case K_GAMEPAD_DPAD_UP: // @pjb
+            if ( item )
+                Menu_Navigate(menu, item, NAV_UP);
+            else
+			    Menu_SetPrevCursorItem(menu);
 			break;
 
 		case K_ESCAPE:
+        case K_GAMEPAD_B: // @pjb
 			if (!g_waitingForKey && menu->onESC) {
 				itemDef_t it;
-		    it.parent = menu;
-		    Item_RunScript(&it, menu->onESC);
+		        it.parent = menu;
+		        Item_RunScript(&it, menu->onESC);
 			}
 			break;
-		case K_TAB:
+		case K_TAB: // @pjb: tab always behaves this way
+		    Menu_SetNextCursorItem(menu);
+			break;
 		case K_KP_DOWNARROW:
 		case K_DOWNARROW:
-			Menu_SetNextCursorItem(menu);
+        case K_GAMEPAD_DPAD_DOWN: // @pjb
+            if ( item )
+                Menu_Navigate(menu, item, NAV_DOWN);
+            else
+			    Menu_SetNextCursorItem(menu);
+			break;
+
+		case K_KP_LEFTARROW:
+		case K_LEFTARROW:
+        case K_GAMEPAD_DPAD_LEFT: // @pjb
+            if ( item )
+                Menu_Navigate(menu, item, NAV_LEFT);
+			break;
+
+		case K_KP_RIGHTARROW:
+		case K_RIGHTARROW:
+        case K_GAMEPAD_DPAD_RIGHT: // @pjb
+            if ( item )
+                Menu_Navigate(menu, item, NAV_RIGHT);
 			break;
 
 		case K_MOUSE1:
@@ -2697,13 +3425,6 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 				if (item->type == ITEM_TYPE_TEXT) {
 					if (Rect_ContainsPoint(Item_CorrectedTextRect(item), DC->cursorx, DC->cursory)) {
 						Item_Action(item);
-					}
-				} else if (item->type == ITEM_TYPE_EDITFIELD || item->type == ITEM_TYPE_NUMERICFIELD) {
-					if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory)) {
-						item->cursorPos = 0;
-						g_editingField = qtrue;
-						g_editItem = item;
-						DC->setOverstrikeMode(qtrue);
 					}
 				} else {
 					if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory)) {
@@ -2735,16 +3456,10 @@ void Menu_HandleKey(menuDef_t *menu, int key, qboolean down) {
 		case K_AUX16:
 			break;
 		case K_KP_ENTER:
+        case K_GAMEPAD_A: // @pjb
 		case K_ENTER:
 			if (item) {
-				if (item->type == ITEM_TYPE_EDITFIELD || item->type == ITEM_TYPE_NUMERICFIELD) {
-					item->cursorPos = 0;
-					g_editingField = qtrue;
-					g_editItem = item;
-					DC->setOverstrikeMode(qtrue);
-				} else {
-						Item_Action(item);
-				}
+				Item_Action(item);
 			}
 			break;
 	}
@@ -3053,7 +3768,7 @@ void Item_TextField_Paint(itemDef_t *item) {
 	}
 
 	offset = (item->text && *item->text) ? 8 : 0;
-	if (item->window.flags & WINDOW_HASFOCUS && g_editingField) {
+	if (item->window.flags & WINDOW_CAPTURE_KEYS) {
 		char cursor = DC->getOverstrikeMode() ? '_' : '|';
 		DC->drawTextWithCursor(item->textRect.x + item->textRect.w + offset, item->textRect.y, item->textscale, newColor, buff + editPtr->paintOffset, item->cursorPos - editPtr->paintOffset , cursor, editPtr->maxPaintChars, item->textStyle);
 	} else {
@@ -3457,20 +4172,33 @@ qboolean Item_Bind_HandleKey(itemDef_t *item, int key, qboolean down) {
 	int			id;
 	int			i;
 
-	if (Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && !g_waitingForKey)
+    // @pjb: better handling of this for keyboard
+	if (!g_waitingForKey)
 	{
-		if (down && (key == K_MOUSE1 || key == K_ENTER)) {
+		if (down && ((Rect_ContainsPoint(&item->window.rect, DC->cursorx, DC->cursory) && key == K_MOUSE1) || key == K_ENTER || key == K_GAMEPAD_A)) {
 			g_waitingForKey = qtrue;
 			g_bindItem = item;
+	    	return qtrue;
 		}
-		return qtrue;
-	}
-	else
-	{
-		if (!g_waitingForKey || g_bindItem == NULL) {
+
+        // @pjb
+		if (key == K_BACKSPACE || key == K_GAMEPAD_BACK )
+        {
+			id = BindingIDFromName(item->cvar);
+			if (id != -1) {
+				g_bindings[id].bind1 = -1;
+				g_bindings[id].bind2 = -1;
+			}
+			Controls_SetConfig(qtrue);
+			g_waitingForKey = qfalse;
+			g_bindItem = NULL;
 			return qtrue;
 		}
 
+        return qfalse;
+	}
+	else
+	{
 		if (key & K_CHAR_FLAG) {
 			return qtrue;
 		}
@@ -3478,18 +4206,9 @@ qboolean Item_Bind_HandleKey(itemDef_t *item, int key, qboolean down) {
 		switch (key)
 		{
 			case K_ESCAPE:
+            case K_GAMEPAD_START: // @pjb
 				g_waitingForKey = qfalse;
-				return qtrue;
-	
-			case K_BACKSPACE:
-				id = BindingIDFromName(item->cvar);
-				if (id != -1) {
-					g_bindings[id].bind1 = -1;
-					g_bindings[id].bind2 = -1;
-				}
-				Controls_SetConfig(qtrue);
-				g_waitingForKey = qfalse;
-				g_bindItem = NULL;
+                g_bindItem = NULL;
 				return qtrue;
 
 			case '`':
@@ -3545,6 +4264,7 @@ qboolean Item_Bind_HandleKey(itemDef_t *item, int key, qboolean down) {
 
 	Controls_SetConfig(qtrue);	
 	g_waitingForKey = qfalse;
+    g_bindItem = NULL;
 
 	return qtrue;
 }
@@ -3812,7 +4532,7 @@ void Item_OwnerDraw_Paint(itemDef_t *item) {
 
 	if (DC->ownerDrawItem) {
 		vec4_t color, lowLight;
-		menuDef_t *parent = (menuDef_t*)item->parent;
+		parent = (menuDef_t*)item->parent;
 		Fade(&item->window.flags, &item->window.foreColor[3], parent->fadeClamp, &item->window.nextTime, parent->fadeCycle, qtrue, parent->fadeAmount);
 		memcpy(&color, &item->window.foreColor, sizeof(color));
 		if (item->numColors > 0 && DC->getValue) {
@@ -4052,6 +4772,26 @@ void Item_Paint(itemDef_t *item) {
       break;
   }
 
+  if ( Item_RequiresExplicitKeyboardCapture( item ) )
+  {
+    // @pjb: draw darkening overlay if the control requires explicit keyboard focus
+    if ( !( item->window.flags & ( WINDOW_CAPTURE_KEYS ) ) &&
+         !Rect_ContainsPoint( &item->window.rect, DC->cursorx, DC->cursory ) ) {
+        vec4_t color = { 0, 0, 0, 0.35f };
+
+		rectDef_t r = item->window.rect;
+
+        if (item->window.border != 0)
+        {
+            r.x += item->window.borderSize;
+            r.y += item->window.borderSize;
+            r.w -= item->window.borderSize + 1;
+            r.h -= item->window.borderSize + 1;
+        }
+
+        DC->fillRect( r.x, r.y, r.w, r.h, color );
+    }
+  }
 }
 
 void Menu_Init(menuDef_t *menu) {
@@ -4159,6 +4899,10 @@ void Item_Init(itemDef_t *item) {
 	memset(item, 0, sizeof(itemDef_t));
 	item->textscale = 0.55f;
 	Window_Init(&item->window);
+
+    // @pjb: set up the default nav thresholds
+    item->verticalNavThreshold = 0.0f;
+    item->horizontalNavThreshold = 1.0f;
 }
 
 void Menu_HandleMouseMove(menuDef_t *menu, float x, float y) {
@@ -4179,7 +4923,7 @@ void Menu_HandleMouseMove(menuDef_t *menu, float x, float y) {
 		return;
 	}
 
-	if (g_waitingForKey || g_editingField) {
+	if (g_waitingForKey) {
 		return;
 	}
 
@@ -5070,6 +5814,43 @@ qboolean ItemParse_hideCvar( itemDef_t *item, int handle ) {
 	return qfalse;
 }
 
+// @pjb: parse the navigation thresholds
+qboolean ItemParse_verticalNavThreshold( itemDef_t *item, int handle ) {
+	float f;
+	if (!PC_Float_Parse(handle, &f)) {
+		return qfalse;
+	}
+    if ( f < 0 || f > 1 )
+        return qfalse;
+	item->verticalNavThreshold = f;
+	return qtrue;
+}
+
+// @pjb: parse the navigation thresholds
+qboolean ItemParse_horizontalNavThreshold( itemDef_t *item, int handle ) {
+	float f;
+	if (!PC_Float_Parse(handle, &f)) {
+		return qfalse;
+	}
+    if ( f < 0 || f > 1 )
+        return qfalse;
+	item->horizontalNavThreshold = f;
+	return qtrue;
+}
+
+// @pjb: navigation overrides
+qboolean ItemParse_navUp( itemDef_t* item, int handle ) {
+    return PC_String_Parse( handle, &item->navUp );
+}
+qboolean ItemParse_navDown( itemDef_t* item, int handle ) {
+    return PC_String_Parse( handle, &item->navDown );
+}
+qboolean ItemParse_navLeft( itemDef_t* item, int handle ) {
+    return PC_String_Parse( handle, &item->navLeft );
+}
+qboolean ItemParse_navRight( itemDef_t* item, int handle ) {
+    return PC_String_Parse( handle, &item->navRight );
+}
 
 keywordHash_t itemParseKeywords[] = {
 	{"name", ItemParse_name, NULL},
@@ -5134,6 +5915,15 @@ keywordHash_t itemParseKeywords[] = {
 	{"hideCvar", ItemParse_hideCvar, NULL},
 	{"cinematic", ItemParse_cinematic, NULL},
 	{"doubleclick", ItemParse_doubleClick, NULL},
+
+    // @pjb
+    {"verticalNavThreshold", ItemParse_verticalNavThreshold, NULL},
+    {"horizontalNavThreshold", ItemParse_horizontalNavThreshold, NULL},
+    {"navUp", ItemParse_navUp, NULL},
+    {"navDown", ItemParse_navDown, NULL},
+    {"navLeft", ItemParse_navLeft, NULL},
+    {"navRight", ItemParse_navRight, NULL},
+
 	{NULL, NULL, NULL}
 };
 
@@ -5506,6 +6296,32 @@ qboolean MenuParse_itemDef( itemDef_t *item, int handle ) {
 	return qtrue;
 }
 
+// @pjb: macro support
+qboolean MenuParse_macro( itemDef_t* item, int handle ) {
+	menuDef_t *menu = (menuDef_t*)item;
+    int i;
+
+    if (menu->macroCount < MAX_MENUMACROS) {
+
+        // Get the name of the macro
+        PC_String_Parse( handle, &menu->macros[menu->macroCount].name );
+
+        // If it's a reserved word, baile
+        for ( i = 0; i < scriptCommandCount; ++i )
+        {
+            if ( Q_stricmp( menu->macros[menu->macroCount].name, commandList[i].name ) == 0 )
+            {
+                PC_SourceError( handle, "use of reserved word as macro definition: '%d'\n", commandList[i].name );
+                return qfalse;
+            }
+        }
+
+        return PC_Script_Parse( handle, &menu->macros[menu->macroCount++].script );
+    }
+
+    return qtrue;
+}
+
 keywordHash_t menuParseKeywords[] = {
 	{"font", MenuParse_font, NULL},
 	{"name", MenuParse_name, NULL},
@@ -5535,6 +6351,10 @@ keywordHash_t menuParseKeywords[] = {
 	{"fadeClamp", MenuParse_fadeClamp, NULL},
 	{"fadeCycle", MenuParse_fadeCycle, NULL},
 	{"fadeAmount", MenuParse_fadeAmount, NULL},
+
+    // @pjb: macro support
+    {"macro", MenuParse_macro, NULL},
+
 	{NULL, NULL, NULL}
 };
 

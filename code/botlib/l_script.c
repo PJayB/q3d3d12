@@ -239,7 +239,7 @@ void QDECL ScriptError(script_t *script, char *str, ...)
 	vsprintf(text, str, ap);
 	va_end(ap);
 #ifdef BOTLIB
-	botimport.Print(PRT_ERROR, "file %s, line %d: %s\n", script->filename, script->line, text);
+	BotImport_Print(PRT_ERROR, "file %s, line %d: %s\n", script->filename, script->line, text);
 #endif //BOTLIB
 #ifdef MEQCC
 	printf("error: file %s, line %d: %s\n", script->filename, script->line, text);
@@ -265,7 +265,7 @@ void QDECL ScriptWarning(script_t *script, char *str, ...)
 	vsprintf(text, str, ap);
 	va_end(ap);
 #ifdef BOTLIB
-	botimport.Print(PRT_WARNING, "file %s, line %d: %s\n", script->filename, script->line, text);
+	BotImport_Print(PRT_WARNING, "file %s, line %d: %s\n", script->filename, script->line, text);
 #endif //BOTLIB
 #ifdef MEQCC
 	printf("warning: file %s, line %d: %s\n", script->filename, script->line, text);
@@ -797,7 +797,7 @@ int PS_ReadPunctuation(script_t *script, token_t *token)
 		punc = &script->punctuations[i];
 #endif //PUNCTABLE
 		p = punc->p;
-		len = strlen(p);
+		len = (int) strlen(p);
 		//if the script contains at least as much characters as the punctuation
 		if (script->script_p + len <= script->end_p)
 		{
@@ -1265,7 +1265,7 @@ int ScriptSkipTo(script_t *script, char *value)
 	char firstchar;
 
 	firstchar = *value;
-	len = strlen(value);
+	len = (int) strlen(value);
 	do
 	{
 		if (!PS_ReadWhiteSpace(script)) return 0;
@@ -1322,7 +1322,7 @@ script_t *LoadScriptFile(const char *filename)
 		Com_sprintf(pathname, sizeof(pathname), "%s/%s", basefolder, filename);
 	else
 		Com_sprintf(pathname, sizeof(pathname), "%s", filename);
-	length = botimport.FS_FOpenFile( pathname, &fp, FS_READ );
+	length = FS_FOpenFileByMode( pathname, &fp, FS_READ );
 	if (!fp) return NULL;
 #else
 	fp = fopen(filename, "rb");
@@ -1353,8 +1353,8 @@ script_t *LoadScriptFile(const char *filename)
 	SetScriptPunctuations(script, NULL);
 	//
 #ifdef BOTLIB
-	botimport.FS_Read(script->buffer, length, fp);
-	botimport.FS_FCloseFile(fp);
+	FS_Read2(script->buffer, length, fp);
+	FS_FCloseFile(fp);
 #else
 	if (fread(script->buffer, length, 1, fp) != 1)
 	{

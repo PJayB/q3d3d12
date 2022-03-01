@@ -30,61 +30,7 @@ USER INTERFACE MAIN
 
 
 #include "ui_local.h"
-
-
-/*
-================
-vmMain
-
-This is the only way control passes into the module.
-This must be the very first function compiled into the .qvm file
-================
-*/
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
-	switch ( command ) {
-	case UI_GETAPIVERSION:
-		return UI_API_VERSION;
-
-	case UI_INIT:
-		UI_Init();
-		return 0;
-
-	case UI_SHUTDOWN:
-		UI_Shutdown();
-		return 0;
-
-	case UI_KEY_EVENT:
-		UI_KeyEvent( arg0, arg1 );
-		return 0;
-
-	case UI_MOUSE_EVENT:
-		UI_MouseEvent( arg0, arg1 );
-		return 0;
-
-	case UI_REFRESH:
-		UI_Refresh( arg0 );
-		return 0;
-
-	case UI_IS_FULLSCREEN:
-		return UI_IsFullscreen();
-
-	case UI_SET_ACTIVE_MENU:
-		UI_SetActiveMenu( arg0 );
-		return 0;
-
-	case UI_CONSOLE_COMMAND:
-		return UI_ConsoleCommand(arg0);
-
-	case UI_DRAW_CONNECT_SCREEN:
-		UI_DrawConnectScreen( arg0 );
-		return 0;
-	case UI_HASUNIQUECDKEY:				// mod authors need to observe this
-		return qtrue;  // bk010117 - change this to qfalse for mods!
-	}
-
-	return -1;
-}
-
+#include "ui.shared.h"
 
 /*
 ================
@@ -124,6 +70,9 @@ vmCvar_t	ui_spAwards;
 vmCvar_t	ui_spVideos;
 vmCvar_t	ui_spSkill;
 
+// @pjb: thumbstick sensitivity when navigating
+vmCvar_t	ui_thumbstickThreshold;
+
 vmCvar_t	ui_spSelection;
 
 vmCvar_t	ui_browserMaster;
@@ -156,6 +105,11 @@ vmCvar_t	ui_server16;
 
 vmCvar_t	ui_cdkeychecked;
 
+// @pjb: is the account system enabled?
+vmCvar_t    ui_accountEnabled;
+// @pjb: is the graphics hardware fixed?
+vmCvar_t    ui_fixedGfxHW;
+
 // bk001129 - made static to avoid aliasing.
 static cvarTable_t		cvarTable[] = {
 	{ &ui_ffa_fraglimit, "ui_ffa_fraglimit", "20", CVAR_ARCHIVE },
@@ -182,6 +136,9 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_spAwards, "g_spAwards", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spVideos, "g_spVideos", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spSkill, "g_spSkill", "2", CVAR_ARCHIVE | CVAR_LATCH },
+
+    // @pjb: thumbstick sensitivity when navigating
+    { &ui_thumbstickThreshold, "ui_thumbstickThreshold", "50", CVAR_ARCHIVE },
 
 	{ &ui_spSelection, "ui_spSelection", "", CVAR_ROM },
 
@@ -213,7 +170,12 @@ static cvarTable_t		cvarTable[] = {
 	{ &ui_server15, "server15", "", CVAR_ARCHIVE },
 	{ &ui_server16, "server16", "", CVAR_ARCHIVE },
 
-	{ &ui_cdkeychecked, "ui_cdkeychecked", "0", CVAR_ROM }
+	{ &ui_cdkeychecked, "ui_cdkeychecked", "0", CVAR_ROM },
+
+    // @pjb: is the account system enabled?
+	{ &ui_accountEnabled, "ua_enabled", "0", CVAR_INIT },
+    // @pjb: is the graphics hardware fixed?
+	{ &ui_fixedGfxHW, "r_fixedhw", "0", CVAR_LATCH },
 };
 
 // bk001129 - made static to avoid aliasing
@@ -246,4 +208,49 @@ void UI_UpdateCvars( void ) {
 	for ( i = 0, cv = cvarTable ; i < cvarTableSize ; i++, cv++ ) {
 		trap_Cvar_Update( cv->vmCvar );
 	}
+}
+
+/*
+=================
+@pjb: Is the account system enabled?
+=================
+*/
+qboolean UI_AccountEnabled( void ) {
+    return ui_accountEnabled.integer;
+}
+
+/*
+=================
+@pjb: Is the graphics hardware fixed?
+=================
+*/
+qboolean UI_IsFixedGraphicsHardware( void ) {
+    return ui_fixedGfxHW.integer;
+}
+
+
+/*
+=================
+@pjb: VM entry point
+=================
+*/
+int UI_GetApiVersion() {
+    return UI_API_VERSION;
+}
+
+// @pjb: auto-generated vm syscalls
+#include "ui.jumpdefs.h"
+
+// @pjb: auto-generated vm syscall indices
+static const vmCall_t uiJumpTable[] = {
+#include "ui.jumptable.h"
+};
+
+int vmMainA( vmArg_t* args ) {
+	vmCall_t func = uiJumpTable[args[0].i];
+	if (args[0].i > _countof(uiJumpTable)) {
+		trap_Error( va("Out-of-bounds ABI call to VM_CallA: 0x%X\n", args[0].i) );
+		return -1;
+	}
+	return func(args+1);
 }

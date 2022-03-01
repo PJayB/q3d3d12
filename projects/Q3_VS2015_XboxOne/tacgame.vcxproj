@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|Durango">
+			<Configuration>Debug</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Profile|Durango">
+			<Configuration>Profile</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|Durango">
+			<Configuration>Release</Configuration>
+			<Platform>Durango</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{D8E203C1-64C3-47A5-AFCD-D911D444ABD1}</ProjectGuid>
+		<DefaultLanguage>en-US</DefaultLanguage>
+		<WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+		<RootNamespace>tacgame</RootNamespace>
+		<MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+		<ApplicationEnvironment>Title</ApplicationEnvironment>
+		<Keyword>Win32Proj</Keyword>
+		<TargetRuntime>Native</TargetRuntime>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v140</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v140</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'" Label="Configuration">
+		<ConfigurationType>DynamicLibrary</ConfigurationType>
+		<PlatformToolset>v140</PlatformToolset>
+		<EmbedManifest>false</EmbedManifest>
+		<GenerateManifest>false</GenerateManifest>
+		<CharacterSet>Unicode</CharacterSet>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	<PropertyGroup>
+		<_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>cgamexbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\missionpack\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>cgamexbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\missionpack\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">
+		<ReferencePath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</ReferencePath>
+		<LibraryPath>$(Console_SdkLibPath)</LibraryPath>
+		<LibraryWPath>$(Console_SdkLibPath);$(Console_SdkWindowsMetadataPath)</LibraryWPath>
+		<IncludePath>$(Console_SdkIncludeRoot)</IncludePath>
+		<ExecutablePath>$(Console_SdkRoot)bin;$(VCInstallDir)bin\x86_amd64;$(VCInstallDir)bin;$(WindowsSDK_ExecutablePath_x86);$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(MSBuildToolsPath32);$(FxCopDir);$(PATH)</ExecutablePath>
+		<LayoutDir>$(SolutionDir)Build\Layout\</LayoutDir>
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>cgamexbo</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\missionpack\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;DEBUG;_DEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;TACGAME;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>Disabled</Optimization>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<DisableOptimizations>true</DisableOptimizations>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<ModuleDefinitionFile>..\..\code\cgame\cgame.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;NDEBUG;PROFILE;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;TACGAME;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+			<ModuleDefinitionFile>..\..\code\cgame\cgame.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">
+		<ClCompile>
+			<AdditionalUsingDirectories>$(Console_SdkPackagesRoot);$(Console_SdkWindowsMetadataPath);%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;_XBOX_ONE;__WRL_NO_DEFAULT_LIB__;Q_WINRT_PLATFORM;Q_WINRT_FORCE_DIPS_EQUAL_PIXELS;Q_WINRT_FORCE_WIN32_THREAD_API;NO_GETENV;Q_HAS_D3D12;Q_HAS_D3D12_X;Q_SKIP_DLIGHT_PROJECTION;Q_WINRT_FIXED_DISPLAY;NDEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;_USRDLL;TACGAME;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4204;4201;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<FunctionalLevelLinking>True</FunctionalLevelLinking>
+			<IntrinsicFunctions>True</IntrinsicFunctions>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+			<TreatWarningAsError>true</TreatWarningAsError>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>combase.lib;kernelx.lib;uuid.lib;xg_x.lib;ws2_32.lib;xaudio2.lib;vccorlib.lib;pixEvt.lib;d3d12_x.lib;qshared.lib</AdditionalDependencies>
+			<AdditionalLibraryDirectories>$(SolutionDir)..\build\lib\$(SolutionName)\$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<OptimizeReferences>true</OptimizeReferences>
+			<GenerateWindowsMetadata>false</GenerateWindowsMetadata>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+			<ModuleDefinitionFile>..\..\code\cgame\cgame.def</ModuleDefinitionFile>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\cgame\cg_consolecmds.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_draw.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_drawtools.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_effects.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_ents.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_event.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_info.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_localents.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_main.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_marks.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_newdraw.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_particles.c">
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|Durango'">True</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Durango'">True</ExcludedFromBuild>
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_players.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_playerstate.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_predict.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_scoreboard.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_servercmds.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_snapshot.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_syscalls.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_view.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\cgame\cg_weapons.c">
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\cgame\cg_local.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\cgame\cg_public.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\cgame\tr_types.h">
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\cgame\cgame.def">
+		</Text>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets" />
+</Project>

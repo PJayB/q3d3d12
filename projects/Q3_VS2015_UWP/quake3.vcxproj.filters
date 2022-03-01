@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{B250315C-2720-4BE2-A2E0-35C442361DCF}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{DDC58B76-07EA-436A-B8FC-1A25D1C67A40}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Images">
+			<UniqueIdentifier>{159D6BE3-F3D8-4C73-BFBC-0E363C69D02F}</UniqueIdentifier>
+			<Extensions>png;ico;tga;bmp</Extensions>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{618B3617-89D3-41BC-AC5F-C3F3DC32BAD4}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{756ADD2C-BD30-43F1-A8B8-E6457C090E67}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{F3112869-C508-469D-8652-B1EC02794C75}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{206220CA-F359-4694-AE61-AC1C9971CF4F}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{CFA2A7BC-C8AD-4949-827B-BE152050A5FC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{BEA0060B-7F51-4B24-958D-C287257DAF94}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{0AE3FCE7-19EE-4163-AEAD-210EBBE0D8C5}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{966AA687-E58C-4E88-90D1-DA1E33B291DE}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{E7ECB939-71EE-4D8F-9E8A-DF9D0B82225C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{5D18A3E9-F491-4C1C-AD28-897E83DA36C9}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{E1CA07D0-41D9-423D-9E52-2CA2369126A2}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\winrt\winrt_d3d.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_shared.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_utils.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_view.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\uwp\uwp_app.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\uwp\uwp_input.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\uwp\uwp_net.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\uwp\uwp_sys.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\winrt\winrt_d3d.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_shared.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_utils.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_view.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\uwp\uwp_app.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\uwp\uwp_common.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\uwp\uwp_msgs.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\uwp\uwp_net.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Image Include="Assets\logo150.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo150wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo24.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo30.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo300wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo310.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo44.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo50.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo70.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo71.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+	</ItemGroup>
+	<ItemGroup>
+		<AppxManifest Include="..\..\code\uwp\Package.appxmanifest">
+			<Filter>Resources</Filter>
+		</AppxManifest>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\uwp\packagelist.txt">
+			<Filter>Resources</Filter>
+		</Text>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\code\uwp\Quake3_TemporaryKey.pfx">
+			<Filter>Resources</Filter>
+		</None>
+	</ItemGroup>
+</Project>

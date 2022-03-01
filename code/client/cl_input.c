@@ -350,11 +350,11 @@ void CL_KeyMove( usercmd_t *cmd ) {
 CL_MouseEvent
 =================
 */
-void CL_MouseEvent( int dx, int dy, int time ) {
+void CL_MouseEvent( int userIndex, int dx, int dy, int time ) {
 	if ( cls.keyCatchers & KEYCATCH_UI ) {
-		VM_Call( uivm, UI_MOUSE_EVENT, dx, dy );
+        UIVM_MouseEvent( userIndex, dx, dy );
 	} else if (cls.keyCatchers & KEYCATCH_CGAME) {
-		VM_Call (cgvm, CG_MOUSE_EVENT, dx, dy);
+        CGVM_MouseEvent( dx, dy );
 	} else {
 		cl.mouseDx[cl.mouseIndex] += dx;
 		cl.mouseDy[cl.mouseIndex] += dy;
@@ -368,7 +368,7 @@ CL_JoystickEvent
 Joystick values stay set until changed
 =================
 */
-void CL_JoystickEvent( int axis, int value, int time ) {
+void CL_JoystickEvent( int userIndex, int axis, int value, int time ) {
 	if ( axis < 0 || axis >= MAX_JOYSTICK_AXIS ) {
 		Com_Error( ERR_DROP, "CL_JoystickEvent: bad axis %i", axis );
 	}
@@ -410,6 +410,39 @@ void CL_JoystickMove( usercmd_t *cmd ) {
 	}
 
 	cmd->upmove = ClampChar( cmd->upmove + cl.joystickAxis[AXIS_UP] );
+}
+
+/*
+=================
+@pjb: CL_GamepadEvent
+
+Gamepad values stay set until changed
+=================
+*/
+void CL_GamepadEvent( int userIndex, int axis, int value, int time ) {
+	if ( axis < 0 || axis >= MAX_JOYSTICK_AXIS ) {
+		Com_Error( ERR_DROP, "CL_GamepadEvent: controller %i bad axis %i", userIndex, axis );
+	}
+    // @pjb: allow UI to track joystick movement for UI nav
+    if ( cls.keyCatchers & KEYCATCH_UI ) {
+		UIVM_GamepadEvent( userIndex, axis, value );
+	//} else if (cls.keyCatchers & KEYCATCH_CGAME) {   // @pjb: game currently cannot hook this
+	//	VM_Call (cgvm, UI_GAMEPAD_EVENT, dx, dy);
+	} else {
+	    cl.gamepadAxis[axis] = value;
+	}
+}
+
+/*
+=================
+@pjb: CL_GamepadMove
+=================
+*/
+void CL_GamepadMove( usercmd_t *cmd ) {
+    // @pjb: only strafing/movement on a gamepad
+	cmd->rightmove = ClampChar( cmd->rightmove + cl.gamepadAxis[AXIS_SIDE] );
+	cmd->forwardmove = ClampChar( cmd->forwardmove + cl.gamepadAxis[AXIS_FORWARD] );
+    cmd->upmove = ClampChar( cmd->upmove + cl.gamepadAxis[AXIS_UP] );
 }
 
 /*
@@ -545,6 +578,9 @@ usercmd_t CL_CreateCmd( void ) {
 
 	// get basic movement from joystick
 	CL_JoystickMove( &cmd );
+
+    // @pjb: get basic movement from gamepad
+    CL_GamepadMove( &cmd );
 
 	// check to make sure the angles haven't wrapped
 	if ( cl.viewangles[PITCH] - oldAngles[PITCH] > 90 ) {

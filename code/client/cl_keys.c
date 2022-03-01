@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include "client.h"
 
+int __last_key_is_less_than_256[256-K_LAST_KEY]; // @pjb: ensure K_LAST_KEY < 256
+
 /*
 
 key up events are sent even if in console mode
@@ -153,6 +155,24 @@ keyname_t keynames[] =
 	{"AUX15", K_AUX15},
 	{"AUX16", K_AUX16},
 
+    // @pjb: gamepad buttons
+    {"PAD_A", K_GAMEPAD_A },
+    {"PAD_B", K_GAMEPAD_B },
+    {"PAD_X", K_GAMEPAD_X },
+    {"PAD_Y", K_GAMEPAD_Y },
+    {"START", K_GAMEPAD_START },
+    {"BACK", K_GAMEPAD_BACK },
+    {"LBUMPER", K_GAMEPAD_LBUMPER },
+    {"RBUMPER", K_GAMEPAD_RBUMPER },
+    {"DPAD_LEFT", K_GAMEPAD_DPAD_LEFT },
+    {"DPAD_RIGHT", K_GAMEPAD_DPAD_RIGHT },
+    {"DPAD_UP", K_GAMEPAD_DPAD_UP },
+    {"DPAD_DOWN", K_GAMEPAD_DPAD_DOWN },
+    {"LSTICK", K_GAMEPAD_LSTICK },
+    {"RSTICK", K_GAMEPAD_RSTICK },
+    {"LTRIGGER", K_GAMEPAD_LTRIGGER },
+    {"RTRIGGER", K_GAMEPAD_RTRIGGER },
+
 	{"KP_HOME",			K_KP_HOME },
 	{"KP_UPARROW",		K_KP_UPARROW },
 	{"KP_PGUP",			K_KP_PGUP },
@@ -205,7 +225,7 @@ void Field_VariableSizeDraw( field_t *edit, int x, int y, int width, int size, q
 	int		i;
 
 	drawLen = edit->widthInChars;
-	len = strlen( edit->buffer ) + 1;
+	len = (int) strlen( edit->buffer ) + 1;
 
 	// guarantee that cursor will be visible
 	if ( len <= drawLen ) {
@@ -304,7 +324,7 @@ void Field_Paste( field_t *edit ) {
 	}
 
 	// send as if typed, so insert / overstrike works properly
-	pasteLen = strlen( cbd );
+	pasteLen = (int) strlen( cbd );
 	for ( i = 0 ; i < pasteLen ; i++ ) {
 		Field_CharEvent( edit, cbd[i] );
 	}
@@ -331,7 +351,7 @@ void Field_KeyDownEvent( field_t *edit, int key ) {
 		return;
 	}
 
-	len = strlen( edit->buffer );
+	len = (int) strlen( edit->buffer );
 
 	if ( key == K_DEL ) {
 		if ( edit->cursor < len ) {
@@ -400,7 +420,7 @@ void Field_CharEvent( field_t *edit, int ch ) {
 		return;
 	}
 
-	len = strlen( edit->buffer );
+	len = (int) strlen( edit->buffer );
 
 	if ( ch == 'h' - 'a' + 1 )	{	// ctrl-h is backspace
 		if ( edit->cursor > 0 ) {
@@ -1013,6 +1033,24 @@ void CL_AddKeyUpCommands( int key, char *kb ) {
 	}
 }
 
+// @pjb: certain keys will skip demos/cinematics
+static qboolean IsDemoSkipKey( int key )
+{
+    switch (key)
+    {
+    case K_MOUSE1:
+    case K_GAMEPAD_A:
+    case K_GAMEPAD_B:
+    case K_GAMEPAD_X:
+    case K_GAMEPAD_Y:
+    case K_GAMEPAD_START:
+    case K_GAMEPAD_BACK:
+        return qtrue;
+    default:
+        return qfalse;
+    }
+}
+
 /*
 ===================
 CL_KeyEvent
@@ -1020,7 +1058,7 @@ CL_KeyEvent
 Called by the system for both key up and key down events
 ===================
 */
-void CL_KeyEvent (int key, qboolean down, unsigned time) {
+void CL_KeyEvent (int userIndex, int key, qboolean down, unsigned time) {
 	char	*kb;
 	char	cmd[1024];
 
@@ -1065,18 +1103,19 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
   }
 #endif
 
-	// console key is hardcoded, so the user can never unbind it
+  // console key is hardcoded, so the user can never unbind it
 	if (key == '`' || key == '~') {
 		if (!down) {
 			return;
 		}
-    Con_ToggleConsole_f ();
+		Con_ToggleConsole_f ();
 		return;
 	}
 
 
 	// keys can still be used for bound actions
-	if ( down && ( key < 128 || key == K_MOUSE1 ) && ( clc.demoplaying || cls.state == CA_CINEMATIC ) && !cls.keyCatchers) {
+    // @pjb: gamepad can skip cutscenes
+	if ( down && ( key < 128 || IsDemoSkipKey( key ) ) && ( clc.demoplaying || cls.state == CA_CINEMATIC ) && !cls.keyCatchers) {
 
 		if (Cvar_VariableValue ("com_cameraMode") == 0) {
 			Cvar_Set ("nextdemo","");
@@ -1084,6 +1123,16 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		}
 	}
 
+    // @pjb: handle start pressed during game
+    if ( down &&
+         key == K_GAMEPAD_START && 
+         !( cls.keyCatchers & KEYCATCH_UI ) &&
+         cls.state == CA_ACTIVE &&
+         !clc.demoplaying )
+    {
+         UIVM_SetActiveMenu( UIMENU_INGAME );
+        return;
+    }
 
 	// escape is always handled special
 	if ( key == K_ESCAPE && down ) {
@@ -1096,23 +1145,23 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		// escape always gets out of CGAME stuff
 		if (cls.keyCatchers & KEYCATCH_CGAME) {
 			cls.keyCatchers &= ~KEYCATCH_CGAME;
-			VM_Call (cgvm, CG_EVENT_HANDLING, CGAME_EVENT_NONE);
+            CGVM_EventHandling( CGAME_EVENT_NONE );
 			return;
 		}
 
 		if ( !( cls.keyCatchers & KEYCATCH_UI ) ) {
 			if ( cls.state == CA_ACTIVE && !clc.demoplaying ) {
-				VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_INGAME );
+				 UIVM_SetActiveMenu( UIMENU_INGAME );
 			}
 			else {
 				CL_Disconnect_f();
 				S_StopAllSounds();
-				VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_MAIN );
+				 UIVM_SetActiveMenu( UIMENU_MAIN );
 			}
 			return;
 		}
 
-		VM_Call( uivm, UI_KEY_EVENT, key, down );
+		UIVM_KeyEvent( userIndex, key, down );
 		return;
 	}
 
@@ -1128,9 +1177,9 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		CL_AddKeyUpCommands( key, kb );
 
 		if ( cls.keyCatchers & KEYCATCH_UI && uivm ) {
-			VM_Call( uivm, UI_KEY_EVENT, key, down );
+			UIVM_KeyEvent( userIndex, key, down );
 		} else if ( cls.keyCatchers & KEYCATCH_CGAME && cgvm ) {
-			VM_Call( cgvm, CG_KEY_EVENT, key, down );
+            CGVM_KeyEvent( key, down );
 		} 
 
 		return;
@@ -1142,11 +1191,11 @@ void CL_KeyEvent (int key, qboolean down, unsigned time) {
 		Console_Key( key );
 	} else if ( cls.keyCatchers & KEYCATCH_UI ) {
 		if ( uivm ) {
-			VM_Call( uivm, UI_KEY_EVENT, key, down );
+			UIVM_KeyEvent( userIndex, key, down );
 		} 
 	} else if ( cls.keyCatchers & KEYCATCH_CGAME ) {
 		if ( cgvm ) {
-			VM_Call( cgvm, CG_KEY_EVENT, key, down );
+            CGVM_KeyEvent( key, down );
 		} 
 	} else if ( cls.keyCatchers & KEYCATCH_MESSAGE ) {
 		Message_Key( key );
@@ -1203,7 +1252,7 @@ CL_CharEvent
 Normal keyboard characters, already shifted / capslocked / etc
 ===================
 */
-void CL_CharEvent( int key ) {
+void CL_CharEvent( int userIndex, int key ) {
 	// the console key should never be used as a char
 	if ( key == '`' || key == '~' ) {
 		return;
@@ -1216,7 +1265,7 @@ void CL_CharEvent( int key ) {
 	}
 	else if ( cls.keyCatchers & KEYCATCH_UI )
 	{
-		VM_Call( uivm, UI_KEY_EVENT, key | K_CHAR_FLAG, qtrue );
+        UIVM_KeyEvent( userIndex, key | K_CHAR_FLAG, qtrue );
 	}
 	else if ( cls.keyCatchers & KEYCATCH_MESSAGE ) 
 	{
@@ -1242,7 +1291,7 @@ void Key_ClearStates (void)
 
 	for ( i=0 ; i < MAX_KEYS ; i++ ) {
 		if ( keys[i].down ) {
-			CL_KeyEvent( i, qfalse, 0 );
+			CL_KeyEvent( Q_USER_ALL, i, qfalse, 0 );
 
 		}
 		keys[i].down = 0;

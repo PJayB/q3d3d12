@@ -48,8 +48,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //#define DEBUG_AI_WEAP
 
 //structure field offsets
-#define WEAPON_OFS(x) (int)&(((weaponinfo_t *)0)->x)
-#define PROJECTILE_OFS(x) (int)&(((projectileinfo_t *)0)->x)
+#define WEAPON_OFS(x) (int)(size_t)&(((weaponinfo_t *)0)->x)
+#define PROJECTILE_OFS(x) (int)(size_t)&(((projectileinfo_t *)0)->x)
 
 //weapon definition // bk001212 - static
 static fielddef_t weaponinfo_fields[] =
@@ -138,7 +138,7 @@ int BotValidWeaponNumber(int weaponnum)
 {
 	if (weaponnum <= 0 || weaponnum > weaponconfig->numweapons)
 	{
-		botimport.Print(PRT_ERROR, "weapon number out of range\n");
+		BotImport_Print(PRT_ERROR, "weapon number out of range\n");
 		return qfalse;
 	} //end if
 	return qtrue;
@@ -153,12 +153,12 @@ bot_weaponstate_t *BotWeaponStateFromHandle(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		BotImport_Print(PRT_FATAL, "move state handle %d out of range\n", handle);
 		return NULL;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		BotImport_Print(PRT_FATAL, "invalid move state %d\n", handle);
 		return NULL;
 	} //end if
 	return botweaponstates[handle];
@@ -208,14 +208,14 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 	max_weaponinfo = (int) LibVarValue("max_weaponinfo", "32");
 	if (max_weaponinfo < 0)
 	{
-		botimport.Print(PRT_ERROR, "max_weaponinfo = %d\n", max_weaponinfo);
+		BotImport_Print(PRT_ERROR, "max_weaponinfo = %d\n", max_weaponinfo);
 		max_weaponinfo = 32;
 		LibVarSet("max_weaponinfo", "32");
 	} //end if
 	max_projectileinfo = (int) LibVarValue("max_projectileinfo", "32");
 	if (max_projectileinfo < 0)
 	{
-		botimport.Print(PRT_ERROR, "max_projectileinfo = %d\n", max_projectileinfo);
+		BotImport_Print(PRT_ERROR, "max_projectileinfo = %d\n", max_projectileinfo);
 		max_projectileinfo = 32;
 		LibVarSet("max_projectileinfo", "32");
 	} //end if
@@ -224,7 +224,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 	source = LoadSourceFile(path);
 	if (!source)
 	{
-		botimport.Print(PRT_ERROR, "counldn't load %s\n", path);
+		BotImport_Print(PRT_ERROR, "counldn't load %s\n", path);
 		return NULL;
 	} //end if
 	//initialize weapon config
@@ -250,7 +250,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 			} //end if
 			if (weaponinfo.number < 0 || weaponinfo.number >= max_weaponinfo)
 			{
-				botimport.Print(PRT_ERROR, "weapon info number %d out of range in %s\n", weaponinfo.number, path);
+				BotImport_Print(PRT_ERROR, "weapon info number %d out of range in %s\n", weaponinfo.number, path);
 				FreeMemory(wc);
 				FreeSource(source);
 				return NULL;
@@ -262,7 +262,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 		{
 			if (wc->numprojectiles >= max_projectileinfo)
 			{
-				botimport.Print(PRT_ERROR, "more than %d projectiles defined in %s\n", max_projectileinfo, path);
+				BotImport_Print(PRT_ERROR, "more than %d projectiles defined in %s\n", max_projectileinfo, path);
 				FreeMemory(wc);
 				FreeSource(source);
 				return NULL;
@@ -278,7 +278,7 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 		} //end if
 		else
 		{
-			botimport.Print(PRT_ERROR, "unknown definition %s in %s\n", token.string, path);
+			BotImport_Print(PRT_ERROR, "unknown definition %s in %s\n", token.string, path);
 			FreeMemory(wc);
 			FreeSource(source);
 			return NULL;
@@ -291,13 +291,13 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 		if (!wc->weaponinfo[i].valid) continue;
 		if (!wc->weaponinfo[i].name[0])
 		{
-			botimport.Print(PRT_ERROR, "weapon %d has no name in %s\n", i, path);
+			BotImport_Print(PRT_ERROR, "weapon %d has no name in %s\n", i, path);
 			FreeMemory(wc);
 			return NULL;
 		} //end if
 		if (!wc->weaponinfo[i].projectile[0])
 		{
-			botimport.Print(PRT_ERROR, "weapon %s has no projectile in %s\n", wc->weaponinfo[i].name, path);
+			BotImport_Print(PRT_ERROR, "weapon %s has no projectile in %s\n", wc->weaponinfo[i].name, path);
 			FreeMemory(wc);
 			return NULL;
 		} //end if
@@ -312,13 +312,13 @@ weaponconfig_t *LoadWeaponConfig(char *filename)
 		} //end for
 		if (j == wc->numprojectiles)
 		{
-			botimport.Print(PRT_ERROR, "weapon %s uses undefined projectile in %s\n", wc->weaponinfo[i].name, path);
+			BotImport_Print(PRT_ERROR, "weapon %s uses undefined projectile in %s\n", wc->weaponinfo[i].name, path);
 			FreeMemory(wc);
 			return NULL;
 		} //end if
 	} //end for
-	if (!wc->numweapons) botimport.Print(PRT_WARNING, "no weapon info loaded\n");
-	botimport.Print(PRT_MESSAGE, "loaded %s\n", path);
+	if (!wc->numweapons) BotImport_Print(PRT_WARNING, "no weapon info loaded\n");
+	BotImport_Print(PRT_MESSAGE, "loaded %s\n", path);
 	return wc;
 } //end of the function LoadWeaponConfig
 //===========================================================================
@@ -372,7 +372,7 @@ int BotLoadWeaponWeights(int weaponstate, char *filename)
 	ws->weaponweightconfig = ReadWeightConfig(filename);
 	if (!ws->weaponweightconfig)
 	{
-		botimport.Print(PRT_FATAL, "couldn't load weapon config %s\n", filename);
+		BotImport_Print(PRT_FATAL, "couldn't load weapon config %s\n", filename);
 		return BLERR_CANNOTLOADWEAPONWEIGHTS;
 	} //end if
 	if (!weaponconfig) return BLERR_CANNOTLOADWEAPONCONFIG;
@@ -483,12 +483,12 @@ void BotFreeWeaponState(int handle)
 {
 	if (handle <= 0 || handle > MAX_CLIENTS)
 	{
-		botimport.Print(PRT_FATAL, "move state handle %d out of range\n", handle);
+		BotImport_Print(PRT_FATAL, "move state handle %d out of range\n", handle);
 		return;
 	} //end if
 	if (!botweaponstates[handle])
 	{
-		botimport.Print(PRT_FATAL, "invalid move state %d\n", handle);
+		BotImport_Print(PRT_FATAL, "invalid move state %d\n", handle);
 		return;
 	} //end if
 	BotFreeWeaponWeights(handle);
@@ -509,7 +509,7 @@ int BotSetupWeaponAI(void)
 	weaponconfig = LoadWeaponConfig(file);
 	if (!weaponconfig)
 	{
-		botimport.Print(PRT_FATAL, "couldn't load the weapon config\n");
+		BotImport_Print(PRT_FATAL, "couldn't load the weapon config\n");
 		return BLERR_CANNOTLOADWEAPONCONFIG;
 	} //end if
 

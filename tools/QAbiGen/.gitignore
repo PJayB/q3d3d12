@@ -1,0 +1,13 @@
+*.suo
+bin
+obj
+*.user
+Debug
+Release
+*.sdf
+*.opensdf
+ipch
+Generated Files
+test
+*.sln.ide
+.vs

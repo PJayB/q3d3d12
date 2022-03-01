@@ -374,6 +374,64 @@ static void StartServer_LevelshotDraw( void *self ) {
 	}
 }
 
+// @pjb: nav override for player model
+static void* StartServer_MapIconNav( menuframework_s* menu, menubitmap_s* item, QNAV direction ) 
+{
+    // Get the index and work out where I am in space.
+    int index = item->generic.id - ID_PICTURES;
+    int col = index % MAX_MAPCOLS;
+    int row = index / MAX_MAPCOLS;
+    int page = s_startserver.page;
+
+    // What would be the new index?
+    switch ( direction )
+    {
+    case QNAV_LEFT : col--; break;
+    case QNAV_RIGHT: col++; break;
+    case QNAV_UP   : row--; break;
+    case QNAV_DOWN : row++; break;
+    }
+
+    // Navigate to the left/right page buttons on row overflow
+    if ( row >= MAX_MAPROWS )
+    {
+        return &s_startserver.gametype;
+    }
+
+    // Just clamp negative rows
+    if ( row < 0 ) {
+        row = 0;
+    }
+
+    // Do we need to switch page to the left?
+    if ( col < 0 )
+    {
+        if ( s_startserver.page > 0 ) {
+            s_startserver.page--;
+            col = MAX_MAPCOLS - 1;
+        } else {
+            col = 0;
+        }
+    }
+
+    // Do we need to switch page to the right?
+    if ( col >= MAX_MAPCOLS )
+    {
+        if ( s_startserver.page < (s_startserver.nummaps / MAX_MAPSPERPAGE) - 1 ) {
+            s_startserver.page++;
+            col = 0;
+        } else {
+            col = MAX_MAPCOLS - 1;
+        }
+    }
+
+    if ( page != s_startserver.page )
+        StartServer_Update();
+
+    // Now return what we've selected
+    return &s_startserver.mapbuttons[row * MAX_MAPCOLS + col];
+}
+
 
 /*
 =================
@@ -393,6 +451,7 @@ static void StartServer_MenuInit( void ) {
 
 	s_startserver.menu.wrapAround = qtrue;
 	s_startserver.menu.fullscreen = qtrue;
+    s_startserver.menu.custom_nav = qtrue;
 
 	s_startserver.banner.generic.type  = MTYPE_BTEXT;
 	s_startserver.banner.generic.x	   = 320;
@@ -425,6 +484,8 @@ static void StartServer_MenuInit( void ) {
 	s_startserver.gametype.generic.x		= 320 - 24;
 	s_startserver.gametype.generic.y		= 368;
 	s_startserver.gametype.itemnames		= gametype_items;
+    s_startserver.gametype.generic.navUp    = &s_startserver.mapbuttons[2];
+    s_startserver.gametype.generic.navDown  = &s_startserver.nextpage;
 
 	for (i=0; i<MAX_MAPSPERPAGE; i++)
 	{
@@ -455,6 +516,10 @@ static void StartServer_MenuInit( void ) {
 		s_startserver.mapbuttons[i].generic.right    = x + 128;
 		s_startserver.mapbuttons[i].generic.bottom   = y + 128;
 		s_startserver.mapbuttons[i].focuspic         = GAMESERVER_SELECT;
+		s_startserver.mapbuttons[i].generic.navLeft  = StartServer_MapIconNav;
+		s_startserver.mapbuttons[i].generic.navRight = StartServer_MapIconNav;
+		s_startserver.mapbuttons[i].generic.navUp    = StartServer_MapIconNav;
+		s_startserver.mapbuttons[i].generic.navDown  = StartServer_MapIconNav;
 	}
 
 	s_startserver.arrows.generic.type  = MTYPE_BITMAP;
@@ -474,6 +539,10 @@ static void StartServer_MenuInit( void ) {
 	s_startserver.prevpage.width  		    = 64;
 	s_startserver.prevpage.height  		    = 32;
 	s_startserver.prevpage.focuspic         = GAMESERVER_ARROWSL;
+    s_startserver.prevpage.generic.navUp    = &s_startserver.gametype;
+    s_startserver.prevpage.generic.navRight = &s_startserver.nextpage;
+    s_startserver.prevpage.generic.navDown  = &s_startserver.back;
+    s_startserver.prevpage.generic.navLeft  = &s_startserver.back;
 
 	s_startserver.nextpage.generic.type	    = MTYPE_BITMAP;
 	s_startserver.nextpage.generic.flags    = QMF_LEFT_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -484,6 +553,10 @@ static void StartServer_MenuInit( void ) {
 	s_startserver.nextpage.width  		    = 64;
 	s_startserver.nextpage.height  		    = 32;
 	s_startserver.nextpage.focuspic         = GAMESERVER_ARROWSR;
+    s_startserver.nextpage.generic.navUp    = &s_startserver.gametype;
+    s_startserver.nextpage.generic.navLeft  = &s_startserver.prevpage;
+    s_startserver.nextpage.generic.navDown  = &s_startserver.next;
+    s_startserver.nextpage.generic.navRight = &s_startserver.next;
 
 	s_startserver.mapname.generic.type  = MTYPE_PTEXT;
 	s_startserver.mapname.generic.flags = QMF_CENTER_JUSTIFY|QMF_INACTIVE;
@@ -503,6 +576,8 @@ static void StartServer_MenuInit( void ) {
 	s_startserver.back.width  		    = 128;
 	s_startserver.back.height  		    = 64;
 	s_startserver.back.focuspic         = GAMESERVER_BACK1;
+    s_startserver.back.generic.navUp    = &s_startserver.prevpage;
+    s_startserver.back.generic.navRight = &s_startserver.next;
 
 	s_startserver.next.generic.type	    = MTYPE_BITMAP;
 	s_startserver.next.generic.name     = GAMESERVER_NEXT0;
@@ -514,6 +589,8 @@ static void StartServer_MenuInit( void ) {
 	s_startserver.next.width  		    = 128;
 	s_startserver.next.height  		    = 64;
 	s_startserver.next.focuspic         = GAMESERVER_NEXT1;
+    s_startserver.next.generic.navUp    = &s_startserver.nextpage;
+    s_startserver.next.generic.navLeft    = &s_startserver.back;
 
 	s_startserver.item_null.generic.type	= MTYPE_BITMAP;
 	s_startserver.item_null.generic.flags	= QMF_LEFT_JUSTIFY|QMF_MOUSEONLY|QMF_SILENT;
@@ -1238,6 +1315,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 
 	s_serveroptions.menu.wrapAround = qtrue;
 	s_serveroptions.menu.fullscreen = qtrue;
+    s_serveroptions.menu.custom_nav = qtrue;
 
 	s_serveroptions.banner.generic.type			= MTYPE_BTEXT;
 	s_serveroptions.banner.generic.x			= 320;
@@ -1285,6 +1363,9 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.flaglimit.field.maxchars     = 3;
 	}
 
+    s_serveroptions.fraglimit.generic.navDown    = &s_serveroptions.timelimit;
+    s_serveroptions.fraglimit.generic.navLeft    = &s_serveroptions.playerTeam[8];
+
 	y += BIGCHAR_HEIGHT+2;
 	s_serveroptions.timelimit.generic.type       = MTYPE_FIELD;
 	s_serveroptions.timelimit.generic.name       = "Time Limit:";
@@ -1294,6 +1375,9 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.timelimit.generic.statusbar  = ServerOptions_StatusBar;
 	s_serveroptions.timelimit.field.widthInChars = 3;
 	s_serveroptions.timelimit.field.maxchars     = 3;
+    s_serveroptions.timelimit.generic.navUp      = &s_serveroptions.fraglimit;
+    s_serveroptions.timelimit.generic.navDown    = &s_serveroptions.friendlyfire;
+    s_serveroptions.timelimit.generic.navLeft    = &s_serveroptions.playerTeam[8];
 
 	if( s_serveroptions.gametype >= GT_TEAM ) {
 		y += BIGCHAR_HEIGHT+2;
@@ -1304,12 +1388,19 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.friendlyfire.generic.name	  = "Friendly Fire:";
 	}
 
+    s_serveroptions.friendlyfire.generic.navUp    = &s_serveroptions.timelimit;
+    s_serveroptions.friendlyfire.generic.navDown  = &s_serveroptions.pure;
+    s_serveroptions.friendlyfire.generic.navLeft  = &s_serveroptions.playerTeam[8];
+
 	y += BIGCHAR_HEIGHT+2;
 	s_serveroptions.pure.generic.type			= MTYPE_RADIOBUTTON;
 	s_serveroptions.pure.generic.flags			= QMF_PULSEIFFOCUS|QMF_SMALLFONT;
 	s_serveroptions.pure.generic.x				= OPTIONS_X;
 	s_serveroptions.pure.generic.y				= y;
 	s_serveroptions.pure.generic.name			= "Pure Server:";
+    s_serveroptions.pure.generic.navUp          = &s_serveroptions.friendlyfire;
+    s_serveroptions.pure.generic.navDown        = &s_serveroptions.dedicated;
+    s_serveroptions.pure.generic.navLeft        = &s_serveroptions.playerTeam[8];
 
 	if( s_serveroptions.multiplayer ) {
 		y += BIGCHAR_HEIGHT+2;
@@ -1323,6 +1414,10 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.dedicated.itemnames			= dedicated_list;
 	}
 
+    s_serveroptions.dedicated.generic.navUp         = &s_serveroptions.pure;
+    s_serveroptions.dedicated.generic.navDown       = &s_serveroptions.hostname;
+    s_serveroptions.dedicated.generic.navLeft       = &s_serveroptions.playerTeam[8];
+
 	if( s_serveroptions.multiplayer ) {
 		y += BIGCHAR_HEIGHT+2;
 		s_serveroptions.hostname.generic.type       = MTYPE_FIELD;
@@ -1334,6 +1429,10 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.hostname.field.maxchars     = 64;
 	}
 
+    s_serveroptions.hostname.generic.navUp          = &s_serveroptions.dedicated;
+    s_serveroptions.hostname.generic.navDown        = &s_serveroptions.punkbuster;
+    s_serveroptions.hostname.generic.navLeft        = &s_serveroptions.playerTeam[8];
+
 	y += BIGCHAR_HEIGHT+2;
 	s_serveroptions.punkbuster.generic.type			= MTYPE_SPINCONTROL;
 	s_serveroptions.punkbuster.generic.name			= "Punkbuster:";
@@ -1342,15 +1441,19 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.punkbuster.generic.x				= OPTIONS_X;
 	s_serveroptions.punkbuster.generic.y				= y;
 	s_serveroptions.punkbuster.itemnames				= punkbuster_items;
+    s_serveroptions.punkbuster.generic.navUp        = &s_serveroptions.hostname;
+    s_serveroptions.punkbuster.generic.navDown      = &s_serveroptions.go;
+    s_serveroptions.punkbuster.generic.navLeft      = &s_serveroptions.playerTeam[8];
 	
 	y = 80;
 	s_serveroptions.botSkill.generic.type			= MTYPE_SPINCONTROL;
 	s_serveroptions.botSkill.generic.flags			= QMF_PULSEIFFOCUS|QMF_SMALLFONT;
 	s_serveroptions.botSkill.generic.name			= "Bot Skill:  ";
-	s_serveroptions.botSkill.generic.x				= 32 + (strlen(s_serveroptions.botSkill.generic.name) + 2 ) * SMALLCHAR_WIDTH;
+	s_serveroptions.botSkill.generic.x				= 32 + ((int) strlen(s_serveroptions.botSkill.generic.name) + 2 ) * SMALLCHAR_WIDTH;
 	s_serveroptions.botSkill.generic.y				= y;
 	s_serveroptions.botSkill.itemnames				= botSkill_list;
 	s_serveroptions.botSkill.curvalue				= 1;
+    s_serveroptions.botSkill.generic.navDown        = &s_serveroptions.playerType[0];
 
 	y += ( 2 * SMALLCHAR_HEIGHT );
 	s_serveroptions.player0.generic.type			= MTYPE_TEXT;
@@ -1368,6 +1471,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.playerType[n].generic.x			= 32;
 		s_serveroptions.playerType[n].generic.y			= y;
 		s_serveroptions.playerType[n].itemnames			= playerType_list;
+        s_serveroptions.playerType[n].generic.navRight  = &s_serveroptions.playerName[n];
 
 		s_serveroptions.playerName[n].generic.type		= MTYPE_TEXT;
 		s_serveroptions.playerName[n].generic.flags		= QMF_SMALLFONT;
@@ -1383,12 +1487,36 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 		s_serveroptions.playerName[n].generic.bottom	= s_serveroptions.playerName[n].generic.y + SMALLCHAR_HEIGHT;
 		s_serveroptions.playerName[n].generic.left		= s_serveroptions.playerName[n].generic.x - SMALLCHAR_HEIGHT/ 2;
 		s_serveroptions.playerName[n].generic.right		= s_serveroptions.playerName[n].generic.x + 16 * SMALLCHAR_WIDTH;
+        s_serveroptions.playerName[n].generic.navLeft   = &s_serveroptions.playerType[n];
+        s_serveroptions.playerName[n].generic.navRight  = &s_serveroptions.playerTeam[n];
 
 		s_serveroptions.playerTeam[n].generic.type		= MTYPE_SPINCONTROL;
 		s_serveroptions.playerTeam[n].generic.flags		= QMF_SMALLFONT;
 		s_serveroptions.playerTeam[n].generic.x			= 240;
 		s_serveroptions.playerTeam[n].generic.y			= y;
 		s_serveroptions.playerTeam[n].itemnames			= playerTeam_list;
+        s_serveroptions.playerTeam[n].generic.navLeft   = &s_serveroptions.playerName[n];
+        s_serveroptions.playerTeam[n].generic.navRight  = &s_serveroptions.fraglimit;
+
+        if ( n > 0 ) {
+            s_serveroptions.playerType[n].generic.navUp = &s_serveroptions.playerType[n-1];
+            s_serveroptions.playerName[n].generic.navUp = &s_serveroptions.playerName[n-1];
+            s_serveroptions.playerTeam[n].generic.navUp = &s_serveroptions.playerTeam[n-1];
+        } else {
+            s_serveroptions.playerType[n].generic.navUp = &s_serveroptions.botSkill;
+            s_serveroptions.playerName[n].generic.navUp = &s_serveroptions.botSkill;
+            s_serveroptions.playerTeam[n].generic.navUp = &s_serveroptions.botSkill;
+        }
+
+        if ( n == PLAYER_SLOTS - 1 ) {
+            s_serveroptions.playerType[n].generic.navDown = &s_serveroptions.back;
+            s_serveroptions.playerName[n].generic.navDown = &s_serveroptions.back;
+            s_serveroptions.playerTeam[n].generic.navDown = &s_serveroptions.back;
+        } else {
+            s_serveroptions.playerType[n].generic.navDown = &s_serveroptions.playerType[n+1];
+            s_serveroptions.playerName[n].generic.navDown = &s_serveroptions.playerName[n+1];
+            s_serveroptions.playerTeam[n].generic.navDown = &s_serveroptions.playerTeam[n+1];
+        }
 
 		y += ( SMALLCHAR_HEIGHT + 4 );
 	}
@@ -1403,6 +1531,8 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.back.width  		  = 128;
 	s_serveroptions.back.height  		  = 64;
 	s_serveroptions.back.focuspic         = GAMESERVER_BACK1;
+    s_serveroptions.back.generic.navUp    = &s_serveroptions.playerType[PLAYER_SLOTS-1];
+    s_serveroptions.back.generic.navRight = &s_serveroptions.next;
 
 	s_serveroptions.next.generic.type	  = MTYPE_BITMAP;
 	s_serveroptions.next.generic.name     = GAMESERVER_NEXT0;
@@ -1415,6 +1545,9 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.next.width  		  = 128;
 	s_serveroptions.next.height  		  = 64;
 	s_serveroptions.next.focuspic         = GAMESERVER_NEXT1;
+    s_serveroptions.next.generic.navLeft  = &s_serveroptions.back;
+    s_serveroptions.next.generic.navRight = &s_serveroptions.go;
+    s_serveroptions.next.generic.navUp    = &s_serveroptions.punkbuster;
 
 	s_serveroptions.go.generic.type	    = MTYPE_BITMAP;
 	s_serveroptions.go.generic.name     = GAMESERVER_FIGHT0;
@@ -1426,6 +1559,8 @@ static void ServerOptions_MenuInit( qboolean multiplayer ) {
 	s_serveroptions.go.width  		    = 128;
 	s_serveroptions.go.height  		    = 64;
 	s_serveroptions.go.focuspic         = GAMESERVER_FIGHT1;
+	s_serveroptions.go.generic.navLeft  = &s_serveroptions.next;
+    s_serveroptions.go.generic.navUp    = &s_serveroptions.punkbuster;
 
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.banner );
 
@@ -1833,6 +1968,64 @@ void UI_BotSelectMenu_Cache( void ) {
 }
 
 
+// @pjb: nav override for player model
+static void* UI_BotSelectNav( menuframework_s* menu, menubitmap_s* item, QNAV direction ) 
+{
+    // Get the index and work out where I am in space.
+    int index = item->generic.id;
+    int col = index % PLAYERGRID_COLS;
+    int row = index / PLAYERGRID_COLS;
+    int page = botSelectInfo.modelpage;
+
+    // What would be the new index?
+    switch ( direction )
+    {
+    case QNAV_LEFT : col--; break;
+    case QNAV_RIGHT: col++; break;
+    case QNAV_UP   : row--; break;
+    case QNAV_DOWN : row++; break;
+    }
+
+    // Navigate to the left/right page buttons on row overflow
+    if ( row >= PLAYERGRID_ROWS )
+    {
+        return &botSelectInfo.go;
+    }
+
+    // Just clamp negative rows
+    if ( row < 0 ) {
+        row = 0;
+    }
+
+    // Do we need to switch page to the left?
+    if ( col < 0 )
+    {
+        if ( botSelectInfo.modelpage > 0 ) {
+            botSelectInfo.modelpage--;
+            col = PLAYERGRID_COLS - 1;
+        } else {
+            col = 0;
+        }
+    }
+
+    // Do we need to switch page to the right?
+    if ( col >= PLAYERGRID_COLS )
+    {
+        if ( botSelectInfo.modelpage < botSelectInfo.numpages - 1 ) {
+            botSelectInfo.modelpage++;
+            col = 0;
+        } else {
+            col = PLAYERGRID_COLS - 1;
+        }
+    }
+
+    if ( page != botSelectInfo.modelpage )
+        UI_BotSelectMenu_UpdateGrid();
+
+    // Now return what we've selected
+    return &botSelectInfo.picbuttons[row * PLAYERGRID_COLS + col];
+}
+
 static void UI_BotSelectMenu_Init( char *bot ) {
 	int		i, j, k;
 	int		x, y;
@@ -1840,6 +2033,7 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 	memset( &botSelectInfo, 0 ,sizeof(botSelectInfo) );
 	botSelectInfo.menu.wrapAround = qtrue;
 	botSelectInfo.menu.fullscreen = qtrue;
+    botSelectInfo.menu.custom_nav = qtrue;
 
 	UI_BotSelectMenu_Cache();
 
@@ -1878,6 +2072,10 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 			botSelectInfo.picbuttons[k].height				= 128;
 			botSelectInfo.picbuttons[k].focuspic			= BOTSELECT_SELECT;
 			botSelectInfo.picbuttons[k].focuscolor			= colorRed;
+            botSelectInfo.picbuttons[k].generic.navUp       = UI_BotSelectNav;
+            botSelectInfo.picbuttons[k].generic.navDown     = UI_BotSelectNav;
+            botSelectInfo.picbuttons[k].generic.navLeft     = UI_BotSelectNav;
+            botSelectInfo.picbuttons[k].generic.navRight    = UI_BotSelectNav;
 
 			botSelectInfo.picnames[k].generic.type			= MTYPE_TEXT;
 			botSelectInfo.picnames[k].generic.flags			= QMF_SMALLFONT;
@@ -1908,6 +2106,9 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 	botSelectInfo.left.width  				= 64;
 	botSelectInfo.left.height  				= 32;
 	botSelectInfo.left.focuspic				= BOTSELECT_ARROWSL;
+    botSelectInfo.left.generic.navUp        = &botSelectInfo.picbuttons[PLAYERGRID_COLS * (PLAYERGRID_ROWS-1) + 1];
+    botSelectInfo.left.generic.navRight     = &botSelectInfo.right;
+    botSelectInfo.left.generic.navLeft      = &botSelectInfo.back;
 
 	botSelectInfo.right.generic.type	    = MTYPE_BITMAP;
 	botSelectInfo.right.generic.flags		= QMF_LEFT_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -1917,6 +2118,9 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 	botSelectInfo.right.width  				= 64;
 	botSelectInfo.right.height  		    = 32;
 	botSelectInfo.right.focuspic			= BOTSELECT_ARROWSR;
+    botSelectInfo.right.generic.navUp       = &botSelectInfo.picbuttons[PLAYERGRID_COLS * (PLAYERGRID_ROWS-1) + 2];
+    botSelectInfo.right.generic.navLeft     = &botSelectInfo.left;
+    botSelectInfo.right.generic.navRight    = &botSelectInfo.go;
 
 	botSelectInfo.back.generic.type		= MTYPE_BITMAP;
 	botSelectInfo.back.generic.name		= BOTSELECT_BACK0;
@@ -1927,6 +2131,8 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 	botSelectInfo.back.width			= 128;
 	botSelectInfo.back.height			= 64;
 	botSelectInfo.back.focuspic			= BOTSELECT_BACK1;
+    botSelectInfo.back.generic.navUp      = &botSelectInfo.picbuttons[PLAYERGRID_COLS * (PLAYERGRID_ROWS-1)];
+    botSelectInfo.back.generic.navRight = &botSelectInfo.left;
 
 	botSelectInfo.go.generic.type		= MTYPE_BITMAP;
 	botSelectInfo.go.generic.name		= BOTSELECT_ACCEPT0;
@@ -1937,6 +2143,8 @@ static void UI_BotSelectMenu_Init( char *bot ) {
 	botSelectInfo.go.width				= 128;
 	botSelectInfo.go.height				= 64;
 	botSelectInfo.go.focuspic			= BOTSELECT_ACCEPT1;
+    botSelectInfo.go.generic.navLeft    = &botSelectInfo.right;
+    botSelectInfo.go.generic.navUp      = &botSelectInfo.picbuttons[PLAYERGRID_COLS * (PLAYERGRID_ROWS-1) + 3];
 
 	Menu_AddItem( &botSelectInfo.menu, &botSelectInfo.banner );
 	for( i = 0; i < MAX_MODELSPERPAGE; i++ ) {

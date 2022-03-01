@@ -148,7 +148,7 @@ static void CG_EntityEffects( centity_t *cent ) {
 		g = ( cl >> 8 ) & 255;
 		b = ( cl >> 16 ) & 255;
 		i = ( ( cl >> 24 ) & 255 ) * 4;
-		trap_R_AddLightToScene( cent->lerpOrigin, i, r, g, b );
+		trap_R_AddLightToScene( cent->lerpOrigin, i, r / 255.0f, g / 255.0f, b / 255.0f );
 	}
 
 }
@@ -339,6 +339,55 @@ static void CG_Item( centity_t *cent ) {
 		ent.nonNormalizedAxes = qtrue;
 	}
 #endif
+
+	// @pjb: powerups glow
+	if ( item->giType == IT_POWERUP && !cg_simpleItems.integer ) {
+        switch (item->giTag) {
+        // Blue
+        case PW_BLUEFLAG:
+        case PW_QUAD:
+        case PW_GUARD:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 0.2f, 0.2f, 1 );
+            break;
+
+        // Red
+        case PW_REDFLAG:
+        case PW_REGEN:
+        case PW_DOUBLER:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 1, 0.2f, 0.2f );
+            break;
+
+        // White
+        case PW_NEUTRALFLAG:
+        case PW_INVIS:
+        case PW_INVULNERABILITY:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 0.6f, 0.6f, 0.6f );
+            break;
+
+        // Yellow
+        case PW_HASTE:
+        case PW_AMMOREGEN:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 1, 1, 0.2f );
+            break;
+
+        // Orange
+        case PW_BATTLESUIT:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 1, 0.6f, 0.2f );
+            break;
+
+        // Purple
+        case PW_FLIGHT:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 1, 0.2f, 1 );
+            break;
+
+        // Green
+        case PW_SCOUT:
+            trap_R_AddLightToScene( cent->lerpOrigin, frac * 200, 0.2f, 1, 0.2f );
+            break;
+        default:
+            break;
+        }
+	}
 
 	// add to refresh list
 	trap_R_AddRefEntityToScene(&ent);

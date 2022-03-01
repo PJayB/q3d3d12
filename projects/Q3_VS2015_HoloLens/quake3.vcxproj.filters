@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{49D26B24-15CE-4382-BBA6-73A7EB41F40E}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{3F9C8EDC-4EA4-4C0C-B057-2D4C54826817}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Images">
+			<UniqueIdentifier>{926DDF0D-7050-4A36-ADAB-DE79317BED8C}</UniqueIdentifier>
+			<Extensions>png;ico;tga;bmp</Extensions>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{1CDF8BDB-D7B7-49EF-AD8B-4ADB1959CDDC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{5A8B9D3E-3CA5-4806-97D6-D5D2F97105A2}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{99ED32A8-2405-4896-A9EB-993563648641}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{CC75C77F-BC9D-458B-96D0-9000AC725E14}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{4E34D7DA-EAA1-4346-B957-C359B2CD58D7}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{6329E4A8-761F-4D21-AB35-DDF5A39AC5F8}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{FE2F5C40-C3B0-4166-A9F9-564E175EAD88}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{2AF343B8-2974-4BCB-B8AB-F74F24D55BFB}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{57E05D64-AA08-4392-BF42-AA39704AE8E3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Images\Assets">
+			<UniqueIdentifier>{DB9659BE-CC49-4CDE-92BF-7825EFACD8C2}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{94BE6812-30C9-440B-9B8E-513DA4BE651F}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\winrt\winrt_d3d.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_shared.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_utils.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\winrt\winrt_view.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\hololens\holo_app.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\hololens\holo_input.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\hololens\holo_net.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\hololens\holo_sys.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\winrt\winrt_d3d.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_shared.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_utils.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\winrt\winrt_view.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\hololens\holo_app.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\hololens\holo_common.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\hololens\holo_msgs.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\hololens\holo_net.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Image Include="Assets\logo150.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo150wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo24.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo30.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo300wide.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo310.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo44.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo50.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo70.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+		<Image Include="Assets\logo71.png">
+			<Filter>Images\Assets</Filter>
+		</Image>
+	</ItemGroup>
+	<ItemGroup>
+		<AppxManifest Include="..\..\code\hololens\Package.appxmanifest">
+			<Filter>Resources</Filter>
+		</AppxManifest>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\hololens\packagelist.txt">
+			<Filter>Resources</Filter>
+		</Text>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\code\hololens\Quake3_TemporaryKey.pfx">
+			<Filter>Resources</Filter>
+		</None>
+	</ItemGroup>
+</Project>

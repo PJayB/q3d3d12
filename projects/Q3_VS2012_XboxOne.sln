@@ -1,0 +1,540 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+VisualStudioVersion = 11.0.50727.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Content", "Content", "{DF35A17C-2F2C-46BC-BD2A-FF7FB902EC43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Q3", "Q3", "{526C956D-42AC-4F1C-8931-8E3F78A602E1}"
+	ProjectSection(SolutionItems) = preProject
+		..\baseq3\autoexec.cfg = ..\baseq3\autoexec.cfg
+		..\baseq3\default.cfg = ..\baseq3\default.cfg
+		..\baseq3\q3config.cfg = ..\baseq3\q3config.cfg
+		..\baseq3\scripts\default_shaderlist.txt = ..\baseq3\scripts\default_shaderlist.txt
+		..\baseq3\scripts\shaderlist.txt = ..\baseq3\scripts\shaderlist.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TA", "TA", "{E14D00B2-CD4B-4771-926A-457D2D9830B7}"
+	ProjectSection(SolutionItems) = preProject
+		..\missionpack\terrademo-README.txt = ..\missionpack\terrademo-README.txt
+		..\missionpack\scripts\default_shaderlist.txt = ..\missionpack\scripts\default_shaderlist.txt
+		..\missionpack\ui\hud.txt = ..\missionpack\ui\hud.txt
+		..\missionpack\ui\hud2.txt = ..\missionpack\ui\hud2.txt
+		..\missionpack\ui\ingame.txt = ..\missionpack\ui\ingame.txt
+		..\missionpack\ui\menus.txt = ..\missionpack\ui\menus.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Menus", "Menus", "{DBD97D95-FD48-4EBE-8575-7417FBED0261}"
+	ProjectSection(SolutionItems) = preProject
+		..\missionpack\ui\addfilter.menu = ..\missionpack\ui\addfilter.menu
+		..\missionpack\ui\cdkey.menu = ..\missionpack\ui\cdkey.menu
+		..\missionpack\ui\cinematicmenu.menu = ..\missionpack\ui\cinematicmenu.menu
+		..\missionpack\ui\connect.menu = ..\missionpack\ui\connect.menu
+		..\missionpack\ui\controls.menu = ..\missionpack\ui\controls.menu
+		..\missionpack\ui\createfavorite.menu = ..\missionpack\ui\createfavorite.menu
+		..\missionpack\ui\createserver.menu = ..\missionpack\ui\createserver.menu
+		..\missionpack\ui\credit.menu = ..\missionpack\ui\credit.menu
+		..\missionpack\ui\default.menu = ..\missionpack\ui\default.menu
+		..\missionpack\ui\demo.menu = ..\missionpack\ui\demo.menu
+		..\missionpack\ui\demo_quit.menu = ..\missionpack\ui\demo_quit.menu
+		..\missionpack\ui\endofgame.menu = ..\missionpack\ui\endofgame.menu
+		..\missionpack\ui\error.menu = ..\missionpack\ui\error.menu
+		..\missionpack\ui\fight.menu = ..\missionpack\ui\fight.menu
+		..\missionpack\ui\findplayer.menu = ..\missionpack\ui\findplayer.menu
+		..\missionpack\ui\help.menu = ..\missionpack\ui\help.menu
+		..\missionpack\ui\hud.menu = ..\missionpack\ui\hud.menu
+		..\missionpack\ui\hud.txt = ..\missionpack\ui\hud.txt
+		..\missionpack\ui\hud2.txt = ..\missionpack\ui\hud2.txt
+		..\missionpack\ui\ingame.menu = ..\missionpack\ui\ingame.menu
+		..\missionpack\ui\ingame.txt = ..\missionpack\ui\ingame.txt
+		..\missionpack\ui\ingame_about.menu = ..\missionpack\ui\ingame_about.menu
+		..\missionpack\ui\ingame_addbot.menu = ..\missionpack\ui\ingame_addbot.menu
+		..\missionpack\ui\ingame_callvote.menu = ..\missionpack\ui\ingame_callvote.menu
+		..\missionpack\ui\ingame_controls.menu = ..\missionpack\ui\ingame_controls.menu
+		..\missionpack\ui\ingame_join.menu = ..\missionpack\ui\ingame_join.menu
+		..\missionpack\ui\ingame_leave.menu = ..\missionpack\ui\ingame_leave.menu
+		..\missionpack\ui\ingame_options.menu = ..\missionpack\ui\ingame_options.menu
+		..\missionpack\ui\ingame_orders.menu = ..\missionpack\ui\ingame_orders.menu
+		..\missionpack\ui\ingame_player.menu = ..\missionpack\ui\ingame_player.menu
+		..\missionpack\ui\ingame_system.menu = ..\missionpack\ui\ingame_system.menu
+		..\missionpack\ui\ingame_vote.menu = ..\missionpack\ui\ingame_vote.menu
+		..\missionpack\ui\joinserver.menu = ..\missionpack\ui\joinserver.menu
+		..\missionpack\ui\main.menu = ..\missionpack\ui\main.menu
+		..\missionpack\ui\menudef.h = ..\missionpack\ui\menudef.h
+		..\missionpack\ui\menus.txt = ..\missionpack\ui\menus.txt
+		..\missionpack\ui\min_hud.menu = ..\missionpack\ui\min_hud.menu
+		..\missionpack\ui\mod.menu = ..\missionpack\ui\mod.menu
+		..\missionpack\ui\options.menu = ..\missionpack\ui\options.menu
+		..\missionpack\ui\ordershelp.menu = ..\missionpack\ui\ordershelp.menu
+		..\missionpack\ui\password.menu = ..\missionpack\ui\password.menu
+		..\missionpack\ui\player.menu = ..\missionpack\ui\player.menu
+		..\missionpack\ui\powerup.menu = ..\missionpack\ui\powerup.menu
+		..\missionpack\ui\quake3.menu = ..\missionpack\ui\quake3.menu
+		..\missionpack\ui\quit.menu = ..\missionpack\ui\quit.menu
+		..\missionpack\ui\quitcredit.menu = ..\missionpack\ui\quitcredit.menu
+		..\missionpack\ui\resetscore.menu = ..\missionpack\ui\resetscore.menu
+		..\missionpack\ui\score.menu = ..\missionpack\ui\score.menu
+		..\missionpack\ui\serverinfo.menu = ..\missionpack\ui\serverinfo.menu
+		..\missionpack\ui\setup.menu = ..\missionpack\ui\setup.menu
+		..\missionpack\ui\skirmish.menu = ..\missionpack\ui\skirmish.menu
+		..\missionpack\ui\system.menu = ..\missionpack\ui\system.menu
+		..\missionpack\ui\teamscore.menu = ..\missionpack\ui\teamscore.menu
+		..\missionpack\ui\vid_restart.menu = ..\missionpack\ui\vid_restart.menu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Maps", "Maps", "{971A8744-5B6A-44DC-8E61-F16E47AF55F8}"
+	ProjectSection(SolutionItems) = preProject
+		..\baseq3\maps\museum.map = ..\baseq3\maps\museum.map
+		..\baseq3\maps\q3dm17sample.map = ..\baseq3\maps\q3dm17sample.map
+		..\baseq3\maps\q3dm1sample.map = ..\baseq3\maps\q3dm1sample.map
+		..\baseq3\maps\q3dm7sample.map = ..\baseq3\maps\q3dm7sample.map
+		..\baseq3\maps\terrademoQ3.map = ..\baseq3\maps\terrademoQ3.map
+		..\baseq3\maps\testbed.map = ..\baseq3\maps\testbed.map
+		..\missionpack\maps\terrademo.map = ..\missionpack\maps\terrademo.map
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{FBF22261-DF4B-40D6-9163-403F67D25257}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VMs", "VMs", "{A066924D-9303-4695-BCC2-8A6BC925745A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QABI", "QABI", "{D05261EF-6DEC-4621-B2A4-DD778651DBC4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Quake 3", "Quake 3", "{3050A82A-CF08-4667-B9EE-22C5F92333F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Team Arena", "Team Arena", "{C5C2D8C5-4010-4D33-B4B9-CEAD00C377FE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quake3", "Q3_VS2012_XboxOne\quake3.vcxproj", "{E35E201A-3518-465A-A24C-0648B8300D0C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{A5AEF06F-1A7B-471A-A656-F349DE717300} = {A5AEF06F-1A7B-471A-A656-F349DE717300}
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889} = {2A2BCEF8-4201-497E-AB58-019E1F46A889}
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1} = {6F67B6E6-49A1-42C5-A394-06C483ACA8B1}
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE} = {057D30CD-E09B-4E5A-86CE-33084D249ACE}
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394} = {FDEC2626-B64D-4E2B-B44F-234C1A802394}
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0} = {90F8D510-83D4-4030-8D70-A75D0AFA55C0}
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7} = {30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F} = {0FC0A172-E837-4375-B92F-6D8E5D26294F}
+		{138807B3-6A12-412A-A82C-9037E833E423} = {138807B3-6A12-412A-A82C-9037E833E423}
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C} = {AF7FC507-B0AF-4978-8163-1347C73AA81C}
+		{D168BDA3-49EB-421A-8104-5409110E3DC1} = {D168BDA3-49EB-421A-8104-5409110E3DC1}
+		{C086533A-926D-4F65-9511-BFD86B0D6A73} = {C086533A-926D-4F65-9511-BFD86B0D6A73}
+		{50251D60-3290-4937-B688-1BDF60192FC4} = {50251D60-3290-4937-B688-1BDF60192FC4}
+		{9121F4A7-1622-4080-A33A-787ECE54001C} = {9121F4A7-1622-4080-A33A-787ECE54001C}
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259} = {CC2F83FF-BA49-4DFE-86B9-058116BBD259}
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481} = {1C256A63-C968-4D11-A23E-0CFB1D67E481}
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B} = {3F2D6566-4A71-47F3-9789-B0335F79D98B}
+		{ADAD1151-3672-4053-A11F-4D1112007693} = {ADAD1151-3672-4053-A11F-4D1112007693}
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D} = {BA9036C7-C53A-4289-B701-452C0CE0ED2D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame_qabi", "Q3_VS2012_XboxOne\cgame_qabi.vcxproj", "{8AB83253-5537-4D71-9164-C49DFFB90AFD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game_qabi", "Q3_VS2012_XboxOne\game_qabi.vcxproj", "{05DAC34C-E10D-49BB-8702-235E1939D6E9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui_qabi", "Q3_VS2012_XboxOne\ui_qabi.vcxproj", "{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine_qabi", "Q3_VS2012_XboxOne\engine_qabi.vcxproj", "{D7824C71-2455-4674-B8DA-717D0420E072}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qshared", "Q3_VS2012_XboxOne\qshared.vcxproj", "{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "botlib", "Q3_VS2012_XboxOne\botlib.vcxproj", "{A5AEF06F-1A7B-471A-A656-F349DE717300}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "serverlib", "Q3_VS2012_XboxOne\serverlib.vcxproj", "{2A2BCEF8-4201-497E-AB58-019E1F46A889}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jpeg-6lib", "Q3_VS2012_XboxOne\jpeg-6lib.vcxproj", "{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "splineslib", "Q3_VS2012_XboxOne\splineslib.vcxproj", "{057D30CD-E09B-4E5A-86CE-33084D249ACE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clientlib", "Q3_VS2012_XboxOne\clientlib.vcxproj", "{FDEC2626-B64D-4E2B-B44F-234C1A802394}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qcommonlib", "Q3_VS2012_XboxOne\qcommonlib.vcxproj", "{90F8D510-83D4-4030-8D70-A75D0AFA55C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gamethreadlib", "Q3_VS2012_XboxOne\gamethreadlib.vcxproj", "{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xaudiolib", "Q3_VS2012_XboxOne\xaudiolib.vcxproj", "{0FC0A172-E837-4375-B92F-6D8E5D26294F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsharedlib", "Q3_VS2012_XboxOne\winsharedlib.vcxproj", "{138807B3-6A12-412A-A82C-9037E833E423}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "Q3_VS2012_XboxOne\renderer.vcxproj", "{AF7FC507-B0AF-4978-8163-1347C73AA81C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "d3dlib", "Q3_VS2012_XboxOne\d3dlib.vcxproj", "{D168BDA3-49EB-421A-8104-5409110E3DC1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "d3d12lib", "Q3_VS2012_XboxOne\d3d12lib.vcxproj", "{C086533A-926D-4F65-9511-BFD86B0D6A73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shaders", "Q3_VS2012_XboxOne\shaders.vcxproj", "{50251D60-3290-4937-B688-1BDF60192FC4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "Q3_VS2012_XboxOne\game.vcxproj", "{9121F4A7-1622-4080-A33A-787ECE54001C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cgame", "Q3_VS2012_XboxOne\cgame.vcxproj", "{CC2F83FF-BA49-4DFE-86B9-058116BBD259}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "q3_ui", "Q3_VS2012_XboxOne\q3_ui.vcxproj", "{1C256A63-C968-4D11-A23E-0CFB1D67E481}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tagame", "Q3_VS2012_XboxOne\tagame.vcxproj", "{3F2D6566-4A71-47F3-9789-B0335F79D98B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {05DAC34C-E10D-49BB-8702-235E1939D6E9}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tacgame", "Q3_VS2012_XboxOne\tacgame.vcxproj", "{ADAD1151-3672-4053-A11F-4D1112007693}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {8AB83253-5537-4D71-9164-C49DFFB90AFD}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "Q3_VS2012_XboxOne\ui.vcxproj", "{BA9036C7-C53A-4289-B701-452C0CE0ED2D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {A2EA91A7-3F65-4548-A418-BEF1090A9FDF}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D7824C71-2455-4674-B8DA-717D0420E072}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {48BCF14A-4D49-4AE8-8B89-EDEC646CE288}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Durango = Debug|Durango
+		Profile|Durango = Profile|Durango
+		Release|Durango = Release|Durango
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Debug|Durango.ActiveCfg = Debug|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Debug|Durango.Build.0 = Debug|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Debug|Durango.Deploy.0 = Debug|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Profile|Durango.ActiveCfg = Profile|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Profile|Durango.Build.0 = Profile|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Profile|Durango.Deploy.0 = Profile|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Release|Durango.ActiveCfg = Release|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Release|Durango.Build.0 = Release|Durango
+		{E35E201A-3518-465A-A24C-0648B8300D0C}.Release|Durango.Deploy.0 = Release|Durango
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Debug|Durango.ActiveCfg = Debug|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Debug|Durango.Build.0 = Debug|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Debug|Durango.Deploy.0 = Debug|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Profile|Durango.ActiveCfg = Profile|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Profile|Durango.Build.0 = Profile|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Profile|Durango.Deploy.0 = Profile|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Release|Durango.ActiveCfg = Release|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Release|Durango.Build.0 = Release|Win32
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD}.Release|Durango.Deploy.0 = Release|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Debug|Durango.ActiveCfg = Debug|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Debug|Durango.Build.0 = Debug|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Debug|Durango.Deploy.0 = Debug|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Profile|Durango.ActiveCfg = Profile|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Profile|Durango.Build.0 = Profile|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Profile|Durango.Deploy.0 = Profile|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Release|Durango.ActiveCfg = Release|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Release|Durango.Build.0 = Release|Win32
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9}.Release|Durango.Deploy.0 = Release|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Debug|Durango.ActiveCfg = Debug|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Debug|Durango.Build.0 = Debug|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Debug|Durango.Deploy.0 = Debug|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Profile|Durango.ActiveCfg = Profile|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Profile|Durango.Build.0 = Profile|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Profile|Durango.Deploy.0 = Profile|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Release|Durango.ActiveCfg = Release|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Release|Durango.Build.0 = Release|Win32
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288}.Release|Durango.Deploy.0 = Release|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Debug|Durango.ActiveCfg = Debug|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Debug|Durango.Build.0 = Debug|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Debug|Durango.Deploy.0 = Debug|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Profile|Durango.ActiveCfg = Profile|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Profile|Durango.Build.0 = Profile|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Profile|Durango.Deploy.0 = Profile|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Release|Durango.ActiveCfg = Release|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Release|Durango.Build.0 = Release|Win32
+		{D7824C71-2455-4674-B8DA-717D0420E072}.Release|Durango.Deploy.0 = Release|Win32
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Debug|Durango.ActiveCfg = Debug|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Debug|Durango.Build.0 = Debug|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Debug|Durango.Deploy.0 = Debug|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Profile|Durango.ActiveCfg = Profile|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Profile|Durango.Build.0 = Profile|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Profile|Durango.Deploy.0 = Profile|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Release|Durango.ActiveCfg = Release|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Release|Durango.Build.0 = Release|Durango
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF}.Release|Durango.Deploy.0 = Release|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Debug|Durango.ActiveCfg = Debug|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Debug|Durango.Build.0 = Debug|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Debug|Durango.Deploy.0 = Debug|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Profile|Durango.ActiveCfg = Profile|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Profile|Durango.Build.0 = Profile|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Profile|Durango.Deploy.0 = Profile|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Release|Durango.ActiveCfg = Release|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Release|Durango.Build.0 = Release|Durango
+		{A5AEF06F-1A7B-471A-A656-F349DE717300}.Release|Durango.Deploy.0 = Release|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Debug|Durango.ActiveCfg = Debug|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Debug|Durango.Build.0 = Debug|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Debug|Durango.Deploy.0 = Debug|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Profile|Durango.ActiveCfg = Profile|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Profile|Durango.Build.0 = Profile|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Profile|Durango.Deploy.0 = Profile|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Release|Durango.ActiveCfg = Release|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Release|Durango.Build.0 = Release|Durango
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889}.Release|Durango.Deploy.0 = Release|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Debug|Durango.ActiveCfg = Debug|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Debug|Durango.Build.0 = Debug|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Debug|Durango.Deploy.0 = Debug|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Profile|Durango.ActiveCfg = Profile|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Profile|Durango.Build.0 = Profile|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Profile|Durango.Deploy.0 = Profile|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Release|Durango.ActiveCfg = Release|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Release|Durango.Build.0 = Release|Durango
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1}.Release|Durango.Deploy.0 = Release|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Debug|Durango.ActiveCfg = Debug|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Debug|Durango.Build.0 = Debug|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Debug|Durango.Deploy.0 = Debug|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Profile|Durango.ActiveCfg = Profile|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Profile|Durango.Build.0 = Profile|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Profile|Durango.Deploy.0 = Profile|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Release|Durango.ActiveCfg = Release|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Release|Durango.Build.0 = Release|Durango
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE}.Release|Durango.Deploy.0 = Release|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Debug|Durango.ActiveCfg = Debug|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Debug|Durango.Build.0 = Debug|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Debug|Durango.Deploy.0 = Debug|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Profile|Durango.ActiveCfg = Profile|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Profile|Durango.Build.0 = Profile|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Profile|Durango.Deploy.0 = Profile|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Release|Durango.ActiveCfg = Release|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Release|Durango.Build.0 = Release|Durango
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394}.Release|Durango.Deploy.0 = Release|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Debug|Durango.ActiveCfg = Debug|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Debug|Durango.Build.0 = Debug|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Debug|Durango.Deploy.0 = Debug|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Profile|Durango.ActiveCfg = Profile|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Profile|Durango.Build.0 = Profile|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Profile|Durango.Deploy.0 = Profile|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Release|Durango.ActiveCfg = Release|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Release|Durango.Build.0 = Release|Durango
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0}.Release|Durango.Deploy.0 = Release|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Debug|Durango.ActiveCfg = Debug|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Debug|Durango.Build.0 = Debug|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Debug|Durango.Deploy.0 = Debug|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Profile|Durango.ActiveCfg = Profile|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Profile|Durango.Build.0 = Profile|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Profile|Durango.Deploy.0 = Profile|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Release|Durango.ActiveCfg = Release|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Release|Durango.Build.0 = Release|Durango
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7}.Release|Durango.Deploy.0 = Release|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Debug|Durango.ActiveCfg = Debug|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Debug|Durango.Build.0 = Debug|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Debug|Durango.Deploy.0 = Debug|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Profile|Durango.ActiveCfg = Profile|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Profile|Durango.Build.0 = Profile|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Profile|Durango.Deploy.0 = Profile|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Release|Durango.ActiveCfg = Release|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Release|Durango.Build.0 = Release|Durango
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F}.Release|Durango.Deploy.0 = Release|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Debug|Durango.ActiveCfg = Debug|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Debug|Durango.Build.0 = Debug|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Debug|Durango.Deploy.0 = Debug|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Profile|Durango.ActiveCfg = Profile|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Profile|Durango.Build.0 = Profile|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Profile|Durango.Deploy.0 = Profile|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Release|Durango.ActiveCfg = Release|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Release|Durango.Build.0 = Release|Durango
+		{138807B3-6A12-412A-A82C-9037E833E423}.Release|Durango.Deploy.0 = Release|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Debug|Durango.ActiveCfg = Debug|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Debug|Durango.Build.0 = Debug|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Debug|Durango.Deploy.0 = Debug|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Profile|Durango.ActiveCfg = Profile|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Profile|Durango.Build.0 = Profile|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Profile|Durango.Deploy.0 = Profile|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Release|Durango.ActiveCfg = Release|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Release|Durango.Build.0 = Release|Durango
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C}.Release|Durango.Deploy.0 = Release|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Debug|Durango.ActiveCfg = Debug|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Debug|Durango.Build.0 = Debug|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Debug|Durango.Deploy.0 = Debug|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Profile|Durango.ActiveCfg = Profile|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Profile|Durango.Build.0 = Profile|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Profile|Durango.Deploy.0 = Profile|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Release|Durango.ActiveCfg = Release|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Release|Durango.Build.0 = Release|Durango
+		{D168BDA3-49EB-421A-8104-5409110E3DC1}.Release|Durango.Deploy.0 = Release|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Debug|Durango.ActiveCfg = Debug|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Debug|Durango.Build.0 = Debug|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Debug|Durango.Deploy.0 = Debug|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Profile|Durango.ActiveCfg = Profile|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Profile|Durango.Build.0 = Profile|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Profile|Durango.Deploy.0 = Profile|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Release|Durango.ActiveCfg = Release|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Release|Durango.Build.0 = Release|Durango
+		{C086533A-926D-4F65-9511-BFD86B0D6A73}.Release|Durango.Deploy.0 = Release|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Debug|Durango.ActiveCfg = Debug|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Debug|Durango.Build.0 = Debug|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Debug|Durango.Deploy.0 = Debug|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Profile|Durango.ActiveCfg = Profile|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Profile|Durango.Build.0 = Profile|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Profile|Durango.Deploy.0 = Profile|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Release|Durango.ActiveCfg = Release|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Release|Durango.Build.0 = Release|Durango
+		{50251D60-3290-4937-B688-1BDF60192FC4}.Release|Durango.Deploy.0 = Release|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Debug|Durango.ActiveCfg = Debug|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Debug|Durango.Build.0 = Debug|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Debug|Durango.Deploy.0 = Debug|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Profile|Durango.ActiveCfg = Profile|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Profile|Durango.Build.0 = Profile|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Profile|Durango.Deploy.0 = Profile|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Release|Durango.ActiveCfg = Release|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Release|Durango.Build.0 = Release|Durango
+		{9121F4A7-1622-4080-A33A-787ECE54001C}.Release|Durango.Deploy.0 = Release|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Debug|Durango.ActiveCfg = Debug|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Debug|Durango.Build.0 = Debug|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Debug|Durango.Deploy.0 = Debug|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Profile|Durango.ActiveCfg = Profile|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Profile|Durango.Build.0 = Profile|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Profile|Durango.Deploy.0 = Profile|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Release|Durango.ActiveCfg = Release|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Release|Durango.Build.0 = Release|Durango
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259}.Release|Durango.Deploy.0 = Release|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Debug|Durango.ActiveCfg = Debug|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Debug|Durango.Build.0 = Debug|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Debug|Durango.Deploy.0 = Debug|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Profile|Durango.ActiveCfg = Profile|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Profile|Durango.Build.0 = Profile|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Profile|Durango.Deploy.0 = Profile|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Release|Durango.ActiveCfg = Release|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Release|Durango.Build.0 = Release|Durango
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481}.Release|Durango.Deploy.0 = Release|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Debug|Durango.ActiveCfg = Debug|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Debug|Durango.Build.0 = Debug|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Debug|Durango.Deploy.0 = Debug|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Profile|Durango.ActiveCfg = Profile|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Profile|Durango.Build.0 = Profile|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Profile|Durango.Deploy.0 = Profile|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Release|Durango.ActiveCfg = Release|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Release|Durango.Build.0 = Release|Durango
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B}.Release|Durango.Deploy.0 = Release|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Debug|Durango.ActiveCfg = Debug|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Debug|Durango.Build.0 = Debug|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Debug|Durango.Deploy.0 = Debug|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Profile|Durango.ActiveCfg = Profile|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Profile|Durango.Build.0 = Profile|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Profile|Durango.Deploy.0 = Profile|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Release|Durango.ActiveCfg = Release|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Release|Durango.Build.0 = Release|Durango
+		{ADAD1151-3672-4053-A11F-4D1112007693}.Release|Durango.Deploy.0 = Release|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Debug|Durango.ActiveCfg = Debug|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Debug|Durango.Build.0 = Debug|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Debug|Durango.Deploy.0 = Debug|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Profile|Durango.ActiveCfg = Profile|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Profile|Durango.Build.0 = Profile|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Profile|Durango.Deploy.0 = Profile|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Release|Durango.ActiveCfg = Release|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Release|Durango.Build.0 = Release|Durango
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D}.Release|Durango.Deploy.0 = Release|Durango
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{526C956D-42AC-4F1C-8931-8E3F78A602E1} = {DF35A17C-2F2C-46BC-BD2A-FF7FB902EC43}
+		{E14D00B2-CD4B-4771-926A-457D2D9830B7} = {DF35A17C-2F2C-46BC-BD2A-FF7FB902EC43}
+		{DBD97D95-FD48-4EBE-8575-7417FBED0261} = {DF35A17C-2F2C-46BC-BD2A-FF7FB902EC43}
+		{971A8744-5B6A-44DC-8E61-F16E47AF55F8} = {DF35A17C-2F2C-46BC-BD2A-FF7FB902EC43}
+		{D05261EF-6DEC-4621-B2A4-DD778651DBC4} = {A066924D-9303-4695-BCC2-8A6BC925745A}
+		{3050A82A-CF08-4667-B9EE-22C5F92333F1} = {A066924D-9303-4695-BCC2-8A6BC925745A}
+		{C5C2D8C5-4010-4D33-B4B9-CEAD00C377FE} = {A066924D-9303-4695-BCC2-8A6BC925745A}
+		{8AB83253-5537-4D71-9164-C49DFFB90AFD} = {D05261EF-6DEC-4621-B2A4-DD778651DBC4}
+		{05DAC34C-E10D-49BB-8702-235E1939D6E9} = {D05261EF-6DEC-4621-B2A4-DD778651DBC4}
+		{48BCF14A-4D49-4AE8-8B89-EDEC646CE288} = {D05261EF-6DEC-4621-B2A4-DD778651DBC4}
+		{D7824C71-2455-4674-B8DA-717D0420E072} = {D05261EF-6DEC-4621-B2A4-DD778651DBC4}
+		{A2EA91A7-3F65-4548-A418-BEF1090A9FDF} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{A5AEF06F-1A7B-471A-A656-F349DE717300} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{2A2BCEF8-4201-497E-AB58-019E1F46A889} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{6F67B6E6-49A1-42C5-A394-06C483ACA8B1} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{057D30CD-E09B-4E5A-86CE-33084D249ACE} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{FDEC2626-B64D-4E2B-B44F-234C1A802394} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{90F8D510-83D4-4030-8D70-A75D0AFA55C0} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{30F23A69-9C4D-4508-B7E3-3DE8C4C6ECB7} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{0FC0A172-E837-4375-B92F-6D8E5D26294F} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{138807B3-6A12-412A-A82C-9037E833E423} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{AF7FC507-B0AF-4978-8163-1347C73AA81C} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{D168BDA3-49EB-421A-8104-5409110E3DC1} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{C086533A-926D-4F65-9511-BFD86B0D6A73} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{50251D60-3290-4937-B688-1BDF60192FC4} = {FBF22261-DF4B-40D6-9163-403F67D25257}
+		{9121F4A7-1622-4080-A33A-787ECE54001C} = {3050A82A-CF08-4667-B9EE-22C5F92333F1}
+		{CC2F83FF-BA49-4DFE-86B9-058116BBD259} = {3050A82A-CF08-4667-B9EE-22C5F92333F1}
+		{1C256A63-C968-4D11-A23E-0CFB1D67E481} = {3050A82A-CF08-4667-B9EE-22C5F92333F1}
+		{3F2D6566-4A71-47F3-9789-B0335F79D98B} = {C5C2D8C5-4010-4D33-B4B9-CEAD00C377FE}
+		{ADAD1151-3672-4053-A11F-4D1112007693} = {C5C2D8C5-4010-4D33-B4B9-CEAD00C377FE}
+		{BA9036C7-C53A-4289-B701-452C0CE0ED2D} = {C5C2D8C5-4010-4D33-B4B9-CEAD00C377FE}
+	EndGlobalSection
+EndGlobal

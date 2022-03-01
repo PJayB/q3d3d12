@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 #include "g_local.h"
+#include "game.shared.h"
 
 level_locals_t	level;
 
@@ -194,47 +195,27 @@ void CheckExitRules( void );
 
 /*
 ================
-vmMain
+vmMainA
 
 This is the only way control passes into the module.
 This must be the very first function compiled into the .q3vm file
 ================
 */
-int vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  ) {
-	switch ( command ) {
-	case GAME_INIT:
-		G_InitGame( arg0, arg1, arg2 );
-		return 0;
-	case GAME_SHUTDOWN:
-		G_ShutdownGame( arg0 );
-		return 0;
-	case GAME_CLIENT_CONNECT:
-		return (int)ClientConnect( arg0, arg1, arg2 );
-	case GAME_CLIENT_THINK:
-		ClientThink( arg0 );
-		return 0;
-	case GAME_CLIENT_USERINFO_CHANGED:
-		ClientUserinfoChanged( arg0 );
-		return 0;
-	case GAME_CLIENT_DISCONNECT:
-		ClientDisconnect( arg0 );
-		return 0;
-	case GAME_CLIENT_BEGIN:
-		ClientBegin( arg0 );
-		return 0;
-	case GAME_CLIENT_COMMAND:
-		ClientCommand( arg0 );
-		return 0;
-	case GAME_RUN_FRAME:
-		G_RunFrame( arg0 );
-		return 0;
-	case GAME_CONSOLE_COMMAND:
-		return ConsoleCommand();
-	case BOTAI_START_FRAME:
-		return BotAIStartFrame( arg0 );
-	}
+// @pjb: auto-generated vm syscalls
+#include "game.jumpdefs.h"
 
-	return -1;
+// @pjb: auto-generated vm syscall indices
+static const vmCall_t gameJumpTable[] = {
+#include "game.jumptable.h"
+};
+
+size_t vmMainA( vmArg_t* args ) {
+	vmCall_t func = gameJumpTable[args[0].i];
+	if (args[0].i > _countof(gameJumpTable)) {
+		trap_Error( va("Out-of-bounds ABI call to VM_CallA: 0x%X\n", args[0].i) );
+		return (size_t)-1;
+	}
+	return func(args+1);
 }
 
 
@@ -539,7 +520,7 @@ void G_ShutdownGame( int restart ) {
 #ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and bg_*.c can link
 
-void QDECL Com_Error ( int level, const char *error, ... ) {
+void QDECL Com_Error ( int errlevel, const char *error, ... ) {
 	va_list		argptr;
 	char		text[1024];
 
@@ -1100,7 +1081,7 @@ void QDECL G_LogPrintf( const char *fmt, ... ) {
 		return;
 	}
 
-	trap_FS_Write( string, strlen( string ), level.logFile );
+	trap_FS_Write( string, (int) strlen( string ), level.logFile );
 }
 
 /*

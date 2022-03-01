@@ -1,0 +1,7 @@
+Win32
+x64
+*.pdb
+*.config
+*.vshost.*
+Release
+Debug

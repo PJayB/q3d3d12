@@ -75,7 +75,7 @@ static void Options_Event( void* ptr, int event ) {
 		UI_GraphicsOptionsMenu();
 		break;
 
-	case ID_DISPLAY:
+    case ID_DISPLAY:
 		UI_DisplayOptionsMenu();
 		break;
 
@@ -153,17 +153,20 @@ void Options_MenuInit( void ) {
 	s_options.framer.height  	   = 334;
 
 	y = 168;
-	s_options.graphics.generic.type		= MTYPE_PTEXT;
-	s_options.graphics.generic.flags	= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
-	s_options.graphics.generic.callback	= Options_Event;
-	s_options.graphics.generic.id		= ID_GRAPHICS;
-	s_options.graphics.generic.x		= 320;
-	s_options.graphics.generic.y		= y;
-	s_options.graphics.string			= "GRAPHICS";
-	s_options.graphics.color			= color_red;
-	s_options.graphics.style			= UI_CENTER;
 
-	y += VERTICAL_SPACING;
+    if (!UI_IsFixedGraphicsHardware()) {
+	    s_options.graphics.generic.type		= MTYPE_PTEXT;
+	    s_options.graphics.generic.flags	= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
+	    s_options.graphics.generic.callback	= Options_Event;
+	    s_options.graphics.generic.id		= ID_GRAPHICS;
+	    s_options.graphics.generic.x		= 320;
+	    s_options.graphics.generic.y		= y;
+	    s_options.graphics.string			= "GRAPHICS";
+	    s_options.graphics.color			= color_red;
+	    s_options.graphics.style			= UI_CENTER;
+	    y += VERTICAL_SPACING;
+    }
+
 	s_options.display.generic.type		= MTYPE_PTEXT;
 	s_options.display.generic.flags		= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
 	s_options.display.generic.callback	= Options_Event;
@@ -210,7 +213,11 @@ void Options_MenuInit( void ) {
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.banner );
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.framel );
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.framer );
-	Menu_AddItem( &s_options.menu, ( void * ) &s_options.graphics );
+
+    if (!UI_IsFixedGraphicsHardware()) {
+    	Menu_AddItem( &s_options.menu, ( void * ) &s_options.graphics );
+    }
+
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.display );
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.sound );
 	Menu_AddItem( &s_options.menu, ( void * ) &s_options.network );

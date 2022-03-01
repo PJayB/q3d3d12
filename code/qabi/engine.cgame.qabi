@@ -1,0 +1,14 @@
+#include "engine.common.qabi"
+#include "engine.client.qabi"
+
+abi (trap_AddCommand) void CL_AddCgameCommand( const char *cmdName );
+abi (trap_SendClientCommand) void CL_AddReliableCommand( const char *s );
+abi (trap_GetVideoConfig) void CL_GetVideoConfig( vdconfig_t *vdconfig );
+abi (trap_GetGameState) void CL_GetGameState( gameState_t *gamestate );
+abi (trap_GetCurrentSnapshotNumber) void CL_GetCurrentSnapshotNumber( int *snapshotNumber, int *serverTime );
+abi (trap_GetSnapshot) qboolean CL_GetSnapshot( int snapshotNumber, snapshot_t *snapshot );
+abi (trap_GetServerCommand) qboolean CL_GetServerCommand( int serverCommandNumber );
+abi (trap_GetCurrentCmdNumber) int CL_GetCurrentCmdNumber( void );
+abi (trap_GetUserCmd) qboolean CL_GetUserCmd( int cmdNumber, usercmd_t *ucmd );
+abi (trap_SetUserCmdValue) void CL_SetUserCmdValue( int stateValue, float sensitivityScale );
+abi (trap_CM_LoadMap) void CL_CM_LoadMap( const char *mapname );

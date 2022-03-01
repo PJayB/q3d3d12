@@ -402,7 +402,7 @@ void idSplineList::parse(const char *(*text)  ) {
 
 			Com_UngetToken();
 			idStr key = Com_ParseOnLine(text);
-			const char *token = Com_Parse(text);
+			// @pjb: ?? const char *token = Com_Parse(text);
 			if (Q_stricmp(key.c_str(), "granularity") == 0) {
 				granularity = atof(token);
 			} else if (Q_stricmp(key.c_str(), "name") == 0) {

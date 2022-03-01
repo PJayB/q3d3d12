@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|Win32">
+			<Configuration>Debug</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Profile|Win32">
+			<Configuration>Profile</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|Win32">
+			<Configuration>Release</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{05DAC34C-E10D-49BB-8702-235E1939D6E9}</ProjectGuid>
+		<DefaultLanguage>en-US</DefaultLanguage>
+		<Keyword>MakeFileProj</Keyword>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+		<ConfigurationType>Makefile</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'" Label="Configuration">
+		<ConfigurationType>Makefile</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+		<ConfigurationType>Makefile</ConfigurationType>
+		<PlatformToolset>v110</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup>
+		<_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<NMakeBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat build "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>call $(SolutionDir)..\tools\genqabis.bat clean "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat rebuild "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeReBuildCommandLine>
+		<TargetName>game_qabi</TargetName>
+		<OutDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</OutDir>
+		<IntDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<NMakeBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat build "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>call $(SolutionDir)..\tools\genqabis.bat clean "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat rebuild "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeReBuildCommandLine>
+		<TargetName>game_qabi</TargetName>
+		<OutDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</OutDir>
+		<IntDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<NMakeBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat build "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>call $(SolutionDir)..\tools\genqabis.bat clean "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>call $(SolutionDir)..\tools\genqabis.bat rebuild "$(ProjectDir)..\..\code\qabi\game.qabi" "$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\." /vm gvm</NMakeReBuildCommandLine>
+		<TargetName>game_qabi</TargetName>
+		<OutDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</OutDir>
+		<IntDir>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.</IntDir>
+	</PropertyGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\qabi\game.qabi">
+		</Text>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets" />
+</Project>

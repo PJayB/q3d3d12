@@ -51,7 +51,7 @@ static int		allocPoint, outOfMemory;
 UI_Alloc
 ===============
 */
-void *UI_Alloc( int size ) {
+void *UI_Alloc( size_t size ) {
 	char	*p;
 
 	if ( allocPoint + size > POOLSIZE ) {
@@ -191,7 +191,7 @@ static void UI_LoadArenas( void ) {
 	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
+		dirlen = (int) strlen(dirptr);
 		strcpy(filename, "scripts/");
 		strcat(filename, dirptr);
 		UI_LoadArenasFromFile(filename);
@@ -378,7 +378,7 @@ static void UI_LoadBots( void ) {
 	numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, 1024 );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
+		dirlen = (int) strlen(dirptr);
 		strcpy(filename, "scripts/");
 		strcat(filename, dirptr);
 		UI_LoadBotsFromFile(filename);

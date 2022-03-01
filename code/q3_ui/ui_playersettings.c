@@ -360,6 +360,7 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.menu.key        = PlayerSettings_MenuKey;
 	s_playersettings.menu.wrapAround = qtrue;
 	s_playersettings.menu.fullscreen = qtrue;
+    s_playersettings.menu.custom_nav  = qtrue;
 
 	s_playersettings.banner.generic.type  = MTYPE_BTEXT;
 	s_playersettings.banner.generic.x     = 320;
@@ -396,6 +397,7 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.name.generic.top			= y - 8;
 	s_playersettings.name.generic.right			= 192 + 200;
 	s_playersettings.name.generic.bottom		= y + 2 * PROP_HEIGHT;
+    s_playersettings.name.generic.navDown       = &s_playersettings.handicap;
 
 	y += 3 * PROP_HEIGHT;
 	s_playersettings.handicap.generic.type		= MTYPE_SPINCONTROL;
@@ -409,6 +411,8 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.handicap.generic.right		= 192 + 200;
 	s_playersettings.handicap.generic.bottom	= y + 2 * PROP_HEIGHT;
 	s_playersettings.handicap.numitems			= 20;
+    s_playersettings.handicap.generic.navUp     = &s_playersettings.name;
+    s_playersettings.handicap.generic.navDown   = &s_playersettings.effects;
 
 	y += 3 * PROP_HEIGHT;
 	s_playersettings.effects.generic.type		= MTYPE_SPINCONTROL;
@@ -422,6 +426,8 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.effects.generic.right		= 192 + 200;
 	s_playersettings.effects.generic.bottom		= y + 2* PROP_HEIGHT;
 	s_playersettings.effects.numitems			= 7;
+    s_playersettings.effects.generic.navUp      = &s_playersettings.handicap;
+    s_playersettings.effects.generic.navDown    = &s_playersettings.model;
 
 	s_playersettings.model.generic.type			= MTYPE_BITMAP;
 	s_playersettings.model.generic.name			= ART_MODEL0;
@@ -433,6 +439,8 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.model.width				= 128;
 	s_playersettings.model.height				= 64;
 	s_playersettings.model.focuspic				= ART_MODEL1;
+    s_playersettings.model.generic.navUp        = &s_playersettings.effects;
+    s_playersettings.model.generic.navLeft      = &s_playersettings.back;
 
 	s_playersettings.player.generic.type		= MTYPE_BITMAP;
 	s_playersettings.player.generic.flags		= QMF_INACTIVE;
@@ -452,6 +460,8 @@ static void PlayerSettings_MenuInit( void ) {
 	s_playersettings.back.width					= 128;
 	s_playersettings.back.height				= 64;
 	s_playersettings.back.focuspic				= ART_BACK1;
+    s_playersettings.back.generic.navUp         = &s_playersettings.effects;
+    s_playersettings.back.generic.navRight      = &s_playersettings.model;
 
 	s_playersettings.item_null.generic.type		= MTYPE_BITMAP;
 	s_playersettings.item_null.generic.flags	= QMF_LEFT_JUSTIFY|QMF_MOUSEONLY|QMF_SILENT;

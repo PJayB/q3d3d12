@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Pixel Shaders">
+			<UniqueIdentifier>{044203E0-3252-4F71-B220-428A584525C4}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Pixel Shaders\4.0_level_9_3">
+			<UniqueIdentifier>{2A896A62-53C6-4D7B-9C8E-18CD7D7A9CA5}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Pixel Shaders\4.0_level_9_3">
+			<UniqueIdentifier>{3AF5F9E7-CC8F-4A12-A05F-367C60821816}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Pixel Shaders\5.0">
+			<UniqueIdentifier>{E9F85EA0-D3CE-4574-AB0D-B544A4868D0A}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Pixel Shaders\5.0">
+			<UniqueIdentifier>{84FBE923-C456-4C80-8435-32815435165C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Pixel Shaders\5.0">
+			<UniqueIdentifier>{70161B2E-5E6E-48B6-87E4-7D516FD6AF6E}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders">
+			<UniqueIdentifier>{C7012F98-3E89-46FA-8956-EEAC89154CC7}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders\4.0_level_9_3">
+			<UniqueIdentifier>{41F61662-4AEF-4223-B985-C0C58E714913}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders\4.0_level_9_3">
+			<UniqueIdentifier>{0BC4A506-A609-418C-B8D7-2023FE979FCE}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders\5.0">
+			<UniqueIdentifier>{84DC3FF2-4CE3-4D5E-9F07-AC24FCF8DAF8}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders\5.0">
+			<UniqueIdentifier>{C6F6AB2E-65E3-4A8C-9100-A3E3905E625F}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Vertex Shaders\5.0">
+			<UniqueIdentifier>{D08D8549-592E-41D3-BB97-B0093BEA92FC}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Compute Shaders">
+			<UniqueIdentifier>{A4542FBD-7CDC-44FA-8853-419D7D9157A3}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Compute Shaders\xbo">
+			<UniqueIdentifier>{AFAF838E-10FD-448A-AD14-BFEB08C9AC6C}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="Header Files">
+			<UniqueIdentifier>{FB53EB77-CFC8-48CC-8877-8436C150795D}</UniqueIdentifier>
+			<Extensions>h</Extensions>
+		</Filter>
+		<Filter Include="Header Files\5.0">
+			<UniqueIdentifier>{E2E45026-FFF0-4F22-A4A0-E54CCC4EA859}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\hlsl\pscommon.h">
+			<Filter>Header Files</Filter>
+		</Text>
+		<Text Include="..\..\code\hlsl\vscommon.h">
+			<Filter>Header Files</Filter>
+		</Text>
+		<Text Include="..\..\code\hlsl\5.0\pslight.h">
+			<Filter>Header Files\5.0</Filter>
+		</Text>
+	</ItemGroup>
+	<ItemGroup>
+		<FxCompile Include="..\..\code\hlsl\depth_ps.hlsl">
+			<Filter>Pixel Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\fsq_ps.hlsl">
+			<Filter>Pixel Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\genericunlitst_ps.hlsl">
+			<Filter>Pixel Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\skybox_ps.hlsl">
+			<Filter>Pixel Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\4.0_level_9_3\genericmt_ps.hlsl">
+			<Filter>Pixel Shaders\4.0_level_9_3</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\4.0_level_9_3\genericst_ps.hlsl">
+			<Filter>Pixel Shaders\4.0_level_9_3</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\dlight_ps.hlsl">
+			<Filter>Pixel Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\genericmt_ps.hlsl">
+			<Filter>Pixel Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\genericst_ps.hlsl">
+			<Filter>Pixel Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\depth_vs.hlsl">
+			<Filter>Vertex Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\fsq_vs.hlsl">
+			<Filter>Vertex Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\skybox_vs.hlsl">
+			<Filter>Vertex Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\4.0_level_9_3\genericmt_vs.hlsl">
+			<Filter>Vertex Shaders\4.0_level_9_3</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\4.0_level_9_3\genericst_vs.hlsl">
+			<Filter>Vertex Shaders\4.0_level_9_3</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\dlight_vs.hlsl">
+			<Filter>Vertex Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\genericmt_vs.hlsl">
+			<Filter>Vertex Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\5.0\genericst_vs.hlsl">
+			<Filter>Vertex Shaders\5.0</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\blur_cs.hlsl">
+			<Filter>Compute Shaders</Filter>
+		</FxCompile>
+		<FxCompile Include="..\..\code\hlsl\xbo\eqaa_resolve_cs.hlsl">
+			<Filter>Compute Shaders\xbo</Filter>
+		</FxCompile>
+	</ItemGroup>
+</Project>

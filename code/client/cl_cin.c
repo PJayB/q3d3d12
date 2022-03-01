@@ -52,7 +52,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define MAX_VIDEO_HANDLES	16
 
-extern glconfig_t glConfig;
+extern vdconfig_t vdConfig;
 extern	int		s_paintedtime;
 extern	int		s_rawend;
 
@@ -83,7 +83,7 @@ typedef struct {
 	byte				file[65536];
 	short				sqrTable[256];
 
-	unsigned int		mcomp[256];
+	int		            mcomp[256];
 	byte				*qStatus[2][32768];
 
 	long				oldXOff, oldYOff, oldysize, oldxsize;
@@ -139,6 +139,8 @@ static int				CL_handle = -1;
 extern int				s_soundtime;		// sample PAIRS
 extern int   			s_paintedtime; 		// sample PAIRS
 
+// @pjb: hack to preserve frames across threads
+static byte             cinScratchBuf[MAX_VIDEO_HANDLES * 256 * 256 * 4 * 2];
 
 void CIN_CloseAllVideos(void) {
 	int		i;
@@ -990,7 +992,7 @@ static void setupQuad( long xOff, long yOff )
 	long numQuadCels, i,x,y;
 	byte *temp;
 
-	if (xOff == cin.oldXOff && yOff == cin.oldYOff && cinTable[currentHandle].ysize == cin.oldysize && cinTable[currentHandle].xsize == cin.oldxsize) {
+	if (xOff == cin.oldXOff && yOff == cin.oldYOff && cinTable[currentHandle].ysize == (unsigned) cin.oldysize && cinTable[currentHandle].xsize == (unsigned) cin.oldxsize) {
 		return;
 	}
 
@@ -1050,14 +1052,14 @@ static void readQuadInfo( byte *qData )
 	cinTable[currentHandle].VQ0 = cinTable[currentHandle].VQNormal;
 	cinTable[currentHandle].VQ1 = cinTable[currentHandle].VQBuffer;
 
-	cinTable[currentHandle].t[0] = (0 - (unsigned int)cin.linbuf)+(unsigned int)cin.linbuf+cinTable[currentHandle].screenDelta;
-	cinTable[currentHandle].t[1] = (0 - ((unsigned int)cin.linbuf + cinTable[currentHandle].screenDelta))+(unsigned int)cin.linbuf;
+	cinTable[currentHandle].t[0] = (long)((0 - (size_t)cin.linbuf)+(size_t)cin.linbuf+cinTable[currentHandle].screenDelta);
+	cinTable[currentHandle].t[1] = (long)((0 - ((size_t)cin.linbuf + cinTable[currentHandle].screenDelta))+(size_t)cin.linbuf);
 
         cinTable[currentHandle].drawX = cinTable[currentHandle].CIN_WIDTH;
         cinTable[currentHandle].drawY = cinTable[currentHandle].CIN_HEIGHT;
         
 	// rage pro is very slow at 512 wide textures, voodoo can't do it at all
-	if ( glConfig.hardwareType == GLHW_RAGEPRO || glConfig.maxTextureSize <= 256) {
+	if ( vdConfig.maxTextureSize <= 256) {
                 if (cinTable[currentHandle].drawX>256) {
                         cinTable[currentHandle].drawX = 256;
                 }
@@ -1447,7 +1449,7 @@ e_status CIN_RunCinematic (int handle)
 		&& (cinTable[currentHandle].status == FMV_PLAY) ) 
 	{
 		RoQInterrupt();
-		if (start != cinTable[currentHandle].startTime) {
+		if (start != (int) cinTable[currentHandle].startTime) {
 			// we need to use CL_ScaledMilliseconds because of the smp mode calls from the renderer
 		  cinTable[currentHandle].tfps = ((((CL_ScaledMilliseconds()*com_timescale->value)
 							  - cinTable[currentHandle].startTime)*3)/100);
@@ -1529,7 +1531,7 @@ int CIN_PlayCinematic( const char *arg, int x, int y, int w, int h, int systemBi
 	if (cinTable[currentHandle].alterGameState) {
 		// close the menu
 		if ( uivm ) {
-			VM_Call( uivm, UI_SET_ACTIVE_MENU, UIMENU_NONE );
+            UIVM_SetActiveMenu( UIMENU_NONE );
 		}
 	} else {
 		cinTable[currentHandle].playonwalls = cl_inGameVideo->integer;
@@ -1614,7 +1616,8 @@ void CIN_DrawCinematic (int handle) {
                 }
                 
 		buf3 = (int*)buf;
-		buf2 = Hunk_AllocateTempMemory( 256*256*4 );
+		//buf2 = Hunk_AllocateTempMemory( 256*256*4 );
+        buf2 = (int*)(cinScratchBuf + 256 * 256 * 4 * handle); // @pjb: breaks in SMP
                 if (xm==2 && ym==2) {
                     byte *bc2, *bc3;
                     int	ic, iiy;
@@ -1652,13 +1655,13 @@ void CIN_DrawCinematic (int handle) {
                             }
                     }
                 }
-		re.DrawStretchRaw( x, y, w, h, 256, 256, (byte *)buf2, handle, qtrue);
+		RE_StretchRaw( x, y, w, h, 256, 256, (byte *)buf2, handle, qtrue);
 		cinTable[handle].dirty = qfalse;
-		Hunk_FreeTempMemory(buf2);
+		//Hunk_FreeTempMemory(buf2);
 		return;
 	}
 
-	re.DrawStretchRaw( x, y, w, h, cinTable[handle].drawX, cinTable[handle].drawY, buf, handle, cinTable[handle].dirty);
+	RE_StretchRaw( x, y, w, h, cinTable[handle].drawX, cinTable[handle].drawY, buf, handle, cinTable[handle].dirty);
 	cinTable[handle].dirty = qfalse;
 }
 
@@ -1731,7 +1734,7 @@ void CIN_UploadCinematic(int handle) {
 				}
 			}
 		}
-		re.UploadCinematic( 256, 256, 256, 256, cinTable[handle].buf, handle, cinTable[handle].dirty);
+		RE_UploadCinematic( 256, 256, 256, 256, cinTable[handle].buf, handle, cinTable[handle].dirty);
 		if (cl_inGameVideo->integer == 0 && cinTable[handle].playonwalls == 1) {
 			cinTable[handle].playonwalls--;
 		}

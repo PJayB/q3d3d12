@@ -1,0 +1,15 @@
+#include "common.qabi"
+
+typedef int uiMenuCommand_t;
+
+abi (UIVM_GetApiVersion) int UI_GetApiVersion( void );
+abi (UIVM_Init) void UI_Init( qboolean reserved );
+abi (UIVM_Shutdown) void UI_Shutdown( void );
+abi (UIVM_KeyEvent) void UI_KeyEvent( int userIndex, int key, int down );
+abi (UIVM_MouseEvent) void UI_MouseEvent( int userIndex, int dx, int dy );
+abi (UIVM_GamepadEvent) void UI_GamepadEvent( int userIndex, int axis, int value );
+abi (UIVM_Refresh) void UI_Refresh( int time );
+abi (UIVM_IsFullscreen) qboolean UI_IsFullscreen( void );
+abi (UIVM_SetActiveMenu) void UI_SetActiveMenu( uiMenuCommand_t menu );
+abi (UIVM_ConsoleCommand) qboolean UI_ConsoleCommand( int realTime );
+abi (UIVM_DrawConnectScreen) void UI_DrawConnectScreen( qboolean overlay );

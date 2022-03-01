@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClCompile Include="..\..\code\renderer\tr_animation.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_backend.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_bsp.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_cmds.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_curve.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_flares.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_font.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_image.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_init.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_layer.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_light.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_main.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_marks.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_mesh.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_model.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_noise.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_scene.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_shade.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_shader.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_shade_calc.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_sky.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_smp.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_state.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_surface.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_world.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\renderer\tr_dds.cpp">
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\renderer\tr_layer.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\renderer\tr_local.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\renderer\tr_public.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\renderer\tr_state.h">
+		</ClInclude>
+	</ItemGroup>
+</Project>

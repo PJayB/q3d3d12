@@ -111,7 +111,7 @@ typedef enum {
 
 
 
-typedef int	vmptr_t;
+typedef size_t	vmptr_t;
 
 typedef struct vmSymbol_s {
 	struct vmSymbol_s	*next;
@@ -127,7 +127,7 @@ struct vm_s {
     // DO NOT MOVE OR CHANGE THESE WITHOUT CHANGING THE VM_OFFSET_* DEFINES
     // USED BY THE ASM CODE
     int			programStack;		// the vm may be recursively entered
-    int			(*systemCall)( int *parms );
+    size_t		(*systemCall)( vmArg_t *parms );
 
 	//------------------------------------
    
@@ -135,7 +135,7 @@ struct vm_s {
 
 	// for dynamic linked modules
 	void		*dllHandle;
-	int			(QDECL *entryPoint)( int callNum, ... );
+	int     	(QDECL *entryPoint)( vmArg_t* args );
 
 	// for interpreted modules
 	qboolean	currentlyInterpreting;

@@ -68,6 +68,7 @@ typedef struct {
 	int			samplebits;
 	int			speed;
 	byte		*buffer;
+    qboolean    manybuffered;           // @pjb: buffer is double+ buffered; always write to beginning
 } dma_t;
 
 #define START_SAMPLE_IMMEDIATE	0x7fffffff
@@ -133,9 +134,9 @@ int		SNDDMA_GetDMAPos(void);
 // shutdown the DMA xfer.
 void	SNDDMA_Shutdown(void);
 
-void	SNDDMA_BeginPainting (void);
+void	SNDDMA_BeginPainting ( int reserve );
 
-void	SNDDMA_Submit(void);
+void	SNDDMA_Submit( int offset, int length );
 
 //====================================================================
 

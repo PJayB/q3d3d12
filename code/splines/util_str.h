@@ -178,7 +178,7 @@ inline idStr::idStr
 
 	if ( text )
 		{
-      len = strlen( text );
+      len = (int) strlen( text );
 		EnsureAlloced ( len + 1 );
 		strcpy( m_data->data, text );
       m_data->len = len;
@@ -262,7 +262,7 @@ inline idStr::idStr
    int len;
 
    sprintf( text, "%.3f", num );
-   len = strlen( text );
+   len = (int) strlen( text );
    EnsureAlloced( len + 1 );
    strcpy( m_data->data, text );
    m_data->len = len;
@@ -278,7 +278,7 @@ inline idStr::idStr
    int len;
 
    sprintf( text, "%d", num );
-   len = strlen( text );
+   len = (int) strlen( text );
    EnsureAlloced( len + 1 );
    strcpy( m_data->data, text );
    m_data->len = len;
@@ -294,7 +294,7 @@ inline idStr::idStr
    int len;
 
    sprintf( text, "%u", num );
-   len = strlen( text );
+   len = (int) strlen( text );
    EnsureAlloced( len + 1 );
    strcpy( m_data->data, text );
    m_data->len = len;
@@ -329,7 +329,7 @@ inline void idStr::append
 
 	if ( text )
 		{
-		len = length() + strlen( text );
+		len = length() + (int) strlen( text );
 		EnsureAlloced( len + 1 );
 
       strcat( m_data->data, text );
@@ -436,7 +436,7 @@ inline void idStr::operator=
 
    if ( !m_data )
       {
-      len = strlen ( text );
+      len = (int) strlen ( text );
       EnsureAlloced( len + 1, false );
       strcpy ( m_data->data, text );
       m_data->len = len;
@@ -456,8 +456,8 @@ inline void idStr::operator=
       // Great, we're aliasing.  We're copying from inside ourselves.
       // This means that I don't have to ensure that anything is alloced,
       // though I'll assert just in case.
-      int diff = text - m_data->data;
-      int i;
+      size_t diff = text - m_data->data;
+      size_t i;
 
       assert ( strlen ( text ) < (unsigned) m_data->len );
       
@@ -468,12 +468,12 @@ inline void idStr::operator=
 
       m_data->data[i] = 0;
 
-      m_data->len -= diff;
+      m_data->len -= (int) diff;
 
       return;
       }
 
-	len = strlen( text );
+	len = (int) strlen( text );
    EnsureAlloced ( len + 1, false );
 	strcpy( m_data->data, text );
    m_data->len = len;

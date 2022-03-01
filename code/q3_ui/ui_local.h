@@ -60,6 +60,9 @@ extern vmCvar_t	ui_spAwards;
 extern vmCvar_t	ui_spVideos;
 extern vmCvar_t	ui_spSkill;
 
+// @pjb: thumbstick sensitivity when navigating
+extern vmCvar_t	ui_thumbstickThreshold;
+
 extern vmCvar_t	ui_spSelection;
 
 extern vmCvar_t	ui_browserMaster;
@@ -146,6 +149,15 @@ extern vmCvar_t	ui_cdkeychecked;
 #define QM_LOSTFOCUS			2
 #define QM_ACTIVATED			3
 
+// @pjb: navigation direction
+typedef enum 
+{
+    QNAV_LEFT,
+    QNAV_RIGHT,
+    QNAV_UP,
+    QNAV_DOWN
+} QNAV;
+
 typedef struct _tag_menuframework
 {
 	int	cursor;
@@ -156,10 +168,12 @@ typedef struct _tag_menuframework
 
 	void (*draw) (void);
 	sfxHandle_t (*key) (int key);
+    sfxHandle_t (*userKey) (int key, int userIndex);
 
 	qboolean	wrapAround;
 	qboolean	fullscreen;
 	qboolean	showlogo;
+    qboolean    custom_nav; // @pjb: uses normal nav if this is qfalse
 } menuframework_s;
 
 typedef struct
@@ -179,6 +193,11 @@ typedef struct
 	void (*callback)( void *self, int event );
 	void (*statusbar)( void *self );
 	void (*ownerdraw)( void *self );
+
+    void* navLeft;
+    void* navRight;
+    void* navUp;
+    void* navDown;
 } menucommon_s;
 
 typedef struct {
@@ -210,8 +229,14 @@ typedef struct
 {
 	menucommon_s generic;
 
+    // @pjb: this indicates the current cursor
+    int highlight;
+    int oldHighlight;
+
+    // @pjb: this now means the selected item
 	int	oldvalue;
 	int curvalue;
+
 	int	numitems;
 	int	top;
 		
@@ -221,6 +246,9 @@ typedef struct
 	int height;
 	int	columns;
 	int	seperation;
+
+    // @pjb: this means that the list differentiates between a cursor highlight and a selection
+    qboolean navigable;
 } menulist_s;
 
 typedef struct
@@ -254,10 +282,13 @@ typedef struct
 	float*			color;
 } menutext_s;
 
+// @pjb: navigation callback
+typedef menucommon_s* (* QNav_Callback)( menuframework_s *, menucommon_s*, QNAV );
+
 extern void			Menu_Cache( void );
 extern void			Menu_Focus( menucommon_s *m );
 extern void			Menu_AddItem( menuframework_s *menu, void *item );
-extern void			Menu_AdjustCursor( menuframework_s *menu, int dir );
+extern void			Menu_AdjustCursor( menuframework_s *menu, QNAV dir );
 extern void			Menu_Draw( menuframework_s *menu );
 extern void			*Menu_ItemAtCursor( menuframework_s *m );
 extern sfxHandle_t	Menu_ActivateItem( menuframework_s *s, menucommon_s* item );
@@ -309,6 +340,11 @@ extern void			MField_Draw( mfield_t *edit, int x, int y, int style, vec4_t color
 extern void			MenuField_Init( menufield_s* m );
 extern void			MenuField_Draw( menufield_s *f );
 extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
+
+//
+// ui_start.c
+//
+extern void UI_StartScreen(void);
 
 //
 // ui_menu.c
@@ -530,12 +566,16 @@ qboolean UI_RegisterClientModelname( playerInfo_t *pi, const char *modelSkinName
 typedef struct {
 	int					frametime;
 	int					realtime;
-	int					cursorx;
-	int					cursory;
+	int					nativecursorx; // @pjb: cursor position at native res
+	int					nativecursory; // @pjb: cursor position at native res
+	int					cursorx; // @pjb: cursor position inside the 640x480 virtual ui space
+	int					cursory; // @pjb: cursor position inside the 640x480 virtual ui space
+    int                 lthumbstickX; // @pjb: current thumbstick horizontal position
+    int                 lthumbstickY; // @pjb: current thumbstick vertical position
 	int					menusp;
 	menuframework_s*	activemenu;
 	menuframework_s*	stack[MAX_MENUDEPTH];
-	glconfig_t			glconfig;
+	vdconfig_t			vdconfig;
 	qboolean			debug;
 	qhandle_t			whiteShader;
 	qhandle_t			menuBackShader;
@@ -553,14 +593,16 @@ typedef struct {
 	qboolean			firstdraw;
 } uiStatic_t;
 
-extern void			UI_Init( void );
+extern void			UI_Init( qboolean );
 extern void			UI_Shutdown( void );
-extern void			UI_KeyEvent( int key, int down );
-extern void			UI_MouseEvent( int dx, int dy );
+extern void			UI_KeyEvent( int userIndex, int key, int down );
+extern void			UI_MouseEvent( int userIndex, int dx, int dy );
+extern void			UI_GamepadEvent( int userIndex, int dx, int dy ); // @pjb: track thumbsticks for UI nav
 extern void			UI_Refresh( int realtime );
 extern qboolean		UI_ConsoleCommand( int realTime );
 extern float		UI_ClampCvar( float min, float max, float value );
 extern void			UI_DrawNamedPic( float x, float y, float width, float height, const char *picname );
+extern void			UI_DrawHandlePicNative( float x, float y, float w, float h, qhandle_t hShader );  // @pjb: draws at native res, not 640x480
 extern void			UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ); 
 extern void			UI_FillRect( float x, float y, float width, float height, const float *color );
 extern void			UI_DrawRect( float x, float y, float width, float height, const float *color );
@@ -663,7 +705,7 @@ int				trap_Key_GetCatcher( void );
 void			trap_Key_SetCatcher( int catcher );
 void			trap_GetClipboardData( char *buf, int bufsize );
 void			trap_GetClientState( uiClientState_t *state );
-void			trap_GetGlconfig( glconfig_t *glconfig );
+void			trap_GetVideoConfig( vdconfig_t *vdconfig );
 int				trap_GetConfigString( int index, char* buff, int buffsize );
 int				trap_LAN_GetServerCount( int source );
 void			trap_LAN_GetServerAddressString( int source, int n, char *buf, int buflen );
@@ -680,6 +722,26 @@ void			trap_SetCDKey( char *buf );
 qboolean               trap_VerifyCDKey( const char *key, const char *chksum); // bk001208 - RC4
 
 void			trap_SetPbClStatus( int status );
+
+/*
+===============================================================================
+
+@pjb: Account specific traps
+
+===============================================================================
+*/
+int             trap_Account_IsUserSignedIn( void );
+void            trap_Account_SignIn( int controllerIndex );
+void            trap_Account_SignOut( void );
+qboolean        trap_Account_GetPlayerName( char* buf, int bufLen );
+void            trap_Account_LoadConfiguration( void );
+void            trap_Account_SaveConfiguration( void );
+
+qboolean        UI_AccountEnabled( void );
+
+// @pjb: returns false if graphics options should be hidden
+qboolean        UI_IsFixedGraphicsHardware( void );
+
 
 //
 // ui_addbots.c

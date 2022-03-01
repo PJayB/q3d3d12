@@ -1,0 +1,7 @@
+// Common type definitions
+
+typedef int qboolean;
+typedef int stereoFrame_t;
+typedef float vec_t;
+typedef vec_t[] vec3_t;
+

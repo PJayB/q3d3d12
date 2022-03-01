@@ -43,9 +43,8 @@ INGAME MENU
 #define ID_SERVERINFO			14
 #define ID_LEAVEARENA			15
 #define ID_RESTART				16
-#define ID_QUIT					17
-#define ID_RESUME				18
-#define ID_TEAMORDERS			19
+#define ID_RESUME				17
+#define ID_TEAMORDERS			18
 
 
 typedef struct {
@@ -60,7 +59,6 @@ typedef struct {
 	menutext_s		addbots;
 	menutext_s		removebots;
 	menutext_s		teamorders;
-	menutext_s		quit;
 	menutext_s		resume;
 } ingamemenu_t;
 
@@ -123,10 +121,6 @@ void InGame_Event( void *ptr, int notification ) {
 		UI_ConfirmMenu( "RESTART ARENA?", (voidfunc_f)NULL, InGame_RestartAction );
 		break;
 
-	case ID_QUIT:
-		UI_ConfirmMenu( "EXIT GAME?",  (voidfunc_f)NULL, InGame_QuitAction );
-		break;
-
 	case ID_SERVERINFO:
 		UI_ServerInfoMenu();
 		break;
@@ -176,8 +170,7 @@ void InGame_MenuInit( void ) {
 	s_ingame.frame.width				= 466;//359;
 	s_ingame.frame.height				= 332;//256;
 
-	//y = 96;
-	y = 88;
+	y = 110; // @pjb: removed Quit so bumping this
 	s_ingame.team.generic.type			= MTYPE_PTEXT;
 	s_ingame.team.generic.flags			= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
 	s_ingame.team.generic.x				= 320;
@@ -296,17 +289,6 @@ void InGame_MenuInit( void ) {
 	s_ingame.leave.color				= color_red;
 	s_ingame.leave.style				= UI_CENTER|UI_SMALLFONT;
 
-	y += INGAME_MENU_VERTICAL_SPACING;
-	s_ingame.quit.generic.type			= MTYPE_PTEXT;
-	s_ingame.quit.generic.flags			= QMF_CENTER_JUSTIFY|QMF_PULSEIFFOCUS;
-	s_ingame.quit.generic.x				= 320;
-	s_ingame.quit.generic.y				= y;
-	s_ingame.quit.generic.id			= ID_QUIT;
-	s_ingame.quit.generic.callback		= InGame_Event; 
-	s_ingame.quit.string				= "EXIT GAME";
-	s_ingame.quit.color					= color_red;
-	s_ingame.quit.style					= UI_CENTER|UI_SMALLFONT;
-
 	Menu_AddItem( &s_ingame.menu, &s_ingame.frame );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.team );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.addbots );
@@ -317,7 +299,6 @@ void InGame_MenuInit( void ) {
 	Menu_AddItem( &s_ingame.menu, &s_ingame.restart );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.resume );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.leave );
-	Menu_AddItem( &s_ingame.menu, &s_ingame.quit );
 }
 
 

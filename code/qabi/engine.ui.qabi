@@ -1,0 +1,42 @@
+#include "engine.common.qabi"
+#include "engine.client.qabi"
+
+abi (trap_Key_KeynumToStringBuf) void Key_KeynumToStringBuf( int keynum, char *buf, int buflen );
+abi (trap_Key_GetBindingBuf) void Key_GetBindingBuf( int keynum, char *buf, int buflen );
+abi (trap_Key_SetBinding) void Key_SetBinding( int keynum, const char *binding );
+abi (trap_Key_GetOverstrikeMode) qboolean Key_GetOverstrikeMode( void );
+abi (trap_Key_SetOverstrikeMode) void Key_SetOverstrikeMode( qboolean state );
+abi (trap_Key_ClearStates) void Key_ClearStates( void );
+
+abi (trap_LAN_GetServerCount) int LAN_GetServerCount( int source );
+abi (trap_LAN_GetServerAddressString) void LAN_GetServerAddressString( int source, int n, char *buf, int buflen );
+abi (trap_LAN_GetServerInfo) void LAN_GetServerInfo( int source, int n, char *buf, int buflen );
+abi (trap_LAN_GetPingQueueCount) int LAN_GetPingQueueCount( void );
+abi (trap_LAN_ServerStatus) int LAN_GetServerStatus( const char *serverAddress, char *serverStatus, int maxLen );
+abi (trap_LAN_SaveCachedServers) void LAN_SaveServersToCache( void );
+abi (trap_LAN_LoadCachedServers) void LAN_LoadCachedServers( void );
+abi (trap_LAN_ResetPings) void LAN_ResetPings(int n);
+abi (trap_LAN_ClearPing) void LAN_ClearPing( int n );
+abi (trap_LAN_GetPing) void LAN_GetPing( int n, char *buf, int buflen, int *pingtime );
+abi (trap_LAN_GetPingInfo) void LAN_GetPingInfo( int n, char *buf, int buflen );
+abi (trap_LAN_MarkServerVisible) void LAN_MarkServerVisible( int source, int n, qboolean visible );
+abi (trap_LAN_ServerIsVisible) int LAN_ServerIsVisible( int source, int n);
+abi (trap_LAN_UpdateVisiblePings) qboolean LAN_UpdateVisiblePings( int source );
+abi (trap_LAN_AddServer) int LAN_AddServer(int source, const char *name, const char *addr);
+abi (trap_LAN_RemoveServer) void LAN_RemoveServer(int source, const char *addr);
+abi (trap_LAN_CompareServers) int LAN_CompareServers( int source, int sortKey, int sortDir, int s1, int s2 );
+abi (trap_LAN_GetServerPing) int LAN_GetServerPing( int source, int n );
+
+abi (trap_GetClipboardData) void GetClipboardData( char *buf, int bufsize );
+
+abi (trap_GetVideoConfig) void CL_GetVideoConfig( vdconfig_t *glconfig );
+
+abi (trap_Account_IsUserSignedIn)    qboolean   Account_IsUserSignedIn   ( void );
+abi (trap_Account_SignIn)            void       Account_SignIn           ( int userIndex );
+abi (trap_Account_SignOut)           void       Account_SignOut          ( void );
+abi (trap_Account_GetPlayerName)     int        Account_GetPlayerName    ( char* buf, int bufLen );
+abi (trap_Account_LoadConfiguration) void       Account_LoadConfiguration( void );
+abi (trap_Account_SaveConfiguration) void       Account_SaveConfiguration( void );
+
+abi (trap_GetClientState)            void       GetClientState           ( uiClientState_t* state );
+abi (trap_GetConfigString)           int        GetConfigString          ( int index, char* buff, int buffsize );

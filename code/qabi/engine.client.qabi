@@ -1,0 +1,86 @@
+#include "common.qabi"
+
+// Engine exports
+abi (trap_SendConsoleCommand) void Cbuf_AddText( const char *text );
+abi (trap_RemoveCommand) void Cmd_RemoveCommand( const char *cmdName );
+abi (trap_UpdateScreen) void SCR_UpdateScreen( void );
+abi (trap_CM_NumInlineModels) int CM_NumInlineModels( void );
+abi (trap_CM_InlineModel) clipHandle_t CM_InlineModel( int index );
+abi (trap_CM_TempBoxModel) clipHandle_t CM_TempBoxModel( const vec3_t mins, const vec3_t maxs, int capsule = qfalse );
+abi (trap_CM_TempCapsuleModel) clipHandle_t CM_TempBoxModel( const vec3_t mins, const vec3_t maxs, int capsule = qtrue );
+abi (trap_CM_PointContents) int CM_PointContents( const vec3_t p, clipHandle_t model );
+abi (trap_CM_TransformedPointContents) int CM_TransformedPointContents( const vec3_t p, clipHandle_t model, const vec3_t origin, const vec3_t angles );
+abi (trap_CM_BoxTrace) void CM_BoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
+        const vec3_t mins, const vec3_t maxs,
+        clipHandle_t model, int brushmask,
+		int capsule = qfalse );
+abi (trap_CM_CapsuleTrace) void CM_BoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
+        const vec3_t mins, const vec3_t maxs,
+        clipHandle_t model, int brushmask,
+		int capsule = qtrue );
+abi (trap_CM_TransformedBoxTrace) void CM_TransformedBoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
+        const vec3_t mins, const vec3_t maxs,
+        clipHandle_t model, int brushmask,
+        const vec3_t origin, const vec3_t angles,
+		int capsule = qfalse );
+abi (trap_CM_TransformedCapsuleTrace) void CM_TransformedBoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
+        const vec3_t mins, const vec3_t maxs,
+        clipHandle_t model, int brushmask,
+        const vec3_t origin, const vec3_t angles,
+		int capsule = qtrue );
+abi (trap_CM_MarkFragments) int R_MarkFragments( int numPoints, const vec3_t *points, 
+        const vec3_t projection,
+        int maxPoints, vec3_t pointBuffer,
+        int maxFragments, markFragment_t *fragmentBuffer );
+abi (trap_S_StartSound) void S_StartSound( vec3_t origin, int entityNum, int entchannel, sfxHandle_t sfx );
+abi (trap_S_StartLocalSound) void S_StartLocalSound( sfxHandle_t sfx, int channelNum );
+abi (trap_S_ClearLoopingSounds) void S_ClearLoopingSounds( qboolean killall );
+abi (trap_S_AddLoopingSound) void S_AddLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
+abi (trap_S_AddRealLoopingSound) void S_AddRealLoopingSound( int entityNum, const vec3_t origin, const vec3_t velocity, sfxHandle_t sfx );
+abi (trap_S_StopLoopingSound) void S_StopLoopingSound( int entityNum );
+abi (trap_S_UpdateEntityPosition) void S_UpdateEntityPosition( int entityNum, const vec3_t origin );
+abi (trap_S_Respatialize) void S_Respatialize( int entityNum, const vec3_t origin, vec3_t axis[3], int inwater );
+abi (trap_S_RegisterSound) sfxHandle_t S_RegisterSound( const char *sample, qboolean compressed );
+abi (trap_S_StartBackgroundTrack) void S_StartBackgroundTrack( const char *intro, const char *loop );
+abi (trap_R_LoadWorldMap) void RE_LoadWorldMap( const char *mapname );
+abi (trap_R_RegisterModel) qhandle_t RE_RegisterModel( const char *name );
+abi (trap_R_RegisterSkin) qhandle_t RE_RegisterSkin( const char *name );
+abi (trap_R_RegisterShader) qhandle_t RE_RegisterShader( const char *name );
+abi (trap_R_RegisterShaderNoMip) qhandle_t RE_RegisterShaderNoMip( const char *name );
+abi (trap_R_RegisterFont) void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
+abi (trap_R_ClearScene) void RE_ClearScene( void );
+abi (trap_R_AddRefEntityToScene) void RE_AddRefEntityToScene( const refEntity_t *re );
+abi (trap_R_AddPolyToScene) void RE_AddPolyToScene( qhandle_t hShader , int numVerts, const polyVert_t *verts, int num = 1 );
+abi (trap_R_AddPolysToScene) void RE_AddPolyToScene( qhandle_t hShader , int numVerts, const polyVert_t *verts, int num );
+abi (trap_R_LightForPoint) int R_LightForPoint( vec3_t point, vec3_t ambientLight, vec3_t directedLight, vec3_t lightDir );
+abi (trap_R_AddLightToScene) void RE_AddLightToScene( const vec3_t org, float intensity, float r, float g, float b );
+abi (trap_R_AddAdditiveLightToScene) void RE_AddAdditiveLightToScene( const vec3_t org, float intensity, float r, float g, float b );
+abi (trap_R_RenderScene) void RE_RenderScene( const refdef_t *fd );
+abi (trap_R_SetColor) void RE_SetColor( const float *rgba );
+abi (trap_R_DrawStretchPic) void RE_StretchPic( float x, float y, float w, float h, 
+        float s1, float t1, float s2, float t2, qhandle_t hShader );
+abi (trap_R_ModelBounds) void R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs );
+abi (trap_R_LerpTag) int R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
+        float frac, const char *tagName );
+abi (trap_CM_LerpTag) int R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
+        float frac, const char *tagName );
+abi (trap_R_RemapShader) void R_RemapShader( const char *oldShader, const char *newShader, const char *timeOffset );
+abi (trap_MemoryRemaining) int Hunk_MemoryRemaining( void );
+abi (trap_Key_IsDown) qboolean Key_IsDown( int keynum );
+abi (trap_Key_GetCatcher) int Key_GetCatcher( void );
+abi (trap_Key_SetCatcher) void Key_SetCatcher( int catcher );
+abi (trap_Key_GetKey) int Key_GetKey( const char *binding );
+abi (trap_PC_AddGlobalDefine) int PC_AddGlobalDefine( char *define );
+abi (trap_PC_LoadSource) int PC_LoadSourceHandle( const char *filename );
+abi (trap_PC_FreeSource) int PC_FreeSourceHandle( int handle );
+abi (trap_PC_ReadToken) int PC_ReadTokenHandle( int handle, pc_token_t *pc_token );
+abi (trap_PC_SourceFileAndLine) int PC_SourceFileAndLine( int handle, char *filename, int *line );
+abi (trap_S_StopBackgroundTrack) void S_StopBackgroundTrack( void );
+abi (trap_CIN_PlayCinematic) int CIN_PlayCinematic( const char *arg0, int xpos, int ypos, int width, int height, int bits);
+abi (trap_CIN_StopCinematic) e_status CIN_StopCinematic(int handle);
+abi (trap_CIN_RunCinematic ) e_status CIN_RunCinematic (int handle);
+abi (trap_CIN_DrawCinematic ) void CIN_DrawCinematic (int handle);
+abi (trap_CIN_SetExtents ) void CIN_SetExtents (int handle, int x, int y, int w, int h);
+abi (trap_GetEntityToken) qboolean R_GetEntityToken( char *buffer, int bufferSize );
+abi (trap_R_inPVS) qboolean R_inPVS( const vec3_t p1, const vec3_t p2 );
+

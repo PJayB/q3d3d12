@@ -268,7 +268,7 @@ static void LogLight( trRefEntity_t *ent ) {
 		max2 = ent->directedLight[2];
 	}
 
-	ri.Printf( PRINT_ALL, "amb:%i  dir:%i\n", max1, max2 );
+	RI_Printf( PRINT_ALL, "amb:%i  dir:%i\n", max1, max2 );
 }
 
 /*
@@ -282,7 +282,7 @@ by the Calc_* functions
 void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	int				i;
 	dlight_t		*dl;
-	float			power;
+	//float			power;
 	vec3_t			dir;
 	float			d;
 	vec3_t			lightDir;
@@ -332,12 +332,20 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 	d = VectorLength( ent->directedLight );
 	VectorScale( ent->lightDir, d, lightDir );
 
+    // @pjb: replacing this with real dlight code.
+    // @pjb: todo: problem with this is that the entity has no radius, meaning it won't
+    // get lit sometimes when it should.
 	for ( i = 0 ; i < refdef->num_dlights ; i++ ) {
 		dl = &refdef->dlights[i];
 		VectorSubtract( dl->origin, lightOrigin, dir );
 		d = VectorNormalize( dir );
 
-		power = DLIGHT_AT_RADIUS * ( dl->radius * dl->radius );
+        if (d < dl->radius) {
+            ent->dlightBits |= 1 << i;
+        }
+
+		/*
+        power = DLIGHT_AT_RADIUS * ( dl->radius * dl->radius );
 		if ( d < DLIGHT_MINIMUM_RADIUS ) {
 			d = DLIGHT_MINIMUM_RADIUS;
 		}
@@ -345,7 +353,10 @@ void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent ) {
 
 		VectorMA( ent->directedLight, d, dl->color, ent->directedLight );
 		VectorMA( lightDir, d, dir, lightDir );
+        */
 	}
+
+    ent->needDlights = ent->dlightBits != 0;
 
 	// clamp ambient
 	for ( i = 0 ; i < 3 ; i++ ) {

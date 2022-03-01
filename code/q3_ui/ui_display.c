@@ -51,8 +51,7 @@ typedef struct {
 	menutext_s		banner;
 	menubitmap_s	framel;
 	menubitmap_s	framer;
-
-	menutext_s		graphics;
+    menutext_s		graphics;
 	menutext_s		display;
 	menutext_s		sound;
 	menutext_s		network;
@@ -81,7 +80,6 @@ static void UI_DisplayOptionsMenu_Event( void* ptr, int event ) {
 		UI_PopMenu();
 		UI_GraphicsOptionsMenu();
 		break;
-
 	case ID_DISPLAY:
 		break;
 
@@ -148,15 +146,18 @@ static void UI_DisplayOptionsMenu_Init( void ) {
 	displayOptionsInfo.framer.width				= 256;
 	displayOptionsInfo.framer.height			= 334;
 
-	displayOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
-	displayOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
-	displayOptionsInfo.graphics.generic.id			= ID_GRAPHICS;
-	displayOptionsInfo.graphics.generic.callback	= UI_DisplayOptionsMenu_Event;
-	displayOptionsInfo.graphics.generic.x			= 216;
-	displayOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
-	displayOptionsInfo.graphics.string				= "GRAPHICS";
-	displayOptionsInfo.graphics.style				= UI_RIGHT;
-	displayOptionsInfo.graphics.color				= color_red;
+    // For fixed hardware (e.g. Surface RT) we lock down the graphics options
+    if (!UI_IsFixedGraphicsHardware()) {
+	    displayOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
+	    displayOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
+	    displayOptionsInfo.graphics.generic.id			= ID_GRAPHICS;
+	    displayOptionsInfo.graphics.generic.callback	= UI_DisplayOptionsMenu_Event;
+	    displayOptionsInfo.graphics.generic.x			= 216;
+	    displayOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
+	    displayOptionsInfo.graphics.string				= "GRAPHICS";
+	    displayOptionsInfo.graphics.style				= UI_RIGHT;
+	    displayOptionsInfo.graphics.color				= color_red;
+    }
 
 	displayOptionsInfo.display.generic.type			= MTYPE_PTEXT;
 	displayOptionsInfo.display.generic.flags		= QMF_RIGHT_JUSTIFY;
@@ -198,7 +199,7 @@ static void UI_DisplayOptionsMenu_Init( void ) {
 	displayOptionsInfo.brightness.generic.y			= y;
 	displayOptionsInfo.brightness.minvalue			= 5;
 	displayOptionsInfo.brightness.maxvalue			= 20;
-	if( !uis.glconfig.deviceSupportsGamma ) {
+	if( !uis.vdconfig.deviceSupportsGamma ) {
 		displayOptionsInfo.brightness.generic.flags |= QMF_GRAYED;
 	}
 
@@ -227,8 +228,13 @@ static void UI_DisplayOptionsMenu_Init( void ) {
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.banner );
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.framel );
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.framer );
-	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.graphics );
-	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.display );
+
+    // @pjb: Settings already tuned for the platform (e.g. surface RT)
+    if (!UI_IsFixedGraphicsHardware()) {
+	    Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.graphics );
+    }
+
+    Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.display );
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.sound );
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.network );
 	Menu_AddItem( &displayOptionsInfo.menu, ( void * ) &displayOptionsInfo.brightness );

@@ -24,15 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../game/q_shared.h"
 #include "qcommon.h"
 #include <setjmp.h>
-#ifdef __linux__
-#include <netinet/in.h>
-#else
-#if defined(MACOS_X)
-#include <netinet/in.h>
-#else
-#include <winsock.h>
-#endif
-#endif
 
 int demo_protocols[] =
 { 66, 67, 68, 0 };
@@ -40,12 +31,12 @@ int demo_protocols[] =
 #define MAX_NUM_ARGVS	50
 
 #define MIN_DEDICATED_COMHUNKMEGS 1
-#define MIN_COMHUNKMEGS 56
+#define MIN_COMHUNKMEGS 256
 #ifdef MACOS_X
-#define DEF_COMHUNKMEGS "64"
+#define DEF_COMHUNKMEGS "256"
 #define DEF_COMZONEMEGS "24"
 #else
-#define DEF_COMHUNKMEGS "56"
+#define DEF_COMHUNKMEGS "256"
 #define DEF_COMZONEMEGS "16"
 #endif
 
@@ -101,6 +92,9 @@ char	com_errorMessage[MAXPRINTMSG];
 
 void Com_WriteConfig_f( void );
 void CIN_CloseAllVideos();
+
+qboolean Account_IsServiceEnabled();
+void Account_SaveConfiguration(); // @pjb
 
 //============================================================================
 
@@ -193,11 +187,15 @@ void QDECL Com_Printf( const char *fmt, ... ) {
       opening_qconsole = qfalse;
 		}
 		if ( logfile && FS_Initialized()) {
-			FS_Write(msg, strlen(msg), logfile);
+			FS_Write(msg, (int) strlen(msg), logfile);
 		}
 	}
 }
 
+// @pjb
+void Com_Print( const char* fmt ) {
+    Com_Printf( "%s", fmt );
+}
 
 /*
 ================
@@ -229,21 +227,13 @@ Both client and server can use this, and it will
 do the apropriate things.
 =============
 */
+extern void IN_DeactivateMouse(void);
+
 void QDECL Com_Error( int code, const char *fmt, ... ) {
 	va_list		argptr;
 	static int	lastErrorTime;
 	static int	errorCount;
 	int			currentTime;
-
-#if defined(_WIN32) && defined(_DEBUG)
-	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
-		if (!com_noErrorInterrupt->integer) {
-			__asm {
-				int 0x03
-			}
-		}
-	}
-#endif
 
 	// when we are running automated scripts, make sure we
 	// know if anything failed
@@ -273,6 +263,28 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	va_start (argptr,fmt);
 	vsprintf (com_errorMessage,fmt,argptr);
 	va_end (argptr);
+
+#if defined(_WIN32) && defined(_DEBUG)
+	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
+        // @pjb: fix a crash if the cvar hadn't even been registered yet
+		if (!com_noErrorInterrupt || !com_noErrorInterrupt->integer) {
+#   if !defined(Q_WINRT_PLATFORM)
+            // @pjb: release the mouse so we can debug
+            IN_DeactivateMouse();
+#   endif
+#   ifdef _APISETDEBUG_
+            if (IsDebuggerPresent())
+            {
+                OutputDebugStringA(com_errorMessage);
+                DebugBreak();
+            }
+#   else
+            // check com_errorMessage
+            __debugbreak();
+#   endif		
+        }
+	}
+#endif
 
 	if ( code != ERR_DISCONNECT && code != ERR_NEED_CD ) {
 		Cvar_Set("com_errorMessage", com_errorMessage);
@@ -527,7 +539,7 @@ Com_StringContains
 char *Com_StringContains(char *str1, char *str2, int casesensitive) {
 	int len, i, j;
 
-	len = strlen(str1) - strlen(str2);
+	len = (int) strlen(str1) - (int) strlen(str2);
 	for (i = 0; i <= len; i++, str1++) {
 		for (j = 0; str2[j]; j++) {
 			if (casesensitive) {
@@ -722,17 +734,19 @@ all big things are allocated on the hunk.
 #define	ZONEID	0x1d4a11
 #define MINFRAGMENT	64
 
+//@ pjb: reordered for alignment purposes
 typedef struct zonedebug_s {
 	char *label;
 	char *file;
+	size_t allocSize;
 	int line;
-	int allocSize;
 } zonedebug_t;
 
+//@ pjb: reordered for alignment purposes
 typedef struct memblock_s {
-	int		size;           // including the header and possibly tiny fragments
-	int     tag;            // a tag of 0 is a free block
+	size_t	size;           // including the header and possibly tiny fragments
 	struct memblock_s       *next, *prev;
+	int     tag;            // a tag of 0 is a free block
 	int     id;        		// should be ZONEID
 #ifdef ZONE_DEBUG
 	zonedebug_t d;
@@ -740,8 +754,8 @@ typedef struct memblock_s {
 } memblock_t;
 
 typedef struct {
-	int		size;			// total bytes malloced, including header
-	int		used;			// total bytes used
+	size_t		size;			// total bytes malloced, including header
+	size_t      used;			// total bytes used
 	memblock_t	blocklist;	// start / end cap for linked list
 	memblock_t	*rover;
 } memzone_t;
@@ -759,7 +773,7 @@ void Z_CheckHeap( void );
 Z_ClearZone
 ========================
 */
-void Z_ClearZone( memzone_t *zone, int size ) {
+void Z_ClearZone( memzone_t *zone, size_t size ) {
 	memblock_t	*block;
 	
 	// set the entire zone to one free block
@@ -784,7 +798,7 @@ void Z_ClearZone( memzone_t *zone, int size ) {
 Z_AvailableZoneMemory
 ========================
 */
-int Z_AvailableZoneMemory( memzone_t *zone ) {
+size_t Z_AvailableZoneMemory( memzone_t *zone ) {
 	return zone->size - zone->used;
 }
 
@@ -793,7 +807,7 @@ int Z_AvailableZoneMemory( memzone_t *zone ) {
 Z_AvailableMemory
 ========================
 */
-int Z_AvailableMemory( void ) {
+size_t Z_AvailableMemory( void ) {
 	return Z_AvailableZoneMemory( mainzone );
 }
 
@@ -904,11 +918,11 @@ Z_TagMalloc
 ================
 */
 #ifdef ZONE_DEBUG
-void *Z_TagMallocDebug( int size, int tag, char *label, char *file, int line ) {
+void *Z_TagMallocDebug( size_t size, int tag, char *label, char *file, int line ) {
 #else
-void *Z_TagMalloc( int size, int tag ) {
+void *Z_TagMalloc( size_t size, int tag ) {
 #endif
-	int		extra, allocSize;
+	size_t		extra, allocSize;
 	memblock_t	*start, *rover, *new, *base;
 	memzone_t *zone;
 
@@ -995,9 +1009,9 @@ Z_Malloc
 ========================
 */
 #ifdef ZONE_DEBUG
-void *Z_MallocDebug( int size, char *label, char *file, int line ) {
+void *Z_MallocDebug( size_t size, char *label, char *file, int line ) {
 #else
-void *Z_Malloc( int size ) {
+void *Z_Malloc( size_t size ) {
 #endif
 	void	*buf;
 	
@@ -1014,11 +1028,11 @@ void *Z_Malloc( int size ) {
 }
 
 #ifdef ZONE_DEBUG
-void *S_MallocDebug( int size, char *label, char *file, int line ) {
+void *S_MallocDebug( size_t size, char *label, char *file, int line ) {
 	return Z_TagMallocDebug( size, TAG_SMALL, label, file, line );
 }
 #else
-void *S_Malloc( int size ) {
+void *S_Malloc( size_t size ) {
 	return Z_TagMalloc( size, TAG_SMALL );
 }
 #endif
@@ -1058,13 +1072,13 @@ void Z_LogZoneHeap( memzone_t *zone, char *name ) {
 #endif
 	memblock_t	*block;
 	char		buf[4096];
-	int size, allocSize, numBlocks;
+	size_t size, allocSize, numBlocks;
 
 	if (!logfile || !FS_Initialized())
 		return;
 	size = allocSize = numBlocks = 0;
 	Com_sprintf(buf, sizeof(buf), "\r\n================\r\n%s log\r\n================\r\n", name);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	for (block = zone->blocklist.next ; block->next != &zone->blocklist; block = block->next) {
 		if (block->tag) {
 #ifdef ZONE_DEBUG
@@ -1080,7 +1094,7 @@ void Z_LogZoneHeap( memzone_t *zone, char *name ) {
 			}
 			dump[j] = '\0';
 			Com_sprintf(buf, sizeof(buf), "size = %8d: %s, line: %d (%s) [%s]\r\n", block->d.allocSize, block->d.file, block->d.line, block->d.label, dump);
-			FS_Write(buf, strlen(buf), logfile);
+			FS_Write(buf, (int) strlen(buf), logfile);
 			allocSize += block->d.allocSize;
 #endif
 			size += block->size;
@@ -1094,9 +1108,9 @@ void Z_LogZoneHeap( memzone_t *zone, char *name ) {
 	allocSize = numBlocks * sizeof(memblock_t); // + 32 bit alignment
 #endif
 	Com_sprintf(buf, sizeof(buf), "%d %s memory in %d blocks\r\n", size, name, numBlocks);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	Com_sprintf(buf, sizeof(buf), "%d %s memory overhead\r\n", size - allocSize, name);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 }
 
 /*
@@ -1117,18 +1131,18 @@ typedef struct memstatic_s {
 
 // bk001204 - initializer brackets
 memstatic_t emptystring =
-	{ {(sizeof(memblock_t)+2 + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'\0', '\0'} };
+	{ {(sizeof(memblock_t)+2 + 3) & ~3, NULL, NULL, TAG_STATIC, ZONEID}, {'\0', '\0'} };
 memstatic_t numberstring[] = {
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'0', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'1', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'2', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'3', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'4', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'5', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'6', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'7', '\0'} },
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'8', '\0'} }, 
-	{ {(sizeof(memstatic_t) + 3) & ~3, TAG_STATIC, NULL, NULL, ZONEID}, {'9', '\0'} }
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'0', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'1', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'2', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'3', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'4', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'5', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'6', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'7', '\0'} },
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'8', '\0'} }, 
+	{ {(sizeof(memstatic_t) + 3) & ~3,  NULL, NULL, TAG_STATIC, ZONEID}, {'9', '\0'} }
 };
 
 /*
@@ -1194,19 +1208,19 @@ Goals:
 #define	HUNK_FREE_MAGIC	0x89537893
 
 typedef struct {
-	int		magic;
-	int		size;
+	size_t	magic;
+	size_t  size;
 } hunkHeader_t;
 
 typedef struct {
-	int		mark;
-	int		permanent;
-	int		temp;
-	int		tempHighwater;
+	size_t		mark;
+	size_t		permanent;
+	size_t		temp;
+	size_t		tempHighwater;
 } hunkUsed_t;
 
 typedef struct hunkblock_s {
-	int size;
+	size_t size;
 	byte printed;
 	struct hunkblock_s *next;
 	char *label;
@@ -1220,10 +1234,10 @@ static	hunkUsed_t	hunk_low, hunk_high;
 static	hunkUsed_t	*hunk_permanent, *hunk_temp;
 
 static	byte	*s_hunkData = NULL;
-static	int		s_hunkTotal;
+static	size_t		s_hunkTotal;
 
-static	int		s_zoneTotal;
-static	int		s_smallZoneTotal;
+static	size_t		s_zoneTotal;
+static	size_t		s_smallZoneTotal;
 
 
 /*
@@ -1233,10 +1247,10 @@ Com_Meminfo_f
 */
 void Com_Meminfo_f( void ) {
 	memblock_t	*block;
-	int			zoneBytes, zoneBlocks;
-	int			smallZoneBytes, smallZoneBlocks;
-	int			botlibBytes, rendererBytes;
-	int			unused;
+	size_t		zoneBytes, zoneBlocks;
+	size_t		smallZoneBytes, smallZoneBlocks;
+	size_t		botlibBytes, rendererBytes;
+	size_t		unused;
 
 	zoneBytes = 0;
 	botlibBytes = 0;
@@ -1326,9 +1340,9 @@ Touch all known used data to make sure it is paged in
 ===============
 */
 void Com_TouchMemory( void ) {
-	int		start, end;
-	int		i, j;
-	int		sum;
+	size_t		start, end;
+	size_t		i, j;
+	size_t		sum;
 	memblock_t	*block;
 
 	Z_CheckHeap();
@@ -1387,7 +1401,7 @@ void Com_InitSmallZoneMemory( void ) {
 void Com_InitZoneMemory( void ) {
 	cvar_t	*cv;
 	// allocate the random block zone
-	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS, CVAR_LATCH | CVAR_ARCHIVE );
+	cv = Cvar_Get( "com_zoneMegs", DEF_COMZONEMEGS, CVAR_LATCH | CVAR_ARCHIVE | CVAR_SYSTEM_SET );
 
 	if ( cv->integer < 20 ) {
 		s_zoneTotal = 1024 * 1024 * 16;
@@ -1412,26 +1426,26 @@ Hunk_Log
 void Hunk_Log( void) {
 	hunkblock_t	*block;
 	char		buf[4096];
-	int size, numBlocks;
+	size_t size, numBlocks;
 
 	if (!logfile || !FS_Initialized())
 		return;
 	size = 0;
 	numBlocks = 0;
 	Com_sprintf(buf, sizeof(buf), "\r\n================\r\nHunk log\r\n================\r\n");
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	for (block = hunkblocks ; block; block = block->next) {
 #ifdef HUNK_DEBUG
 		Com_sprintf(buf, sizeof(buf), "size = %8d: %s, line: %d (%s)\r\n", block->size, block->file, block->line, block->label);
-		FS_Write(buf, strlen(buf), logfile);
+		FS_Write(buf, (int) strlen(buf), logfile);
 #endif
 		size += block->size;
 		numBlocks++;
 	}
 	Com_sprintf(buf, sizeof(buf), "%d Hunk memory\r\n", size);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	Com_sprintf(buf, sizeof(buf), "%d hunk blocks\r\n", numBlocks);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 }
 
 /*
@@ -1442,7 +1456,7 @@ Hunk_SmallLog
 void Hunk_SmallLog( void) {
 	hunkblock_t	*block, *block2;
 	char		buf[4096];
-	int size, locsize, numBlocks;
+	size_t size, locsize, numBlocks;
 
 	if (!logfile || !FS_Initialized())
 		return;
@@ -1452,7 +1466,7 @@ void Hunk_SmallLog( void) {
 	size = 0;
 	numBlocks = 0;
 	Com_sprintf(buf, sizeof(buf), "\r\n================\r\nHunk Small log\r\n================\r\n");
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	for (block = hunkblocks; block; block = block->next) {
 		if (block->printed) {
 			continue;
@@ -1471,15 +1485,15 @@ void Hunk_SmallLog( void) {
 		}
 #ifdef HUNK_DEBUG
 		Com_sprintf(buf, sizeof(buf), "size = %8d: %s, line: %d (%s)\r\n", locsize, block->file, block->line, block->label);
-		FS_Write(buf, strlen(buf), logfile);
+		FS_Write(buf, (int) strlen(buf), logfile);
 #endif
 		size += block->size;
 		numBlocks++;
 	}
 	Com_sprintf(buf, sizeof(buf), "%d Hunk memory\r\n", size);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 	Com_sprintf(buf, sizeof(buf), "%d hunk blocks\r\n", numBlocks);
-	FS_Write(buf, strlen(buf), logfile);
+	FS_Write(buf, (int) strlen(buf), logfile);
 }
 
 /*
@@ -1489,7 +1503,7 @@ Com_InitZoneMemory
 */
 void Com_InitHunkMemory( void ) {
 	cvar_t	*cv;
-	int nMinAlloc;
+	size_t nMinAlloc;
 	char *pMsg = NULL;
 
 	// make sure the file system has allocated and "not" freed any temp blocks
@@ -1501,7 +1515,7 @@ void Com_InitHunkMemory( void ) {
 	}
 
 	// allocate the stack based hunk allocator
-	cv = Cvar_Get( "com_hunkMegs", DEF_COMHUNKMEGS, CVAR_LATCH | CVAR_ARCHIVE );
+	cv = Cvar_Get( "com_hunkMegs", DEF_COMHUNKMEGS, CVAR_LATCH | CVAR_ARCHIVE | CVAR_SYSTEM_SET );
 
 	// if we are not dedicated min allocation is 56, otherwise min is 1
 	if (com_dedicated && com_dedicated->integer) {
@@ -1527,7 +1541,7 @@ void Com_InitHunkMemory( void ) {
 		Com_Error( ERR_FATAL, "Hunk data failed to allocate %i megs", s_hunkTotal / (1024*1024) );
 	}
 	// cacheline align
-	s_hunkData = (byte *) ( ( (int)s_hunkData + 31 ) & ~31 );
+	s_hunkData = (byte *) ( ( (size_t) s_hunkData + 31 ) & ~31 );
 	Hunk_Clear();
 
 	Cmd_AddCommand( "meminfo", Com_Meminfo_f );
@@ -1545,8 +1559,8 @@ void Com_InitHunkMemory( void ) {
 Hunk_MemoryRemaining
 ====================
 */
-int	Hunk_MemoryRemaining( void ) {
-	int		low, high;
+size_t	Hunk_MemoryRemaining( void ) {
+	size_t		low, high;
 
 	low = hunk_low.permanent > hunk_low.temp ? hunk_low.permanent : hunk_low.temp;
 	high = hunk_high.permanent > hunk_high.temp ? hunk_high.permanent : hunk_high.temp;
@@ -1657,9 +1671,9 @@ Allocate permanent (until the hunk is cleared) memory
 =================
 */
 #ifdef HUNK_DEBUG
-void *Hunk_AllocDebug( int size, ha_pref preference, char *label, char *file, int line ) {
+void *Hunk_AllocDebug( size_t size, ha_pref preference, char *label, char *file, int line ) {
 #else
-void *Hunk_Alloc( int size, ha_pref preference ) {
+void *Hunk_Alloc( size_t size, ha_pref preference ) {
 #endif
 	void	*buf;
 
@@ -1732,7 +1746,7 @@ Multiple files can be loaded in temporary memory.
 When the files-in-use count reaches zero, all temp memory will be deleted
 =================
 */
-void *Hunk_AllocateTempMemory( int size ) {
+void *Hunk_AllocateTempMemory( size_t size ) {
 	void		*buf;
 	hunkHeader_t	*hdr;
 
@@ -1841,7 +1855,7 @@ Hunk_Trash
 =================
 */
 void Hunk_Trash( void ) {
-	int length, i, rnd;
+	size_t length, i, rnd;
 	char *buf, value;
 
 	return;
@@ -2099,16 +2113,19 @@ int Com_EventLoop( void ) {
         case SE_NONE:
             break;
 		case SE_KEY:
-			CL_KeyEvent( ev.evValue, ev.evValue2, ev.evTime );
+			CL_KeyEvent( ev.evUserID, ev.evValue, ev.evValue2, ev.evTime );
 			break;
 		case SE_CHAR:
-			CL_CharEvent( ev.evValue );
+			CL_CharEvent( ev.evUserID, ev.evValue );
 			break;
 		case SE_MOUSE:
-			CL_MouseEvent( ev.evValue, ev.evValue2, ev.evTime );
+			CL_MouseEvent( ev.evUserID, ev.evValue, ev.evValue2, ev.evTime );
 			break;
 		case SE_JOYSTICK_AXIS:
-			CL_JoystickEvent( ev.evValue, ev.evValue2, ev.evTime );
+			CL_JoystickEvent( ev.evUserID, ev.evValue, ev.evValue2, ev.evTime );
+			break;
+		case SE_GAMEPAD_AXIS: // @pjb
+			CL_GamepadEvent( ev.evUserID, ev.evValue, ev.evValue2, ev.evTime );
 			break;
 		case SE_CONSOLE:
 			Cbuf_AddText( (char *)ev.evPtr );
@@ -2305,44 +2322,6 @@ void Com_AppendCDKey( const char *filename ) {
 	}
 }
 
-#ifndef DEDICATED // bk001204
-/*
-=================
-Com_WriteCDKey
-=================
-*/
-static void Com_WriteCDKey( const char *filename, const char *ikey ) {
-	fileHandle_t	f;
-	char			fbuffer[MAX_OSPATH];
-	char			key[17];
-
-
-	sprintf(fbuffer, "%s/q3key", filename);
-
-
-	Q_strncpyz( key, ikey, 17 );
-
-	if(!CL_CDKeyValidate(key, NULL) ) {
-		return;
-	}
-
-	f = FS_SV_FOpenFileWrite( fbuffer );
-	if ( !f ) {
-		Com_Printf ("Couldn't write %s.\n", filename );
-		return;
-	}
-
-	FS_Write( key, 16, f );
-
-	FS_Printf( f, "\n// generated by quake, do not modify\r\n" );
-	FS_Printf( f, "// Do not give this file to ANYONE.\r\n" );
-	FS_Printf( f, "// id Software and Activision will NOT ask you to send this file to them.\r\n");
-
-	FS_FCloseFile( f );
-}
-#endif
-
-
 /*
 =================
 Com_Init
@@ -2351,7 +2330,11 @@ Com_Init
 void Com_Init( char *commandLine ) {
 	char	*s;
 
+#ifndef _ARM_
 	Com_Printf( "%s %s %s\n", Q3_VERSION, CPUSTRING, __DATE__ );
+#else
+    Com_Printf( "%s ARM %s\n", Q3_VERSION, __DATE__ );
+#endif
 
 	if ( setjmp (abortframe) ) {
 		Sys_Error ("Error during initialization");
@@ -2388,8 +2371,13 @@ void Com_Init( char *commandLine ) {
 
 	Cbuf_AddText ("exec default.cfg\n");
 
+    /*
+        @pjb: We want to do this AFTER the user opts to sign in
+    */
 	// skip the q3config.cfg if "safe" is on the command line
-	if ( !Com_SafeMode() ) {
+    // @pjb: or this platform is account enabled (e.g. settings are saved
+    // directly to the server or whatever)
+	if ( !Com_SafeMode() && !Account_IsServiceEnabled() ) {
 		Cbuf_AddText ("exec q3config.cfg\n");
 	}
 
@@ -2458,7 +2446,11 @@ void Com_Init( char *commandLine ) {
 	Cmd_AddCommand ("changeVectors", MSG_ReportChangeVectors_f );
 	Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
 
+#ifndef _ARM_
 	s = va("%s %s %s", Q3_VERSION, CPUSTRING, __DATE__ );
+#else
+	s = va("%s ARM %s", Q3_VERSION, __DATE__ );
+#endif
 	com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
 
 	Sys_Init();
@@ -2527,9 +2519,6 @@ Writes key bindings and archived cvars to config file if modified
 ===============
 */
 void Com_WriteConfiguration( void ) {
-#ifndef DEDICATED // bk001204
-	cvar_t	*fs;
-#endif
 	// if we are quiting without fully initializing, make sure
 	// we don't write out anything
 	if ( !com_fullyInitialized ) {
@@ -2541,17 +2530,11 @@ void Com_WriteConfiguration( void ) {
 	}
 	cvar_modifiedFlags &= ~CVAR_ARCHIVE;
 
-	Com_WriteConfigToFile( "q3config.cfg" );
-
-	// bk001119 - tentative "not needed for dedicated"
-#ifndef DEDICATED
-	fs = Cvar_Get ("fs_game", "", CVAR_INIT|CVAR_SYSTEMINFO );
-	if (UI_usesUniqueCDKey() && fs && fs->string[0] != 0) {
-		Com_WriteCDKey( fs->string, &cl_cdkey[16] );
-	} else {
-		Com_WriteCDKey( "baseq3", cl_cdkey );
-	}
-#endif
+    // @pjb: write configuration to account service storage or config otherwise
+    if (Account_IsServiceEnabled())
+        Account_SaveConfiguration();
+    else
+        Com_WriteConfigToFile( "q3config.cfg" );
 }
 
 
@@ -2717,6 +2700,7 @@ void Com_Frame( void ) {
 	// Do this after the server may have started,
 	// but before the client tries to auto-connect
 	if ( com_dedicated->modified ) {
+#ifndef Q_WINRT_PLATFORM
 		// get the latched value
 		Cvar_Get( "dedicated", "0", 0 );
 		com_dedicated->modified = qfalse;
@@ -2727,6 +2711,11 @@ void Com_Frame( void ) {
 			CL_Shutdown();
 			Sys_ShowConsole( 1, qtrue );
 		}
+#else
+        Com_Printf( "Dedicated not supported on this platform.\n" );
+        com_dedicated->integer = 0;
+        com_dedicated->modified = qfalse;
+#endif
 	}
 
 	//
@@ -3193,7 +3182,7 @@ FindMatches
 static void FindMatches( const char *s ) {
 	int		i;
 
-	if ( Q_stricmpn( s, completionString, strlen( completionString ) ) ) {
+	if ( Q_stricmpn( s, completionString, (int) strlen( completionString ) ) ) {
 		return;
 	}
 	matchCount++;
@@ -3217,7 +3206,7 @@ PrintMatches
 ===============
 */
 static void PrintMatches( const char *s ) {
-	if ( !Q_stricmpn( s, shortestMatch, strlen( shortestMatch ) ) ) {
+	if ( !Q_stricmpn( s, shortestMatch, (int) strlen( shortestMatch ) ) ) {
 		Com_Printf( "    %s\n", s );
 	}
 }
@@ -3300,13 +3289,13 @@ void Field_CompleteCommand( field_t *field ) {
 		} else {
 			ConcatRemaining( temp.buffer, completionString );
 		}
-		completionField->cursor = strlen( completionField->buffer );
+		completionField->cursor = (int) strlen( completionField->buffer );
 		return;
 	}
 
 	// multiple matches, complete to shortest
 	Com_sprintf( completionField->buffer, sizeof( completionField->buffer ), "\\%s", shortestMatch );
-	completionField->cursor = strlen( completionField->buffer );
+	completionField->cursor = (int) strlen( completionField->buffer );
 	ConcatRemaining( temp.buffer, completionString );
 
 	Com_Printf( "]%s\n", completionField->buffer );
