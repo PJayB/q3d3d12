@@ -814,7 +814,7 @@ char *Q_strupr( char *s1 ) {
 void Q_strcat( char *dest, int size, const char *src ) {
 	int		l1;
 
-	l1 = strlen( dest );
+	l1 = (int) strlen( dest );
 	if ( l1 >= size ) {
 		Com_Error( ERR_FATAL, "Q_strcat: already overflowed" );
 	}
@@ -880,10 +880,13 @@ void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
 	}
 	if (len >= size) {
 		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
-#ifdef	_DEBUG
-		__asm {
-			int 3;
-		}
+#if defined(_DEBUG)
+#   ifdef _APISETDEBUG_
+		// @pjb: standard way of breaking into the debugger
+        DebugBreak();
+#   else
+        __debugbreak();
+#   endif
 #endif
 	}
 	Q_strncpyz (dest, bigbuffer, size );

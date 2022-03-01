@@ -167,7 +167,7 @@ static void UI_Mods_LoadMods( void ) {
 	numdirs = trap_FS_GetFileList( "$modlist", "", dirlist, sizeof(dirlist) );
 	dirptr  = dirlist;
 	for( i = 0; i < numdirs; i++ ) {
-		dirlen = strlen( dirptr ) + 1;
+		dirlen = (int) strlen( dirptr ) + 1;
     descptr = dirptr + dirlen;
   	UI_Mods_ParseInfos( dirptr, descptr);
     dirptr += dirlen + strlen(descptr) + 1;
@@ -191,6 +191,7 @@ static void UI_Mods_MenuInit( void ) {
 	memset( &s_mods, 0 ,sizeof(mods_t) );
 	s_mods.menu.wrapAround = qtrue;
 	s_mods.menu.fullscreen = qtrue;
+    s_mods.menu.custom_nav = qtrue;
 
 	s_mods.banner.generic.type		= MTYPE_BTEXT;
 	s_mods.banner.generic.x			= 320;
@@ -225,6 +226,8 @@ static void UI_Mods_MenuInit( void ) {
 	s_mods.back.width				= 128;
 	s_mods.back.height				= 64;
 	s_mods.back.focuspic			= ART_BACK1;
+    s_mods.back.generic.navUp       = &s_mods.list;
+    s_mods.back.generic.navRight    = &s_mods.go;
 
 	s_mods.go.generic.type			= MTYPE_BITMAP;
 	s_mods.go.generic.name			= ART_FIGHT0;
@@ -236,6 +239,8 @@ static void UI_Mods_MenuInit( void ) {
 	s_mods.go.width					= 128;
 	s_mods.go.height				= 64;
 	s_mods.go.focuspic				= ART_FIGHT1;
+    s_mods.go.generic.navUp         = &s_mods.list;
+    s_mods.go.generic.navLeft       = &s_mods.back;
 
 	// scan for mods
 	s_mods.list.generic.type		= MTYPE_SCROLLLIST;
@@ -246,6 +251,8 @@ static void UI_Mods_MenuInit( void ) {
 	s_mods.list.generic.y			= 130;
 	s_mods.list.width				= 48;
 	s_mods.list.height				= 14;
+    s_mods.list.navigable           = qtrue;
+    s_mods.list.generic.navDown     = &s_mods.go;
 
 	UI_Mods_LoadMods();
 

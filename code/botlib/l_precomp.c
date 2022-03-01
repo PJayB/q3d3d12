@@ -134,7 +134,7 @@ void QDECL SourceError(source_t *source, char *str, ...)
 	vsprintf(text, str, ap);
 	va_end(ap);
 #ifdef BOTLIB
-	botimport.Print(PRT_ERROR, "file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
+	BotImport_Print(PRT_ERROR, "file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
 #endif	//BOTLIB
 #ifdef MEQCC
 	printf("error: file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
@@ -158,7 +158,7 @@ void QDECL SourceWarning(source_t *source, char *str, ...)
 	vsprintf(text, str, ap);
 	va_end(ap);
 #ifdef BOTLIB
-	botimport.Print(PRT_WARNING, "file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
+	BotImport_Print(PRT_WARNING, "file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
 #endif //BOTLIB
 #ifdef MEQCC
 	printf("warning: file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
@@ -705,7 +705,7 @@ int PC_ExpandBuiltinDefine(source_t *source, token_t *deftoken, define_t *define
 										token_t **firsttoken, token_t **lasttoken)
 {
 	token_t *token;
-	unsigned long t;	//	time_t t; //to prevent LCC warning
+	time_t t;
 	char *curtime;
 
 	token = PC_CopyToken(deftoken);
@@ -728,7 +728,7 @@ int PC_ExpandBuiltinDefine(source_t *source, token_t *deftoken, define_t *define
 		{
 			strcpy(token->string, source->scriptstack->filename);
 			token->type = TT_NAME;
-			token->subtype = strlen(token->string);
+			token->subtype = (int) strlen(token->string);
 			*firsttoken = token;
 			*lasttoken = token;
 			break;
@@ -743,7 +743,7 @@ int PC_ExpandBuiltinDefine(source_t *source, token_t *deftoken, define_t *define
 			strcat(token->string, "\"");
 			free(curtime);
 			token->type = TT_NAME;
-			token->subtype = strlen(token->string);
+			token->subtype = (int) strlen(token->string);
 			*firsttoken = token;
 			*lasttoken = token;
 			break;
@@ -757,7 +757,7 @@ int PC_ExpandBuiltinDefine(source_t *source, token_t *deftoken, define_t *define
 			strcat(token->string, "\"");
 			free(curtime);
 			token->type = TT_NAME;
-			token->subtype = strlen(token->string);
+			token->subtype = (int) strlen(token->string);
 			*firsttoken = token;
 			*lasttoken = token;
 			break;
@@ -1325,7 +1325,7 @@ define_t *PC_DefineFromString(char *string)
 
 	PC_InitTokenHeap();
 
-	script = LoadScriptMemory(string, strlen(string), "*extern");
+	script = LoadScriptMemory(string, (int) strlen(string), "*extern");
 	//create a new source
 	Com_Memset(&src, 0, sizeof(source_t));
 	strncpy(src.filename, "*extern", MAX_PATH);
@@ -3220,7 +3220,7 @@ void PC_CheckOpenSourceHandles(void)
 		if (sourceFiles[i])
 		{
 #ifdef BOTLIB
-			botimport.Print(PRT_ERROR, "file %s still open in precompiler\n", sourceFiles[i]->scriptstack->filename);
+			BotImport_Print(PRT_ERROR, "file %s still open in precompiler\n", sourceFiles[i]->scriptstack->filename);
 #endif	//BOTLIB
 		} //end if
 	} //end for

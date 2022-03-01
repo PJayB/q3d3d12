@@ -102,6 +102,7 @@ typedef struct {
 	int			mouseDx[2], mouseDy[2];	// added to by mouse events
 	int			mouseIndex;
 	int			joystickAxis[MAX_JOYSTICK_AXIS];	// set by joystick events
+    int         gamepadAxis[MAX_JOYSTICK_AXIS]; // @pjb: set by gamepad events
 
 	// cgame communicates a few values to the client system
 	int			cgameUserCmdValue;	// current weapon to add to usercmd_t
@@ -294,7 +295,7 @@ typedef struct {
 	netadr_t	authorizeServer;
 
 	// rendering info
-	glconfig_t	glconfig;
+	vdconfig_t	vdconfig;
 	qhandle_t	charSetShader;
 	qhandle_t	whiteShader;
 	qhandle_t	consoleShader;
@@ -306,7 +307,6 @@ extern	clientStatic_t		cls;
 
 extern	vm_t			*cgvm;	// interface to cgame dll or vm
 extern	vm_t			*uivm;	// interface to ui dll or vm
-extern	refexport_t		re;		// interface to refresh .dll
 
 
 //
@@ -381,7 +381,7 @@ int CL_GetPingQueueCount( void );
 void CL_ShutdownRef( void );
 void CL_InitRef( void );
 qboolean CL_CDKeyValidate( const char *key, const char *checksum );
-int CL_ServerStatus( char *serverAddress, char *serverStatusString, int maxLen );
+int CL_ServerStatus( const char *serverAddress, char *serverStatusString, int maxLen );
 
 
 //
@@ -517,3 +517,20 @@ void LAN_SaveServersToCache();
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg);	//int length, const byte *data );
 void CL_Netchan_TransmitNextFragment( netchan_t *chan );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
+
+// @pjb: Account specific client functions
+void            Account_Init( void );
+void            Account_Shutdown( void );
+qboolean        Account_IsServiceEnabled( void );
+qboolean        Account_IsServiceEnabled( void );
+qboolean        Account_IsUserSignedIn( void );
+void            Account_SignIn( int controllerIndex );
+void            Account_SignOut( void );
+qboolean        Account_GetPlayerName( char* buf, int bufLen );
+void            Account_SaveConfiguration( void );
+void            Account_LoadConfiguration( void );
+
+// @pjb: VM declarations
+#include "cgame.public.h"
+#include "ui.public.h"
+

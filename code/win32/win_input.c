@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../client/client.h"
 #include "win_local.h"
+#include "../win/win_shared.h"
+#include "../xinput/xinput_public.h"
 
 
 typedef struct {
@@ -72,8 +74,6 @@ typedef struct {
 } joystickInfo_t;
 
 static	joystickInfo_t	joy;
-
-
 
 cvar_t	*in_midi;
 cvar_t	*in_midiport;
@@ -132,7 +132,7 @@ void IN_ActivateWin32Mouse( void ) {
 	width = GetSystemMetrics (SM_CXSCREEN);
 	height = GetSystemMetrics (SM_CYSCREEN);
 
-	GetWindowRect ( g_wv.hWnd, &window_rect);
+	GetWindowRect ( g_wv.hPrimaryWnd, &window_rect);
 	if (window_rect.left < 0)
 		window_rect.left = 0;
 	if (window_rect.top < 0)
@@ -146,7 +146,7 @@ void IN_ActivateWin32Mouse( void ) {
 
 	SetCursorPos (window_center_x, window_center_y);
 
-	SetCapture ( g_wv.hWnd );
+	SetCapture ( g_wv.hPrimaryWnd );
 	ClipCursor (&window_rect);
 	while (ShowCursor (FALSE) >= 0)
 		;
@@ -313,7 +313,7 @@ qboolean IN_InitDIMouse( void ) {
 	}
 
 	// set the cooperativity level.
-	hr = IDirectInputDevice_SetCooperativeLevel(g_pMouse, g_wv.hWnd,
+    hr = IDirectInputDevice_SetCooperativeLevel(g_pMouse, g_wv.hPrimaryWnd,
 			DISCL_EXCLUSIVE | DISCL_FOREGROUND);
 
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=50
@@ -325,7 +325,11 @@ qboolean IN_InitDIMouse( void ) {
 
 	// set the buffer size to DINPUT_BUFFERSIZE elements.
 	// the buffer size is a DWORD property associated with the device
-	hr = IDirectInputDevice_SetProperty(g_pMouse, DIPROP_BUFFERSIZE, &dipdw.diph);
+    {
+        // @pjb: DIPROP_BUFFERSIZE is whack in 64-bit
+        const GUID* guid = ((const GUID *)(size_t)(1U));
+	    hr = IDirectInputDevice_SetProperty(g_pMouse, guid, &dipdw.diph);
+    }
 
 	if (FAILED(hr)) {
 		Com_Printf ("Couldn't set DI buffersize\n");
@@ -573,16 +577,20 @@ void IN_StartupMouse( void )
 	if ( in_mouse->integer == -1 ) {
 		Com_Printf ("Skipping check for DirectInput\n");
 	} else {
-    if (!g_wv.hWnd)
-    {
-      Com_Printf ("No window for DirectInput mouse init, delaying\n");
-      s_wmv.mouseStartupDelayed = qtrue;
-      return;
-    }
-		if ( IN_InitDIMouse() ) {
-	    s_wmv.mouseInitialized = qtrue;
+
+        if (!g_wv.hPrimaryWnd)
+        {
+          Com_Printf ("No window for DirectInput mouse init, delaying\n");
+          s_wmv.mouseStartupDelayed = qtrue;
+          return;
+        }
+
+        // @pjb: if we're debugging it's useful to have a mouse that works
+		if ( !IsDebuggerPresent() && IN_InitDIMouse() ) {
+	        s_wmv.mouseInitialized = qtrue;
 			return;
 		}
+
 		Com_Printf ("Falling back to Win32 mouse support...\n");
 	}
 	s_wmv.mouseInitialized = qtrue;
@@ -607,13 +615,13 @@ void IN_MouseEvent (int mstate)
 		if ( (mstate & (1<<i)) &&
 			!(s_wmv.oldButtonState & (1<<i)) )
 		{
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, K_MOUSE1 + i, qtrue, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, K_MOUSE1 + i, qtrue, 0, NULL );
 		}
 
 		if ( !(mstate & (1<<i)) &&
 			(s_wmv.oldButtonState & (1<<i)) )
 		{
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, K_MOUSE1 + i, qfalse, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, K_MOUSE1 + i, qfalse, 0, NULL );
 		}
 	}	
 
@@ -659,6 +667,7 @@ void IN_Startup( void ) {
 	IN_StartupMouse ();
 	IN_StartupJoystick ();
 	IN_StartupMIDI();
+    IN_StartupGamepad();
 	Com_Printf ("------------------------------------\n");
 
 	in_mouse->modified = qfalse;
@@ -737,8 +746,11 @@ void IN_Frame (void) {
 	// post joystick events
 	IN_JoyMove();
 
+    // @pjb: handle gamepad events
+    IN_GamepadMove();
+
 	if ( !s_wmv.mouseInitialized ) {
-    if (s_wmv.mouseStartupDelayed && g_wv.hWnd)
+    if (s_wmv.mouseStartupDelayed && g_wv.hPrimaryWnd)
 		{
 			Com_Printf("Proceeding with delayed mouse init\n");
       IN_StartupMouse();
@@ -950,10 +962,10 @@ void IN_JoyMove( void ) {
 	buttonstate = joy.ji.dwButtons;
 	for ( i=0 ; i < joy.jc.wNumButtons ; i++ ) {
 		if ( (buttonstate & (1<<i)) && !(joy.oldbuttonstate & (1<<i)) ) {
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, K_JOY1 + i, qtrue, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, K_JOY1 + i, qtrue, 0, NULL );
 		}
 		if ( !(buttonstate & (1<<i)) && (joy.oldbuttonstate & (1<<i)) ) {
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, K_JOY1 + i, qfalse, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, K_JOY1 + i, qfalse, 0, NULL );
 		}
 	}
 	joy.oldbuttonstate = buttonstate;
@@ -989,11 +1001,11 @@ void IN_JoyMove( void ) {
 	// determine which bits have changed and key an auxillary event for each change
 	for (i=0 ; i < 16 ; i++) {
 		if ( (povstate & (1<<i)) && !(joy.oldpovstate & (1<<i)) ) {
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, joyDirectionKeys[i], qtrue, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, joyDirectionKeys[i], qtrue, 0, NULL );
 		}
 
 		if ( !(povstate & (1<<i)) && (joy.oldpovstate & (1<<i)) ) {
-			Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, joyDirectionKeys[i], qfalse, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, joyDirectionKeys[i], qfalse, 0, NULL );
 		}
 	}
 	joy.oldpovstate = povstate;
@@ -1003,7 +1015,7 @@ void IN_JoyMove( void ) {
 		x = JoyToI( joy.ji.dwUpos ) * in_joyBallScale->value;
 		y = JoyToI( joy.ji.dwVpos ) * in_joyBallScale->value;
 		if ( x || y ) {
-			Sys_QueEvent( g_wv.sysMsgTime, SE_MOUSE, x, y, 0, NULL );
+			Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_MOUSE, x, y, 0, NULL );
 		}
 	}
 }
@@ -1025,7 +1037,7 @@ static void MIDI_NoteOff( int note )
 	if ( qkey > 255 || qkey < K_AUX1 )
 		return;
 
-	Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, qkey, qfalse, 0, NULL );
+	Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, qkey, qfalse, 0, NULL );
 }
 
 static void MIDI_NoteOn( int note, int velocity )
@@ -1040,7 +1052,7 @@ static void MIDI_NoteOn( int note, int velocity )
 	if ( qkey > 255 || qkey < K_AUX1 )
 		return;
 
-	Sys_QueEvent( g_wv.sysMsgTime, SE_KEY, qkey, qtrue, 0, NULL );
+	Sys_QueEvent( SYS_EVENT_FRAME_TIME, SE_KEY, qkey, qtrue, 0, NULL );
 }
 
 static void CALLBACK MidiInProc( HMIDIIN hMidiIn, UINT uMsg, DWORD dwInstance, 
@@ -1127,8 +1139,8 @@ static void IN_StartupMIDI( void )
 	//
 	if ( midiInOpen( &s_midiInfo.hMidiIn, 
 		             in_mididevice->integer,
-					 ( unsigned long ) MidiInProc,
-					 ( unsigned long ) NULL,
+					 ( size_t ) MidiInProc,
+					 ( size_t ) NULL,
 					 CALLBACK_FUNCTION ) != MMSYSERR_NOERROR )
 	{
 		Com_Printf( "WARNING: could not open MIDI device %d: '%s'\n", in_mididevice->integer , s_midiInfo.caps[( int ) in_mididevice->value] );

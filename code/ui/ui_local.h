@@ -57,6 +57,9 @@ extern vmCvar_t	ui_spAwards;
 extern vmCvar_t	ui_spVideos;
 extern vmCvar_t	ui_spSkill;
 
+// @pjb: thumbstick sensitivity when navigating
+extern vmCvar_t	ui_thumbstickThreshold;
+
 extern vmCvar_t	ui_spSelection;
 
 extern vmCvar_t	ui_browserMaster;
@@ -130,6 +133,10 @@ extern vmCvar_t	ui_scoreTime;
 extern vmCvar_t	ui_smallFont;
 extern vmCvar_t	ui_bigFont;
 extern vmCvar_t ui_serverStatusTimeOut;
+
+
+// @pjb: for debugging the nav code
+extern vmCvar_t ui_debugMenuNav;
 
 
 
@@ -355,7 +362,7 @@ extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
 void UI_Report();
 void UI_Load();
 void UI_LoadMenus(const char *menuFile, qboolean reset);
-void _UI_SetActiveMenu( uiMenuCommand_t menu );
+void UI_SetActiveMenu( uiMenuCommand_t menu );
 int UI_AdjustTimeByGame(int time);
 void UI_ShowPostGame(qboolean newHigh);
 void UI_ClearScores();
@@ -582,7 +589,7 @@ typedef struct {
 	int					realtime;
 	int					cursorx;
 	int					cursory;
-	glconfig_t 	glconfig;
+	vdconfig_t 	glconfig;
 	qboolean		debug;
 	qhandle_t		whiteShader;
 	qhandle_t		menuBackShader;
@@ -757,6 +764,11 @@ typedef struct {
 
 typedef struct {
 	displayContextDef_t uiDC;
+
+    // @pjb: a good a place as any?
+    int lthumbstickX;
+    int lthumbstickY;
+
 	int newHighScoreTime;
 	int newBestTime;
 	int showPostGameTime;
@@ -848,10 +860,11 @@ typedef struct {
 extern uiInfo_t uiInfo;
 
 
-extern void			UI_Init( void );
+extern void			UI_Init( qboolean );
 extern void			UI_Shutdown( void );
-extern void			UI_KeyEvent( int key );
-extern void			UI_MouseEvent( int dx, int dy );
+extern void			UI_KeyEvent( int userIndex, int key, qboolean down );
+extern void			UI_MouseEvent( int userIndex, int dx, int dy );
+extern void			UI_GamepadEvent( int userIndex, int dx, int dy ); // @pjb: track thumbsticks for UI nav
 extern void			UI_Refresh( int realtime );
 extern qboolean		UI_ConsoleCommand( int realTime );
 extern float		UI_ClampCvar( float min, float max, float value );
@@ -881,7 +894,6 @@ extern void			UI_ForceMenuOff (void);
 extern char			*UI_Argv( int arg );
 extern char			*UI_Cvar_VariableString( const char *var_name );
 extern void			UI_Refresh( int time );
-extern void			UI_KeyEvent( int key );
 extern void			UI_StartDemoLoop( void );
 extern qboolean		m_entersound;
 void UI_LoadBestScores(const char *map, int game);
@@ -931,8 +943,8 @@ int				trap_Argc( void );
 void			trap_Argv( int n, char *buffer, int bufferLength );
 void			trap_Cmd_ExecuteText( int exec_when, const char *text );	// don't use EXEC_NOW!
 int				trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void			trap_FS_Read( void *buffer, int len, fileHandle_t f );
-void			trap_FS_Write( const void *buffer, int len, fileHandle_t f );
+int 			trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int 			trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void			trap_FS_FCloseFile( fileHandle_t f );
 int				trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 int				trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
@@ -962,7 +974,7 @@ int				trap_Key_GetCatcher( void );
 void			trap_Key_SetCatcher( int catcher );
 void			trap_GetClipboardData( char *buf, int bufsize );
 void			trap_GetClientState( uiClientState_t *state );
-void			trap_GetGlconfig( glconfig_t *glconfig );
+void			trap_GetVideoConfig( vdconfig_t *glconfig );
 int				trap_GetConfigString( int index, char* buff, int buffsize );
 int				trap_LAN_GetServerCount( int source );
 void			trap_LAN_GetServerAddressString( int source, int n, char *buf, int buflen );
@@ -1105,6 +1117,26 @@ void UI_SignupMenu( void );
 //
 void RankStatus_Cache( void );
 void UI_RankStatusMenu( void );
+
+/*
+===============================================================================
+
+@pjb: Account specific traps
+
+===============================================================================
+*/
+int             trap_Account_IsUserSignedIn( void );
+void            trap_Account_SignIn( int controllerIndex );
+void            trap_Account_SignOut( void );
+qboolean        trap_Account_GetPlayerName( char* buf, int bufLen );
+void            trap_Account_LoadConfiguration( void );
+void            trap_Account_SaveConfiguration( void );
+
+qboolean        UI_AccountEnabled( void );
+
+// @pjb: returns false if graphics options should be hidden
+qboolean        UI_IsFixedGraphicsHardware( void );
+
 
 
 // new ui 

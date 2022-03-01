@@ -116,14 +116,21 @@ void S_TransferStereo16 (unsigned long *pbuf, int endtime)
 	int		ls_paintedtime;
 	
 	snd_p = (int *) paintbuffer;
-	ls_paintedtime = s_paintedtime;
+
+    // @pjb: if the audio system double or triple buffers, we want to start over each time
+    if ( dma.manybuffered ) {
+        endtime -= s_paintedtime;
+    	ls_paintedtime = 0;
+    } else {
+        ls_paintedtime = s_paintedtime;
+    }
 
 	while (ls_paintedtime < endtime)
 	{
 	// handle recirculating buffer issues
 		lpos = ls_paintedtime & ((dma.samples>>1)-1);
 
-		snd_out = (short *) pbuf + (lpos<<1);
+        snd_out = (short *) pbuf + (lpos<<1);
 
 		snd_linear_count = (dma.samples>>1) - lpos;
 		if (ls_paintedtime + snd_linear_count > endtime)

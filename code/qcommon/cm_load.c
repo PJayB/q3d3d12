@@ -580,7 +580,7 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 #ifndef BSPC
 	cm_noAreas = Cvar_Get ("cm_noAreas", "0", CVAR_CHEAT);
 	cm_noCurves = Cvar_Get ("cm_noCurves", "0", CVAR_CHEAT);
-	cm_playerCurveClip = Cvar_Get ("cm_playerCurveClip", "1", CVAR_ARCHIVE|CVAR_CHEAT );
+	cm_playerCurveClip = Cvar_Get ("cm_playerCurveClip", "1", CVAR_ARCHIVE|CVAR_CHEAT|CVAR_SYSTEM_SET );
 #endif
 	Com_DPrintf( "CM_LoadMap( %s, %i )\n", name, clientload );
 
@@ -623,9 +623,14 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum ) {
 		((int *)&header)[i] = LittleLong ( ((int *)&header)[i]);
 	}
 
-	if ( header.version != BSP_VERSION ) {
+    if ( header.ident != BSP_IDENT && header.ident != BSPX_IDENT ) {
+		Com_Error (ERR_DROP, "CM_LoadMap: %s is not an IBSP or XBSP.",
+		name );
+    }
+
+	if ( header.version != BSP_VERSION &&  header.version != BSPX_VERSION ) {
 		Com_Error (ERR_DROP, "CM_LoadMap: %s has wrong version number (%i should be %i)"
-		, name, header.version, BSP_VERSION );
+		, name, header.version, ( header.ident == BSP_IDENT ) ? BSP_VERSION : BSPX_VERSION );
 	}
 
 	cmod_base = (byte *)buf;

@@ -95,7 +95,9 @@ static sfxHandle_t ConfirmMenu_Key( int key ) {
 	case K_LEFTARROW:
 	case K_KP_RIGHTARROW:
 	case K_RIGHTARROW:
-		key = K_TAB;
+    case K_GAMEPAD_DPAD_LEFT: // @pjb
+    case K_GAMEPAD_DPAD_RIGHT: // @pjb
+		key = K_DOWNARROW;
 		break;
 
 	case 'n':

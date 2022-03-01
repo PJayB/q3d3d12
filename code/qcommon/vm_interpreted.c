@@ -518,7 +518,8 @@ nextInstruction2:
 				*(int *)&image[ programStack + 4 ] = -1 - programCounter;
 
 //VM_LogSyscalls( (int *)&image[ programStack + 4 ] );
-				r = vm->systemCall( (int *)&image[ programStack + 4 ] );
+                // @pjb: TODO: probably want to check this
+				r = vm->systemCall( (vmArg_t *)&image[ programStack + 4 ] );
 
 #ifdef DEBUG_VM
 				// this is just our stack frame pointer, only needed

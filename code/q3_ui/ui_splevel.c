@@ -726,6 +726,7 @@ static void UI_SPLevelMenu_Init( void ) {
 	memset( &levelMenuInfo, 0, sizeof(levelMenuInfo) );
 	levelMenuInfo.menu.fullscreen = qtrue;
 	levelMenuInfo.menu.wrapAround = qtrue;
+    levelMenuInfo.menu.custom_nav = qtrue;
 	levelMenuInfo.menu.draw = UI_SPLevelMenu_MenuDraw;
 
 	UI_SPLevelMenu_Cache();
@@ -747,6 +748,8 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_leftarrow.width				= 16;
 	levelMenuInfo.item_leftarrow.height				= 114;
 	levelMenuInfo.item_leftarrow.focuspic			= ART_ARROW_FOCUS;
+    levelMenuInfo.item_leftarrow.generic.navDown    = &levelMenuInfo.item_back;
+    levelMenuInfo.item_leftarrow.generic.navRight   = &levelMenuInfo.item_maps[0];
 
 	levelMenuInfo.item_maps[0].generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_maps[0].generic.name			= levelMenuInfo.levelPicNames[0];
@@ -757,6 +760,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_maps[0].generic.callback		= UI_SPLevelMenu_LevelEvent;
 	levelMenuInfo.item_maps[0].width				= 128;
 	levelMenuInfo.item_maps[0].height				= 96;
+    levelMenuInfo.item_maps[0].generic.navLeft      = &levelMenuInfo.item_leftarrow;
+    levelMenuInfo.item_maps[0].generic.navRight     = &levelMenuInfo.item_maps[1];
+    levelMenuInfo.item_maps[0].generic.navDown      = &levelMenuInfo.item_back;
 
 	levelMenuInfo.item_maps[1].generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_maps[1].generic.name			= levelMenuInfo.levelPicNames[1];
@@ -767,6 +773,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_maps[1].generic.callback		= UI_SPLevelMenu_LevelEvent;
 	levelMenuInfo.item_maps[1].width				= 128;
 	levelMenuInfo.item_maps[1].height				= 96;
+    levelMenuInfo.item_maps[1].generic.navLeft      = &levelMenuInfo.item_maps[0];
+    levelMenuInfo.item_maps[1].generic.navRight     = &levelMenuInfo.item_maps[2];
+    levelMenuInfo.item_maps[1].generic.navDown      = &levelMenuInfo.item_reset;
 
 	levelMenuInfo.item_maps[2].generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_maps[2].generic.name			= levelMenuInfo.levelPicNames[2];
@@ -777,6 +786,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_maps[2].generic.callback		= UI_SPLevelMenu_LevelEvent;
 	levelMenuInfo.item_maps[2].width				= 128;
 	levelMenuInfo.item_maps[2].height				= 96;
+    levelMenuInfo.item_maps[2].generic.navLeft      = &levelMenuInfo.item_maps[1];
+    levelMenuInfo.item_maps[2].generic.navRight     = &levelMenuInfo.item_maps[3];
+    levelMenuInfo.item_maps[2].generic.navDown      = &levelMenuInfo.item_custom;
 
 	levelMenuInfo.item_maps[3].generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_maps[3].generic.name			= levelMenuInfo.levelPicNames[3];
@@ -787,6 +799,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_maps[3].generic.callback		= UI_SPLevelMenu_LevelEvent;
 	levelMenuInfo.item_maps[3].width				= 128;
 	levelMenuInfo.item_maps[3].height				= 96;
+    levelMenuInfo.item_maps[3].generic.navLeft      = &levelMenuInfo.item_maps[2];
+    levelMenuInfo.item_maps[3].generic.navRight     = &levelMenuInfo.item_rightarrow;
+    levelMenuInfo.item_maps[3].generic.navDown      = &levelMenuInfo.item_next;
 
 	levelMenuInfo.item_rightarrow.generic.type		= MTYPE_BITMAP;
 	levelMenuInfo.item_rightarrow.generic.name		= ART_ARROW;
@@ -798,6 +813,8 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_rightarrow.width				= -16;
 	levelMenuInfo.item_rightarrow.height			= 114;
 	levelMenuInfo.item_rightarrow.focuspic			= ART_ARROW_FOCUS;
+	levelMenuInfo.item_rightarrow.generic.navLeft   = &levelMenuInfo.item_maps[3];
+	levelMenuInfo.item_rightarrow.generic.navDown   = &levelMenuInfo.item_next;
 
 	trap_Cvar_VariableStringBuffer( "model", levelMenuInfo.playerModel, sizeof(levelMenuInfo.playerModel) );
 	PlayerIcon( levelMenuInfo.playerModel, levelMenuInfo.playerPicName, sizeof(levelMenuInfo.playerPicName) );
@@ -850,6 +867,8 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_back.width					= 128;
 	levelMenuInfo.item_back.height					= 64;
 	levelMenuInfo.item_back.focuspic				= ART_BACK1;
+	levelMenuInfo.item_back.generic.navUp           = &levelMenuInfo.item_leftarrow;
+	levelMenuInfo.item_back.generic.navRight        = &levelMenuInfo.item_reset;
 
 	levelMenuInfo.item_reset.generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_reset.generic.name			= ART_RESET0;
@@ -861,6 +880,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_reset.width					= 128;
 	levelMenuInfo.item_reset.height					= 64;
 	levelMenuInfo.item_reset.focuspic				= ART_RESET1;
+	levelMenuInfo.item_reset.generic.navUp          = &levelMenuInfo.item_maps[0];
+	levelMenuInfo.item_reset.generic.navLeft        = &levelMenuInfo.item_back;
+	levelMenuInfo.item_reset.generic.navRight       = &levelMenuInfo.item_custom;
 
 	levelMenuInfo.item_custom.generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_custom.generic.name			= ART_CUSTOM0;
@@ -872,6 +894,9 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_custom.width					= 128;
 	levelMenuInfo.item_custom.height				= 64;
 	levelMenuInfo.item_custom.focuspic				= ART_CUSTOM1;
+	levelMenuInfo.item_custom.generic.navUp         = &levelMenuInfo.item_maps[3];
+	levelMenuInfo.item_custom.generic.navLeft       = &levelMenuInfo.item_reset;
+	levelMenuInfo.item_custom.generic.navRight      = &levelMenuInfo.item_next;
 
 	levelMenuInfo.item_next.generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_next.generic.name			= ART_FIGHT0;
@@ -883,6 +908,8 @@ static void UI_SPLevelMenu_Init( void ) {
 	levelMenuInfo.item_next.width					= 128;
 	levelMenuInfo.item_next.height					= 64;
 	levelMenuInfo.item_next.focuspic				= ART_FIGHT1;
+	levelMenuInfo.item_next.generic.navUp           = &levelMenuInfo.item_rightarrow;
+	levelMenuInfo.item_next.generic.navLeft         = &levelMenuInfo.item_custom;
 
 	levelMenuInfo.item_null.generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.item_null.generic.flags			= QMF_LEFT_JUSTIFY|QMF_MOUSEONLY|QMF_SILENT;

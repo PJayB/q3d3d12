@@ -1227,7 +1227,7 @@ static void CG_Text_Paint_Limit(float *maxX, float x, float y, float scale, vec4
 		}
 		useScale = scale * font->glyphScale;
 		trap_R_SetColor( color );
-    len = strlen(text);					 
+    len = (int) strlen(text);					 
 		if (limit > 0 && len > limit) {
 			len = limit;
 		}

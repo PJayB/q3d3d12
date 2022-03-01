@@ -195,7 +195,7 @@ void UI_ClearScores() {
 	if (count > 0) {
 		gameFile = gameList;
 		for ( i = 0; i < count; i++ ) {
-			len = strlen(gameFile);
+			len = (int) strlen(gameFile);
 			if (trap_FS_FOpenFile(va("games/%s",gameFile), &f, FS_WRITE) >= 0) {
 				trap_FS_Write(&size, sizeof(int), f);
 				trap_FS_Write(&newInfo, size, f);
@@ -379,14 +379,6 @@ qboolean UI_ConsoleCommand( int realTime ) {
 	}
 
 	return qfalse;
-}
-
-/*
-=================
-UI_Shutdown
-=================
-*/
-void UI_Shutdown( void ) {
 }
 
 /*

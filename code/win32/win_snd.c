@@ -54,20 +54,20 @@ static const char *DSoundError( int error ) {
 	return "unknown";
 }
 
+int DirectSound_InitDS( void );
+
 /*
 ==================
 SNDDMA_Shutdown
 ==================
 */
-void SNDDMA_Shutdown( void ) {
-	Com_DPrintf( "Shutting down sound system\n" );
-
+void DirectSound_Shutdown( void ) {
 	if ( pDS ) {
 		Com_DPrintf( "Destroying DS buffers\n" );
 		if ( pDS )
 		{
 			Com_DPrintf( "...setting NORMAL coop level\n" );
-			pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hWnd, DSSCL_PRIORITY );
+			pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hPrimaryWnd, DSSCL_PRIORITY );
 		}
 
 		if ( pDSBuf )
@@ -114,14 +114,13 @@ Initialize direct sound
 Returns false if failed
 ==================
 */
-qboolean SNDDMA_Init(void) {
+qboolean DirectSound_Init(void) {
 
-	memset ((void *)&dma, 0, sizeof (dma));
 	dsound_init = 0;
 
 	CoInitialize(NULL);
 
-	if ( !SNDDMA_InitDS () ) {
+	if ( !DirectSound_InitDS () ) {
 		return qfalse;
 	}
 
@@ -148,7 +147,7 @@ DEFINE_GUID(IID_IDirectSound8, 0xC50A7E93, 0xF395, 0x4834, 0x9E, 0xF6, 0x7F, 0xA
 DEFINE_GUID(IID_IDirectSound, 0x279AFA83, 0x4981, 0x11CE, 0xA5, 0x21, 0x00, 0x20, 0xAF, 0x0B, 0xE5, 0x60);
 
 
-int SNDDMA_InitDS ()
+int DirectSound_InitDS ()
 {
 	HRESULT			hresult;
 	DSBUFFERDESC	dsbuf;
@@ -175,7 +174,7 @@ int SNDDMA_InitDS ()
 
 	Com_DPrintf("...setting DSSCL_PRIORITY coop level: " );
 
-	if ( DS_OK != pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hWnd, DSSCL_PRIORITY ) )	{
+	if ( DS_OK != pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hPrimaryWnd, DSSCL_PRIORITY ) )	{
 		Com_Printf ("failed\n");
 		SNDDMA_Shutdown ();
 		return qfalse;
@@ -261,10 +260,10 @@ int SNDDMA_InitDS ()
 
 	sample16 = (dma.samplebits/8) - 1;
 
-	SNDDMA_BeginPainting ();
+	SNDDMA_BeginPainting ( dma.samples );
 	if (dma.buffer)
 		memset(dma.buffer, 0, dma.samples * dma.samplebits/8);
-	SNDDMA_Submit ();
+	SNDDMA_Submit(0, dma.samples);
 	return 1;
 }
 /*
@@ -276,7 +275,7 @@ inside the recirculating dma buffer, so the mixing code will know
 how many sample are required to fill it up.
 ===============
 */
-int SNDDMA_GetDMAPos( void ) {
+int DirectSound_GetDMAPos( void ) {
 	MMTIME	mmtime;
 	int		s;
 	DWORD	dwWrite;
@@ -304,12 +303,14 @@ SNDDMA_BeginPainting
 Makes sure dma.buffer is valid
 ===============
 */
-void SNDDMA_BeginPainting( void ) {
+void DirectSound_BeginPainting(  int reserve  ) {
 	int		reps;
 	DWORD	dwSize2;
 	DWORD	*pbuf, *pbuf2;
 	HRESULT	hresult;
 	DWORD	dwStatus;
+
+    (void)( reserve );
 
 	if ( !pDSBuf ) {
 		return;
@@ -359,7 +360,11 @@ Send sound to device if buffer isn't really the dma buffer
 Also unlocks the dsound buffer
 ===============
 */
-void SNDDMA_Submit( void ) {
+void DirectSound_Submit(  int offset, int length  ) {
+
+    (void)( offset );
+    (void)( length );
+
     // unlock the dsound buffer
 	if ( pDSBuf ) {
 		pDSBuf->lpVtbl->Unlock(pDSBuf, dma.buffer, locksize, NULL, 0);
@@ -374,14 +379,14 @@ SNDDMA_Activate
 When we change windows we need to do this
 =================
 */
-void SNDDMA_Activate( void ) {
+void DirectSound_Activate( void ) {
 	if ( !pDS ) {
 		return;
 	}
 
-	if ( DS_OK != pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hWnd, DSSCL_PRIORITY ) )	{
+	if ( DS_OK != pDS->lpVtbl->SetCooperativeLevel( pDS, g_wv.hPrimaryWnd, DSSCL_PRIORITY ) )	{
 		Com_Printf ("sound SetCooperativeLevel failed\n");
-		SNDDMA_Shutdown ();
+		//SNDDMA_Shutdown ();
 	}
 }
 

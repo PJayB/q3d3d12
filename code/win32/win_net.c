@@ -140,6 +140,7 @@ void NetadrToSockadr( netadr_t *a, struct sockaddr *s ) {
 void SockadrToNetadr( struct sockaddr *s, netadr_t *a ) {
 	if (s->sa_family == AF_INET) {
 		a->type = NA_IP;
+        Com_Memset( a->ip, 0, sizeof( a->ip ) ); // @pjb: clear IPv6 bits
 		*(int *)&a->ip = ((struct sockaddr_in *)s)->sin_addr.s_addr;
 		a->port = ((struct sockaddr_in *)s)->sin_port;
 	}
@@ -488,7 +489,7 @@ int NET_IPSocket( char *net_interface, int port ) {
 	}
 
 	// make it non-blocking
-	if( ioctlsocket( newsocket, FIONBIO, &_true ) == SOCKET_ERROR ) {
+	if( ioctlsocket( newsocket, FIONBIO, (u_long *) &_true ) == SOCKET_ERROR ) {
 		Com_Printf( "WARNING: UDP_OpenSocket: ioctl FIONBIO: %s\n", NET_ErrorString() );
 		return 0;
 	}
@@ -623,8 +624,8 @@ void NET_OpenSocks( int port ) {
 		int		plen;
 
 		// build the request
-		ulen = strlen( net_socksUsername->string );
-		plen = strlen( net_socksPassword->string );
+		ulen = (int) strlen( net_socksUsername->string );
+		plen = (int) strlen( net_socksPassword->string );
 
 		buf[0] = 1;		// username/password authentication version
 		buf[1] = ulen;

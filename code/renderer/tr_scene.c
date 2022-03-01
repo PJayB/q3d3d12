@@ -51,7 +51,9 @@ void R_ToggleSmpFrame( void ) {
 		tr.smpFrame = 0;
 	}
 
-	backEndData[tr.smpFrame]->commands.used = 0;
+	// @pjb:
+    //backEndData[tr.smpFrame]->commands.used = 0;
+    assert(backEndData[tr.smpFrame]->commands.used == 0);
 
 	r_firstSceneDrawSurf = 0;
 
@@ -127,7 +129,7 @@ void RE_AddPolyToScene( qhandle_t hShader, int numVerts, const polyVert_t *verts
 	}
 
 	if ( !hShader ) {
-		ri.Printf( PRINT_WARNING, "WARNING: RE_AddPolyToScene: NULL poly shader\n");
+		RI_Printf( PRINT_WARNING, "WARNING: RE_AddPolyToScene: NULL poly shader\n");
 		return;
 	}
 
@@ -139,7 +141,7 @@ void RE_AddPolyToScene( qhandle_t hShader, int numVerts, const polyVert_t *verts
       since we don't plan on changing the const and making for room for those effects
       simply cut this message to developer only
       */
-			ri.Printf( PRINT_DEVELOPER, "WARNING: RE_AddPolyToScene: r_max_polys or r_max_polyverts reached\n");
+			RI_Printf( PRINT_DEVELOPER, "WARNING: RE_AddPolyToScene: r_max_polys or r_max_polyverts reached\n");
 			return;
 		}
 
@@ -151,12 +153,6 @@ void RE_AddPolyToScene( qhandle_t hShader, int numVerts, const polyVert_t *verts
 		
 		Com_Memcpy( poly->verts, &verts[numVerts*j], numVerts * sizeof( *verts ) );
 
-		if ( glConfig.hardwareType == GLHW_RAGEPRO ) {
-			poly->verts->modulate[0] = 255;
-			poly->verts->modulate[1] = 255;
-			poly->verts->modulate[2] = 255;
-			poly->verts->modulate[3] = 255;
-		}
 		// done.
 		r_numpolys++;
 		r_numpolyverts += numVerts;
@@ -213,7 +209,7 @@ void RE_AddRefEntityToScene( const refEntity_t *ent ) {
 		return;
 	}
 	if ( ent->reType < 0 || ent->reType >= RT_MAX_REF_ENTITY_TYPE ) {
-		ri.Error( ERR_DROP, "RE_AddRefEntityToScene: bad reType %i", ent->reType );
+		Com_Error( ERR_DROP, "RE_AddRefEntityToScene: bad reType %i", ent->reType );
 	}
 
 	backEndData[tr.smpFrame]->entities[r_numentities].e = *ent;
@@ -239,10 +235,6 @@ void RE_AddDynamicLightToScene( const vec3_t org, float intensity, float r, floa
 		return;
 	}
 	if ( intensity <= 0 ) {
-		return;
-	}
-	// these cards don't have the correct blend mode
-	if ( glConfig.hardwareType == GLHW_RIVA128 || glConfig.hardwareType == GLHW_PERMEDIA2 ) {
 		return;
 	}
 	dl = &backEndData[tr.smpFrame]->dlights[r_numdlights++];
@@ -292,16 +284,15 @@ void RE_RenderScene( const refdef_t *fd ) {
 	if ( !tr.registered ) {
 		return;
 	}
-	GLimp_LogComment( "====== RE_RenderScene =====\n" );
 
 	if ( r_norefresh->integer ) {
 		return;
 	}
 
-	startTime = ri.Milliseconds();
+	startTime = RI_ScaledMilliseconds();
 
 	if (!tr.world && !( fd->rdflags & RDF_NOWORLDMODEL ) ) {
-		ri.Error (ERR_DROP, "R_RenderScene: NULL worldmodel");
+		Com_Error (ERR_DROP, "R_RenderScene: NULL worldmodel");
 	}
 
 	Com_Memcpy( tr.refdef.text, fd->text, sizeof( tr.refdef.text ) );
@@ -361,8 +352,7 @@ void RE_RenderScene( const refdef_t *fd ) {
 	// turn off dynamic lighting globally by clearing all the
 	// dlights if it needs to be disabled or if vertex lighting is enabled
 	if ( r_dynamiclight->integer == 0 ||
-		 r_vertexLight->integer == 1 ||
-		 glConfig.hardwareType == GLHW_PERMEDIA2 ) {
+		 r_vertexLight->integer == 1 ) {
 		tr.refdef.num_dlights = 0;
 	}
 
@@ -382,10 +372,24 @@ void RE_RenderScene( const refdef_t *fd ) {
 	//
 	Com_Memset( &parms, 0, sizeof( parms ) );
 	parms.viewportX = tr.refdef.x;
-	parms.viewportY = glConfig.vidHeight - ( tr.refdef.y + tr.refdef.height );
+	parms.viewportY = vdConfig.vidHeight - ( tr.refdef.y + tr.refdef.height );
 	parms.viewportWidth = tr.refdef.width;
 	parms.viewportHeight = tr.refdef.height;
 	parms.isPortal = qfalse;
+    parms.passFeatures = PASSF_DEPTH | PASSF_COLOR;
+
+    // @pjb: translate the refdef flags into pass features
+    if ( fd->rdflags & RDF_SHADOW ) {
+        parms.passFeatures = PASSF_DEPTH;
+        assert( (fd->rdflags & RDF_POST_PROCESS) == 0 );
+        assert( (fd->rdflags & RDF_DEBUG) == 0 );
+    }
+    if ( fd->rdflags & RDF_DEBUG ) { 
+        parms.passFeatures |= PASSF_DEBUG;
+    }
+    if ( fd->rdflags & RDF_POST_PROCESS ) {
+        parms.passFeatures |= PASSF_POST;
+    }
 
 	parms.fovX = tr.refdef.fov_x;
 	parms.fovY = tr.refdef.fov_y;
@@ -405,5 +409,5 @@ void RE_RenderScene( const refdef_t *fd ) {
 	r_firstSceneDlight = r_numdlights;
 	r_firstScenePoly = r_numpolys;
 
-	tr.frontEndMsec += ri.Milliseconds() - startTime;
+	tr.frontEndMsec += RI_ScaledMilliseconds() - startTime;
 }

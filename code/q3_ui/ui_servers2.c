@@ -1155,17 +1155,12 @@ PunkBuster_Confirm
 =================
 */
 static void Punkbuster_ConfirmEnable( qboolean result ) {
-	if (result)
-	{		
-		trap_SetPbClStatus(1);
-	}
 	g_arenaservers.punkbuster.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "cl_punkbuster" ) );
 }
 
 static void Punkbuster_ConfirmDisable( qboolean result ) {
 	if (result)
 	{
-		trap_SetPbClStatus(0);
 		UI_Message( punkbuster_msg );
 	}
 	g_arenaservers.punkbuster.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "cl_punkbuster" ) );
@@ -1337,6 +1332,7 @@ static void ArenaServers_MenuInit( void ) {
 
 	g_arenaservers.menu.fullscreen = qtrue;
 	g_arenaservers.menu.wrapAround = qtrue;
+    g_arenaservers.menu.custom_nav = qtrue;
 	g_arenaservers.menu.draw       = ArenaServers_MenuDraw;
 	g_arenaservers.menu.key        = ArenaServers_MenuKey;
 
@@ -1357,6 +1353,8 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.master.generic.x				= 320;
 	g_arenaservers.master.generic.y				= y;
 	g_arenaservers.master.itemnames				= master_items;
+    g_arenaservers.master.generic.navDown       = &g_arenaservers.gametype;
+    g_arenaservers.master.generic.navRight    = &g_arenaservers.punkbuster;
 
 	y += SMALLCHAR_HEIGHT;
 	g_arenaservers.gametype.generic.type		= MTYPE_SPINCONTROL;
@@ -1367,6 +1365,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.gametype.generic.x			= 320;
 	g_arenaservers.gametype.generic.y			= y;
 	g_arenaservers.gametype.itemnames			= servertype_items;
+    g_arenaservers.gametype.generic.navUp       = &g_arenaservers.master;
+    g_arenaservers.gametype.generic.navDown     = &g_arenaservers.sortkey;
+    g_arenaservers.gametype.generic.navRight    = &g_arenaservers.punkbuster;
 
 	y += SMALLCHAR_HEIGHT;
 	g_arenaservers.sortkey.generic.type			= MTYPE_SPINCONTROL;
@@ -1377,6 +1378,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.sortkey.generic.x			= 320;
 	g_arenaservers.sortkey.generic.y			= y;
 	g_arenaservers.sortkey.itemnames			= sortkey_items;
+    g_arenaservers.sortkey.generic.navUp        = &g_arenaservers.gametype;
+    g_arenaservers.sortkey.generic.navDown      = &g_arenaservers.showfull;
+    g_arenaservers.sortkey.generic.navRight    = &g_arenaservers.punkbuster;
 
 	y += SMALLCHAR_HEIGHT;
 	g_arenaservers.showfull.generic.type		= MTYPE_RADIOBUTTON;
@@ -1386,6 +1390,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.showfull.generic.id			= ID_SHOW_FULL;
 	g_arenaservers.showfull.generic.x			= 320;
 	g_arenaservers.showfull.generic.y			= y;
+    g_arenaservers.showfull.generic.navUp       = &g_arenaservers.sortkey;
+    g_arenaservers.showfull.generic.navDown     = &g_arenaservers.showempty;
+    g_arenaservers.showfull.generic.navRight    = &g_arenaservers.punkbuster;
 
 	y += SMALLCHAR_HEIGHT;
 	g_arenaservers.showempty.generic.type		= MTYPE_RADIOBUTTON;
@@ -1395,6 +1402,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.showempty.generic.id			= ID_SHOW_EMPTY;
 	g_arenaservers.showempty.generic.x			= 320;
 	g_arenaservers.showempty.generic.y			= y;
+    g_arenaservers.showempty.generic.navUp       = &g_arenaservers.showfull;
+    g_arenaservers.showempty.generic.navDown     = &g_arenaservers.list;
+    g_arenaservers.showempty.generic.navRight    = &g_arenaservers.punkbuster;
 
 	y += 3 * SMALLCHAR_HEIGHT;
 	g_arenaservers.list.generic.type			= MTYPE_SCROLLLIST;
@@ -1409,6 +1419,9 @@ static void ArenaServers_MenuInit( void ) {
 	for( i = 0; i < MAX_LISTBOXITEMS; i++ ) {
 		g_arenaservers.items[i] = g_arenaservers.table[i].buff;
 	}
+    g_arenaservers.list.generic.navUp           = &g_arenaservers.showempty;
+    g_arenaservers.list.generic.navDown         = &g_arenaservers.back;
+    g_arenaservers.list.generic.navRight        = &g_arenaservers.up;
 
 	g_arenaservers.mappic.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.mappic.generic.flags			= QMF_LEFT_JUSTIFY|QMF_INACTIVE;
@@ -1436,6 +1449,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.up.width						= 64;
 	g_arenaservers.up.height					= 64;
 	g_arenaservers.up.focuspic					= ART_ARROWS_UP;
+    g_arenaservers.up.generic.navLeft           = &g_arenaservers.list;
+    g_arenaservers.up.generic.navUp             = &g_arenaservers.punkbuster;
+    g_arenaservers.up.generic.navDown           = &g_arenaservers.down;
 
 	g_arenaservers.down.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.down.generic.flags			= QMF_LEFT_JUSTIFY|QMF_PULSEIFFOCUS|QMF_MOUSEONLY;
@@ -1446,6 +1462,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.down.width					= 64;
 	g_arenaservers.down.height					= 64;
 	g_arenaservers.down.focuspic				= ART_ARROWS_DOWN;
+    g_arenaservers.down.generic.navLeft         = &g_arenaservers.list;
+    g_arenaservers.down.generic.navUp           = &g_arenaservers.up;
+    g_arenaservers.down.generic.navDown         = &g_arenaservers.go;
 
 	y = 376;
 	g_arenaservers.status.generic.type		= MTYPE_TEXT;
@@ -1484,6 +1503,8 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.back.width				= 128;
 	g_arenaservers.back.height				= 64;
 	g_arenaservers.back.focuspic			= ART_BACK1;
+    g_arenaservers.back.generic.navUp       = &g_arenaservers.list;
+    g_arenaservers.back.generic.navRight    = &g_arenaservers.specify;
 
 	g_arenaservers.specify.generic.type	    = MTYPE_BITMAP;
 	g_arenaservers.specify.generic.name		= ART_SPECIFY0;
@@ -1495,6 +1516,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.specify.width  		    = 128;
 	g_arenaservers.specify.height  		    = 64;
 	g_arenaservers.specify.focuspic         = ART_SPECIFY1;
+    g_arenaservers.specify.generic.navUp    = &g_arenaservers.list;
+    g_arenaservers.specify.generic.navLeft  = &g_arenaservers.back;
+    g_arenaservers.specify.generic.navRight = &g_arenaservers.refresh;
 
 	g_arenaservers.refresh.generic.type		= MTYPE_BITMAP;
 	g_arenaservers.refresh.generic.name		= ART_REFRESH0;
@@ -1506,6 +1530,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.refresh.width			= 128;
 	g_arenaservers.refresh.height			= 64;
 	g_arenaservers.refresh.focuspic			= ART_REFRESH1;
+    g_arenaservers.refresh.generic.navUp    = &g_arenaservers.list;
+    g_arenaservers.refresh.generic.navLeft  = &g_arenaservers.specify;
+    g_arenaservers.refresh.generic.navRight = &g_arenaservers.create;
 
 	g_arenaservers.create.generic.type		= MTYPE_BITMAP;
 	g_arenaservers.create.generic.name		= ART_CREATE0;
@@ -1517,6 +1544,9 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.create.width				= 128;
 	g_arenaservers.create.height			= 64;
 	g_arenaservers.create.focuspic			= ART_CREATE1;
+    g_arenaservers.create.generic.navUp     = &g_arenaservers.list;
+    g_arenaservers.create.generic.navLeft   = &g_arenaservers.refresh;
+    g_arenaservers.create.generic.navRight  = &g_arenaservers.go;
 
 	g_arenaservers.go.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.go.generic.name			= ART_CONNECT0;
@@ -1528,6 +1558,8 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.go.width					= 128;
 	g_arenaservers.go.height				= 64;
 	g_arenaservers.go.focuspic				= ART_CONNECT1;
+    g_arenaservers.go.generic.navUp         = &g_arenaservers.down;
+    g_arenaservers.go.generic.navLeft       = &g_arenaservers.create;
 
 	g_arenaservers.punkbuster.generic.type			= MTYPE_SPINCONTROL;
 	g_arenaservers.punkbuster.generic.name			= "Punkbuster:";
@@ -1537,6 +1569,8 @@ static void ArenaServers_MenuInit( void ) {
 	g_arenaservers.punkbuster.generic.x				= 480+32;
 	g_arenaservers.punkbuster.generic.y				= 144;
 	g_arenaservers.punkbuster.itemnames				= punkbuster_items;
+    g_arenaservers.punkbuster.generic.navLeft       = &g_arenaservers.showempty;
+    g_arenaservers.punkbuster.generic.navDown       = &g_arenaservers.list;
 	
 	g_arenaservers.pblogo.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.pblogo.generic.name			= ART_PUNKBUSTER;

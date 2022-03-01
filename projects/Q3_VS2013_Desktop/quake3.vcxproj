@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|Win32">
+			<Configuration>Debug</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Profile|Win32">
+			<Configuration>Profile</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|Win32">
+			<Configuration>Release</Configuration>
+			<Platform>Win32</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Profile|x64">
+			<Configuration>Profile</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{B146159F-0849-454E-8675-11C474FE21DA}</ProjectGuid>
+		<DefaultLanguage>en-US</DefaultLanguage>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<PlatformToolset>v120</PlatformToolset>
+		<UseDebugLibraries>true</UseDebugLibraries>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	<PropertyGroup>
+		<_ProjectFileVersion>11.0.60610.1</_ProjectFileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<IncrementalLinking>true</IncrementalLinking>
+		<TargetName>quake3</TargetName>
+		<OutDir>$(SolutionDir)..\build\bin\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+		<IntDir>$(SolutionDir)..\build\int\$(SolutionName)\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+	</PropertyGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;DEBUG;_DEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>Disabled</Optimization>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<DisableOptimizations>true</DisableOptimizations>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX86</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;NDEBUG;PROFILE;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX86</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;NDEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+			<TreatWarningAsError>true</TreatWarningAsError>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX86</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;DEBUG;_DEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>Disabled</Optimization>
+			<RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<DisableOptimizations>true</DisableOptimizations>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;NDEBUG;PROFILE;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<EnableDebuggingInformation>true</EnableDebuggingInformation>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<ClCompile>
+			<AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+			<AdditionalIncludeDirectories>$(SolutionDir)..\build\qabi\$(SolutionName)\$(Configuration)\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>WIN32;_WINDOWS;Q_HAS_D3D11;Q_HAS_D3D12;Q_SKIP_DLIGHT_PROJECTION;NDEBUG;_CRT_SECURE_NO_WARNINGS;PRIORITIZE_LOOSE_FILES;QUAKE3;MISSIONPACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<TreatSpecificWarningsAsErrors>%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+			<UndefinePreprocessorDefinitions>%(UndefinePreprocessorDefinitions)</UndefinePreprocessorDefinitions>
+			<DisableSpecificWarnings>4201;4204;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+			<Optimization>MaxSpeed</Optimization>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<CompileAsWinRT>False</CompileAsWinRT>
+			<WarningLevel>Level4</WarningLevel>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+			<TreatWarningAsError>true</TreatWarningAsError>
+		</ClCompile>
+		<FxCompile>
+			<AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<ShaderModel>5.0</ShaderModel>
+			<ObjectFileOutput>$(OutDir)baseq3\hlsl\%(Filename).cso</ObjectFileOutput>
+		</FxCompile>
+		<Link>
+			<AdditionalDependencies>xaudio2.lib;xinput.lib;winmm.lib;wsock32.lib;dxgi.lib;d3d11.lib;d3d12.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
+			<AdditionalManifestDependencies>%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Subsystem>Windows</Subsystem>
+			<TargetMachine>MachineX64</TargetMachine>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<IncrementalLinking>false</IncrementalLinking>
+			<UseDebugLibraries>false</UseDebugLibraries>
+		</Link>
+		<Lib>
+			<AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+			<AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+			<IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+			<RemoveObjects>%(RemoveObjects)</RemoveObjects>
+			<ForceSymbolReferences>%(ForceSymbolReferences)</ForceSymbolReferences>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+		</Lib>
+		<ResourceCompile>
+			<PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<SuppressStartupBanner>true</SuppressStartupBanner>
+			<Culture>0x0409</Culture>
+		</ResourceCompile>
+		<PostBuildEvent>
+			<Command>..\..\code\deploydx12sdkbits.bat "$(OutDir)"</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\win32\win_input.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_main.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_net.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_snd.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_syscon.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_wndproc.c">
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_d3d.cpp">
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\win32\resource.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_d3d.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_local.h">
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_snd.h">
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Image Include="..\..\code\win32\icon2.ico">
+		</Image>
+		<Image Include="..\..\code\win32\qe3.ico">
+		</Image>
+		<Image Include="..\..\code\win32\background.bmp">
+		</Image>
+		<Image Include="..\..\code\win32\clear.bmp">
+		</Image>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\win32\readme-debug.txt">
+		</Text>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="qshared.vcxproj">
+			<Project>{40AEAFAA-000A-441E-9FF6-EAFB9232969C}</Project>
+		</ProjectReference>
+		<ProjectReference Include="botlib.vcxproj">
+			<Project>{04126D41-2102-4862-B20A-125EB30A60B6}</Project>
+		</ProjectReference>
+		<ProjectReference Include="serverlib.vcxproj">
+			<Project>{A799BF14-ADE8-4D5B-848A-DE4DB59B5594}</Project>
+		</ProjectReference>
+		<ProjectReference Include="jpeg-6lib.vcxproj">
+			<Project>{CB9D7D04-1061-4C08-BD32-74C099607116}</Project>
+		</ProjectReference>
+		<ProjectReference Include="splineslib.vcxproj">
+			<Project>{3CBEEE12-BF23-4229-A009-27087ECE0657}</Project>
+		</ProjectReference>
+		<ProjectReference Include="clientlib.vcxproj">
+			<Project>{40B0EF1F-71F4-4382-9DED-448BEAAC3A2D}</Project>
+		</ProjectReference>
+		<ProjectReference Include="qcommonlib.vcxproj">
+			<Project>{F8834995-4C82-49CA-AE29-7F56D5146AA7}</Project>
+		</ProjectReference>
+		<ProjectReference Include="gamethreadlib.vcxproj">
+			<Project>{205D02F5-A12F-43E3-ADA2-1D4792CD882E}</Project>
+		</ProjectReference>
+		<ProjectReference Include="xaudiolib.vcxproj">
+			<Project>{E1297B9D-4ACF-42F3-AD76-7D97ED8BB6F7}</Project>
+		</ProjectReference>
+		<ProjectReference Include="winsharedlib.vcxproj">
+			<Project>{EBCF2E3E-7B04-476C-B5CB-F1E0147E38D5}</Project>
+		</ProjectReference>
+		<ProjectReference Include="accountlib.vcxproj">
+			<Project>{613ED482-DBD1-419C-9884-08188165599A}</Project>
+		</ProjectReference>
+		<ProjectReference Include="xinputlib.vcxproj">
+			<Project>{A50CBD26-83EB-46FE-9C98-2F76E8694BC3}</Project>
+		</ProjectReference>
+		<ProjectReference Include="renderer.vcxproj">
+			<Project>{B462C730-02B4-41B5-BB9B-4E46A031FD14}</Project>
+		</ProjectReference>
+		<ProjectReference Include="d3dlib.vcxproj">
+			<Project>{7C03AA2C-D197-47F6-AE40-3FC1473E5449}</Project>
+		</ProjectReference>
+		<ProjectReference Include="d3d11lib.vcxproj">
+			<Project>{E43CC11E-EB23-4697-8656-D53B9D13F413}</Project>
+		</ProjectReference>
+		<ProjectReference Include="d3d12lib.vcxproj">
+			<Project>{B03987A0-4B9C-43B8-8A1F-16EC2A86CD74}</Project>
+		</ProjectReference>
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets" />
+</Project>

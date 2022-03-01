@@ -109,6 +109,7 @@ void SpecifyServer_MenuInit( void )
 
 	s_specifyserver.menu.wrapAround = qtrue;
 	s_specifyserver.menu.fullscreen = qtrue;
+    s_specifyserver.menu.custom_nav = qtrue;
 
 	s_specifyserver.banner.generic.type	 = MTYPE_BTEXT;
 	s_specifyserver.banner.generic.x     = 320;
@@ -140,6 +141,7 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.domain.generic.y	      = 220;
 	s_specifyserver.domain.field.widthInChars = 38;
 	s_specifyserver.domain.field.maxchars     = 80;
+    s_specifyserver.domain.generic.navDown    = &s_specifyserver.port;
 
 	s_specifyserver.port.generic.type       = MTYPE_FIELD;
 	s_specifyserver.port.generic.name	    = "Port:";
@@ -148,6 +150,8 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.port.generic.y	        = 250;
 	s_specifyserver.port.field.widthInChars = 6;
 	s_specifyserver.port.field.maxchars     = 5;
+    s_specifyserver.port.generic.navUp      = &s_specifyserver.domain;
+    s_specifyserver.port.generic.navDown    = &s_specifyserver.go;
 
 	s_specifyserver.go.generic.type	    = MTYPE_BITMAP;
 	s_specifyserver.go.generic.name     = SPECIFYSERVER_FIGHT0;
@@ -159,6 +163,8 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.go.width  		    = 128;
 	s_specifyserver.go.height  		    = 64;
 	s_specifyserver.go.focuspic         = SPECIFYSERVER_FIGHT1;
+    s_specifyserver.go.generic.navUp    = &s_specifyserver.port;
+    s_specifyserver.go.generic.navLeft  = &s_specifyserver.back;
 
 	s_specifyserver.back.generic.type	  = MTYPE_BITMAP;
 	s_specifyserver.back.generic.name     = SPECIFYSERVER_BACK0;
@@ -170,6 +176,8 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.back.width  		  = 128;
 	s_specifyserver.back.height  		  = 64;
 	s_specifyserver.back.focuspic         = SPECIFYSERVER_BACK1;
+    s_specifyserver.back.generic.navUp    = &s_specifyserver.port;
+    s_specifyserver.back.generic.navRight = &s_specifyserver.go;
 
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.banner );
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.framel );

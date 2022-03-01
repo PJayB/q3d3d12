@@ -51,7 +51,7 @@ void R_AddAnimSurfaces( trRefEntity_t *ent ) {
 	surface = (md4Surface_t *)( (byte *)lod + lod->ofsSurfaces );
 	for ( i = 0 ; i < lod->numSurfaces ; i++ ) {
 		shader = R_GetShaderByHandle( surface->shaderIndex );
-		R_AddDrawSurf( (void *)surface, shader, 0 /*fogNum*/, qfalse );
+		R_AddDrawSurf( (void *)surface, shader, 0 /*fogNum*/, ent->dlightBits != 0 );
 		surface = (md4Surface_t *)( (byte *)surface + surface->ofsEnd );
 	}
 }
@@ -87,7 +87,7 @@ void RB_SurfaceAnim( md4Surface_t *surface ) {
 	}
 	header = (md4Header_t *)((byte *)surface + surface->ofsHeader);
 
-	frameSize = (int)( &((md4Frame_t *)0)->bones[ header->numBones ] );
+	frameSize = (int)(size_t)( &((md4Frame_t *)0)->bones[ header->numBones ] );
 
 	frame = (md4Frame_t *)((byte *)header + header->ofsFrames + 
 		backEnd.currentEntity->e.frame * frameSize );

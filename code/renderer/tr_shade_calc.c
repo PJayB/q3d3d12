@@ -45,7 +45,7 @@ static float *TableForFunc( genFunc_t func )
 		break;
 	}
 
-	ri.Error( ERR_DROP, "TableForFunc called with invalid function '%d' in shader '%s'\n", func, tess.shader->name );
+	Com_Error( ERR_DROP, "TableForFunc called with invalid function '%d' in shader '%s'\n", func, tess.shader->name );
 	return NULL;
 }
 
@@ -296,7 +296,7 @@ void DeformText( const char *text ) {
 	VectorScale( width, height[2] * -0.75f, width );
 
 	// determine the starting position
-	len = strlen( text );
+	len = (int) strlen( text );
 	VectorMA( origin, (len-1), width, origin );
 
 	// clear the shader indexes
@@ -356,10 +356,10 @@ static void AutospriteDeform( void ) {
 	vec3_t	leftDir, upDir;
 
 	if ( tess.numVertexes & 3 ) {
-		ri.Printf( PRINT_WARNING, "Autosprite shader %s had odd vertex count", tess.shader->name );
+		RI_Printf( PRINT_WARNING, "Autosprite shader %s had odd vertex count", tess.shader->name );
 	}
 	if ( tess.numIndexes != ( tess.numVertexes >> 2 ) * 6 ) {
-		ri.Printf( PRINT_WARNING, "Autosprite shader %s had odd index count", tess.shader->name );
+		RI_Printf( PRINT_WARNING, "Autosprite shader %s had odd index count", tess.shader->name );
 	}
 
 	oldVerts = tess.numVertexes;
@@ -407,6 +407,7 @@ static void AutospriteDeform( void ) {
 
 		RB_AddQuadStamp( mid, left, up, tess.vertexColors[i] );
 	}
+
 }
 
 
@@ -427,16 +428,16 @@ int edgeVerts[6][2] = {
 };
 
 static void Autosprite2Deform( void ) {
-	int		i, j, k;
+	glIndex_t i, j, k;
 	int		indexes;
 	float	*xyz;
 	vec3_t	forward;
 
 	if ( tess.numVertexes & 3 ) {
-		ri.Printf( PRINT_WARNING, "Autosprite2 shader %s had odd vertex count", tess.shader->name );
+		RI_Printf( PRINT_WARNING, "Autosprite2 shader %s had odd vertex count", tess.shader->name );
 	}
 	if ( tess.numIndexes != ( tess.numVertexes >> 2 ) * 6 ) {
-		ri.Printf( PRINT_WARNING, "Autosprite2 shader %s had odd index count", tess.shader->name );
+		RI_Printf( PRINT_WARNING, "Autosprite2 shader %s had odd index count", tess.shader->name );
 	}
 
 	if ( backEnd.currentEntity != &tr.worldEntity ) {
@@ -535,12 +536,12 @@ RB_DeformTessGeometry
 
 =====================
 */
-void RB_DeformTessGeometry( void ) {
+void RB_DeformTessGeometry( shaderCommands_t* input ) {
 	int		i;
 	deformStage_t	*ds;
 
-	for ( i = 0 ; i < tess.shader->numDeforms ; i++ ) {
-		ds = &tess.shader->deforms[ i ];
+	for ( i = 0 ; i < input->shader->numDeforms ; i++ ) {
+		ds = &input->shader->deforms[ i ];
 
 		switch ( ds->deformation ) {
         case DEFORM_NONE:
@@ -558,7 +559,7 @@ void RB_DeformTessGeometry( void ) {
 			RB_CalcMoveVertexes( ds );
 			break;
 		case DEFORM_PROJECTION_SHADOW:
-			RB_ProjectionShadowDeform();
+			// @pjb: stencil shadows are dead, baby
 			break;
 		case DEFORM_AUTOSPRITE:
 			AutospriteDeform();
@@ -682,8 +683,7 @@ void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 	int *colors = ( int * ) dstColors;
 	byte	color[4];
 
-
-  if ( wf->func == GF_NOISE ) {
+	if ( wf->func == GF_NOISE ) {
 		glow = wf->base + R_NoiseGet4f( 0, 0, 0, ( tess.shaderTime + wf->phase ) * wf->frequency ) * wf->amplitude;
 	} else {
 		glow = EvalWaveForm( wf ) * tr.identityLight;

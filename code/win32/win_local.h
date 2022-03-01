@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void	IN_MouseEvent (int mstate);
 
 void Sys_QueEvent( int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr );
+void Sys_QueUserEvent( int time, sysEventType_t type, int value, int value2, int userIndex, int ptrLength, void *ptr );
 
 void	Sys_CreateConsole( void );
 void	Sys_DestroyConsole( void );
@@ -73,7 +74,6 @@ LONG WINAPI MainWndProc (
 void Conbuf_AppendText( const char *msg );
 
 void SNDDMA_Activate( void );
-int  SNDDMA_InitDS ();
 
 typedef struct
 {
@@ -81,7 +81,7 @@ typedef struct
 	HINSTANCE		reflib_library;		// Handle to refresh DLL 
 	qboolean		reflib_active;
 
-	HWND			hWnd;
+	HWND			hPrimaryWnd;
 	HINSTANCE		hInstance;
 	qboolean		activeApp;
 	qboolean		isMinimized;
@@ -89,7 +89,8 @@ typedef struct
 
 	// when we get a windows message, we store the time off so keyboard processing
 	// can know the exact time of an event
-	unsigned		sysMsgTime;
+	//unsigned		sysMsgTime;
+    // @pjb: replaced by Sys_FrameTime
 } WinVars_t;
 
 extern WinVars_t	g_wv;

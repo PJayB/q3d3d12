@@ -198,14 +198,14 @@ static void CG_CalcVrect (void) {
 		}
 
 	}
-	cg.refdef.width = cgs.glconfig.vidWidth*size/100;
+	cg.refdef.width = cgs.vdconfig.vidWidth*size/100;
 	cg.refdef.width &= ~1;
 
-	cg.refdef.height = cgs.glconfig.vidHeight*size/100;
+	cg.refdef.height = cgs.vdconfig.vidHeight*size/100;
 	cg.refdef.height &= ~1;
 
-	cg.refdef.x = (cgs.glconfig.vidWidth - cg.refdef.width)/2;
-	cg.refdef.y = (cgs.glconfig.vidHeight - cg.refdef.height)/2;
+	cg.refdef.x = (cgs.vdconfig.vidWidth - cg.refdef.width)/2;
+	cg.refdef.y = (cgs.vdconfig.vidHeight - cg.refdef.height)/2;
 }
 
 //==============================================================================
@@ -573,11 +573,6 @@ static void CG_DamageBlendBlob( void ) {
 	//	return;
 	//}
 
-	// ragePro systems can't fade blends, so don't obscure the screen
-	if ( cgs.glconfig.hardwareType == GLHW_RAGEPRO ) {
-		return;
-	}
-
 	maxTime = DAMAGE_TIME;
 	t = cg.time - cg.damageTime;
 	if ( t <= 0 || t >= maxTime ) {
@@ -687,7 +682,10 @@ static int CG_CalcViewValues( void ) {
 
 	if ( cg.hyperspace ) {
 		cg.refdef.rdflags |= RDF_NOWORLDMODEL | RDF_HYPERSPACE;
-	}
+	} else {
+        // @pjb: set the view parameters for world rendering
+        cg.refdef.rdflags |= RDF_DEBUG | RDF_POST_PROCESS;
+    }
 
 	// field of view
 	return CG_CalcFov();

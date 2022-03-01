@@ -41,8 +41,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "be_aas_funcs.h"
 #include "be_aas_def.h"
 
-extern botlib_import_t botimport;
-
 aas_settings_t aassettings;
 
 //#define AAS_MOVE_DEBUG
@@ -655,7 +653,7 @@ int AAS_ClientMovementPrediction(struct aas_clientmove_s *move,
 //#ifdef AAS_MOVE_DEBUG
 			if (visualize)
 			{
-				if (trace.startsolid) botimport.Print(PRT_MESSAGE, "PredictMovement: start solid\n");
+				if (trace.startsolid) BotImport_Print(PRT_MESSAGE, "PredictMovement: start solid\n");
 				AAS_DebugLine(org, trace.endpos, LINECOLOR_RED);
 			} //end if
 //#endif //AAS_MOVE_DEBUG
@@ -1045,7 +1043,7 @@ void AAS_TestMovementPrediction(int entnum, vec3_t origin, vec3_t dir)
 									velocity, cmdmove, 13, 13, 0.1f, SE_HITGROUND, 0, qtrue);//SE_LEAVEGROUND);
 	if (move.stopevent & SE_LEAVEGROUND)
 	{
-		botimport.Print(PRT_MESSAGE, "leave ground\n");
+		BotImport_Print(PRT_MESSAGE, "leave ground\n");
 	} //end if
 } //end of the function TestMovementPrediction
 //===========================================================================

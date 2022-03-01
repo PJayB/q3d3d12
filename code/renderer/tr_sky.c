@@ -21,8 +21,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 // tr_sky.c
 #include "tr_local.h"
+#include "tr_layer.h"
 
-#define SKY_SUBDIVISIONS		8
 #define HALF_SKY_SUBDIVISIONS	(SKY_SUBDIVISIONS/2)
 
 static float s_cloudTexCoords[6][SKY_SUBDIVISIONS+1][SKY_SUBDIVISIONS+1][2];
@@ -160,7 +160,7 @@ static void ClipSkyPolygon (int nump, vec3_t vecs, int stage)
 	int		i, j;
 
 	if (nump > MAX_CLIP_VERTS-2)
-		ri.Error (ERR_DROP, "ClipSkyPolygon: MAX_CLIP_VERTS");
+		Com_Error (ERR_DROP, "ClipSkyPolygon: MAX_CLIP_VERTS");
 	if (stage == 6)
 	{	// fully clipped, so draw it
 		AddSkyPolygon (nump, vecs);
@@ -357,36 +357,69 @@ static void MakeSkyVec( float s, float t, int axis, float outSt[2], vec3_t outXY
 	}
 }
 
-static int	sky_texorder[6] = {0,2,1,3,4,5};
+#define MAX_SKY_INDICES (6*2*(SKY_SUBDIVISIONS+1)*(SKY_SUBDIVISIONS+1))
+#define MAX_SKY_POINT_INDICES (3*MAX_SKY_INDICES)
+#define MAX_SKY_TEX_INDICES (2*MAX_SKY_INDICES)
+
+static int	    sky_texorder[6] = {0,2,1,3,4,5};
 static vec3_t	s_skyPoints[SKY_SUBDIVISIONS+1][SKY_SUBDIVISIONS+1];
 static float	s_skyTexCoords[SKY_SUBDIVISIONS+1][SKY_SUBDIVISIONS+1][2];
 
-static void DrawSkySide( struct image_s *image, const int mins[2], const int maxs[2] )
+static float    s_skyVBuffer[MAX_SKY_POINT_INDICES];
+static float    s_skyTBuffer[MAX_SKY_TEX_INDICES];
+
+static int DrawSkySide( skyboxSideDrawInfo_t* skyboxSideInfo, int vertexOffset, const int mins[2], const int maxs[2] )
 {
 	int s, t;
-
-	GL_Bind( image );
-
+    int strips = 0;
+    int points = vertexOffset;
+    int pointOffset = vertexOffset * 3;
+    int texOffset = vertexOffset * 2;
+    
 	for ( t = mins[1]+HALF_SKY_SUBDIVISIONS; t < maxs[1]+HALF_SKY_SUBDIVISIONS; t++ )
 	{
-		qglBegin( GL_TRIANGLE_STRIP );
+        // @pjb: lazy: serializing the buffer. I've tried other ways and I always end up refactoring this whole file.
+        int stripStart = points;
+        skyboxSideInfo->stripInfo[strips].offset = points;
 
 		for ( s = mins[0]+HALF_SKY_SUBDIVISIONS; s <= maxs[0]+HALF_SKY_SUBDIVISIONS; s++ )
 		{
-			qglTexCoord2fv( s_skyTexCoords[t][s] );
-			qglVertex3fv( s_skyPoints[t][s] );
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t][s][0];
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t][s][1];
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t][s][2];
+            s_skyTBuffer[texOffset++] = s_skyTexCoords[t][s][0];
+            s_skyTBuffer[texOffset++] = s_skyTexCoords[t][s][1];
 
-			qglTexCoord2fv( s_skyTexCoords[t+1][s] );
-			qglVertex3fv( s_skyPoints[t+1][s] );
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t+1][s][0];
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t+1][s][1];
+            s_skyVBuffer[pointOffset++] = s_skyPoints[t+1][s][2];
+            s_skyTBuffer[texOffset++] = s_skyTexCoords[t+1][s][0];
+            s_skyTBuffer[texOffset++] = s_skyTexCoords[t+1][s][1];
+
+            points += 2;
+
+            assert(points <= MAX_SKY_INDICES);
+            assert(texOffset <= MAX_SKY_TEX_INDICES);
+            assert(pointOffset <= MAX_SKY_POINT_INDICES);
 		}
 
-		qglEnd();
+        skyboxSideInfo->stripInfo[strips++].length = points - stripStart;
 	}
+
+    assert(strips <= SKY_SUBDIVISIONS);
+
+    skyboxSideInfo->stripCount = strips;
+
+    return points;
 }
 
-static void DrawSkyBox( shader_t *shader )
+static void DrawSkyBox( shader_t *shader, const float* eye_origin, const float* colorTint )
 {
 	int		i;
+    int     vertexCount = 0;
+    skyboxDrawInfo_t skybox;
+
+    memset( &skybox, 0, sizeof( skybox ) );
 
 	sky_min = 0;
 	sky_max = 1;
@@ -397,6 +430,7 @@ static void DrawSkyBox( shader_t *shader )
 	{
 		int sky_mins_subd[2], sky_maxs_subd[2];
 		int s, t;
+        skyboxSideDrawInfo_t* skyboxSide = &skybox.sides[i];
 
 		sky_mins[0][i] = floor( sky_mins[0][i] * HALF_SKY_SUBDIVISIONS ) / HALF_SKY_SUBDIVISIONS;
 		sky_mins[1][i] = floor( sky_mins[1][i] * HALF_SKY_SUBDIVISIONS ) / HALF_SKY_SUBDIVISIONS;
@@ -447,11 +481,19 @@ static void DrawSkyBox( shader_t *shader )
 			}
 		}
 
-		DrawSkySide( shader->sky.outerbox[sky_texorder[i]],
+        skyboxSide->image = shader->sky.outerbox[sky_texorder[i]];
+
+		vertexCount = DrawSkySide( 
+                     skyboxSide,
+                     vertexCount,
 			         sky_mins_subd,
 					 sky_maxs_subd );
 	}
 
+    skybox.vbuffer = s_skyVBuffer;
+    skybox.tbuffer = s_skyTBuffer;
+
+    GFX_DrawSkyBox( &skybox, eye_origin, colorTint );
 }
 
 static void FillCloudySkySide( const int mins[2], const int maxs[2], qboolean addIndexes )
@@ -475,7 +517,7 @@ static void FillCloudySkySide( const int mins[2], const int maxs[2], qboolean ad
 
 			if ( tess.numVertexes >= SHADER_MAX_VERTEXES )
 			{
-				ri.Error( ERR_DROP, "SHADER_MAX_VERTEXES hit in FillCloudySkySide()\n" );
+				Com_Error( ERR_DROP, "SHADER_MAX_VERTEXES hit in FillCloudySkySide()\n" );
 			}
 		}
 	}
@@ -701,6 +743,8 @@ void RB_DrawSun( void ) {
 	float		dist;
 	vec3_t		origin, vec1, vec2;
 	vec3_t		temp;
+    float cachedModelView[16];
+    float newModelView[16];
 
 	if ( !backEnd.skyRenderedThisView ) {
 		return;
@@ -708,8 +752,14 @@ void RB_DrawSun( void ) {
 	if ( !r_drawSun->integer ) {
 		return;
 	}
-	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
-	qglTranslatef (backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1], backEnd.viewParms.or.origin[2]);
+
+    GFX_GetModelViewMatrix( cachedModelView );
+    
+    memcpy( newModelView, backEnd.viewParms.world.modelMatrix, sizeof(float) * 16 );
+    newModelView[12] += backEnd.viewParms.or.origin[0];
+    newModelView[13] += backEnd.viewParms.or.origin[1];
+    newModelView[14] += backEnd.viewParms.or.origin[2];
+    GFX_SetModelViewMatrix( newModelView );
 
 	dist = 	backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
 	size = dist * 0.4;
@@ -722,7 +772,7 @@ void RB_DrawSun( void ) {
 	VectorScale( vec2, size, vec2 );
 
 	// farthest depth range
-	qglDepthRange( 1.0, 1.0 );
+	GFX_SetDepthRange( 1.0, 1.0 );
 
 	// FIXME: use quad stamp
 	RB_BeginSurface( tr.sunShader, tess.fogNum );
@@ -780,7 +830,8 @@ void RB_DrawSun( void ) {
 	RB_EndSurface();
 
 	// back to normal depth range
-	qglDepthRange( 0.0, 1.0 );
+	GFX_SetDepthRange( 0.0, 1.0 );
+    GFX_SetModelViewMatrix( cachedModelView );
 }
 
 
@@ -800,6 +851,11 @@ void RB_StageIteratorSky( void ) {
 		return;
 	}
 
+    // @pjb: Don't draw if in depth only mode
+    if ( !RB_IsColorPass() ) {
+        return;
+    }
+
 	// go through all the polygons and project them onto
 	// the sky box to see which blocks on each side need
 	// to be drawn
@@ -809,35 +865,37 @@ void RB_StageIteratorSky( void ) {
 	// front of everything to allow developers to see how
 	// much sky is getting sucked in
 	if ( r_showsky->integer ) {
-		qglDepthRange( 0.0, 0.0 );
+		GFX_SetDepthRange( 0.0, 0.0 );
 	} else {
-		qglDepthRange( 1.0, 1.0 );
+		GFX_SetDepthRange( 1.0, 1.0 );
 	}
 
 	// draw the outer skybox
 	if ( tess.shader->sky.outerbox[0] && tess.shader->sky.outerbox[0] != tr.defaultImage ) {
-		qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
-		
-		qglPushMatrix ();
-		GL_State( 0 );
-		qglTranslatef (backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1], backEnd.viewParms.or.origin[2]);
+        float colorTint[] = {
+            tr.identityLight,
+            tr.identityLight,
+            tr.identityLight
+        };
 
-		DrawSkyBox( tess.shader );
-
-		qglPopMatrix();
+		DrawSkyBox( tess.shader, backEnd.viewParms.or.origin, colorTint );
 	}
 
 	// generate the vertexes for all the clouds, which will be drawn
 	// by the generic shader routine
 	R_BuildCloudData( &tess );
 
-	RB_StageIteratorGeneric();
+    // @pjb: Prepare the tess buffer
+    RB_GenericStageIteratorPrep( &tess );
+
+    // @pjb: Iterate on the stages
+	GFX_DrawStageSky( &tess );
 
 	// draw the inner skybox
 
 
 	// back to normal depth range
-	qglDepthRange( 0.0, 1.0 );
+	GFX_SetDepthRange( 0.0, 1.0 );
 
 	// note that sky was drawn so we will draw a sun later
 	backEnd.skyRenderedThisView = qtrue;

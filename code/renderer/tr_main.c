@@ -22,6 +22,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_main.c -- main control flow for each frame
 
 #include "tr_local.h"
+#include "tr_state.h"
+#include "tr_layer.h"
+
 
 trGlobals_t		tr;
 
@@ -34,12 +37,13 @@ static float	s_flipMatrix[16] = {
 	0, 0, 0, 1
 };
 
-
-refimport_t	ri;
-
 // entities that will have procedurally generated surfaces will just
 // point at this for their sorting surface
 surfaceType_t	entitySurface = SF_ENTITY;
+
+
+void R_OpenCommandBuffer( void );
+
 
 /*
 =================
@@ -731,7 +735,7 @@ qboolean R_GetPortalOrientations( drawSurf_t *drawSurf, int entityNum,
 	// to see a surface before the server has communicated the matching
 	// portal surface entity, so we don't want to print anything here...
 
-	//ri.Printf( PRINT_ALL, "Portal surface without a portal entity\n" );
+	//RI_Printf( PRINT_ALL, "Portal surface without a portal entity\n" );
 
 	return qfalse;
 }
@@ -813,13 +817,13 @@ static qboolean SurfIsOffscreen( const drawSurf_t *drawSurf, vec4_t clipDest[128
 	unsigned int pointOr = 0;
 	unsigned int pointAnd = (unsigned int)~0;
 
-	if ( glConfig.smpActive ) {		// FIXME!  we can't do RB_BeginSurface/RB_EndSurface stuff with smp!
+	if ( vdConfig.smpActive ) {		// FIXME!  we can't do RB_BeginSurface/RB_EndSurface stuff with smp!
 		return qfalse;
 	}
 
 	R_RotateForViewer();
 
-	R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
+	R_DecomposeSort( (unsigned) drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
 	RB_BeginSurface( shader, fogNum );
 	rb_surfaceTable[ *drawSurf->surface ]( drawSurf->surface );
 
@@ -914,7 +918,7 @@ qboolean R_MirrorViewBySurface (drawSurf_t *drawSurf, int entityNum) {
 
 	// don't recursively mirror
 	if (tr.viewParms.isPortal) {
-		ri.Printf( PRINT_DEVELOPER, "WARNING: recursive mirror/portal found\n" );
+		RI_Printf( PRINT_DEVELOPER, "WARNING: recursive mirror/portal found\n" );
 		return qfalse;
 	}
 
@@ -1003,7 +1007,9 @@ qsort replacement
 
 =================
 */
-#define	SWAP_DRAW_SURF(a,b) temp=((int *)a)[0];((int *)a)[0]=((int *)b)[0];((int *)b)[0]=temp; temp=((int *)a)[1];((int *)a)[1]=((int *)b)[1];((int *)b)[1]=temp;
+
+// @pjb: changing to size_t instead of int
+#define	SWAP_DRAW_SURF(a,b) temp=((size_t *)a)[0];((size_t *)a)[0]=((size_t *)b)[0];((size_t *)b)[0]=temp; temp=((size_t *)a)[1];((size_t *)a)[1]=((size_t *)b)[1];((size_t *)b)[1]=temp;
 
 /* this parameter defines the cutoff between using quick sort and
    insertion sort for arrays; arrays with lengths shorter or equal to the
@@ -1013,7 +1019,7 @@ qsort replacement
 
 static void shortsort( drawSurf_t *lo, drawSurf_t *hi ) {
     drawSurf_t	*p, *max;
-	int			temp;
+	size_t			temp;
 
     while (hi > lo) {
         max = lo;
@@ -1044,10 +1050,10 @@ void qsortFast (
     unsigned size;              /* size of the sub-array */
     char *lostk[30], *histk[30];
     int stkptr;                 /* stack for saving sub-array to be processed */
-	int	temp;
+	size_t	temp;
 
-	if ( sizeof(drawSurf_t) != 8 ) {
-		ri.Error( ERR_DROP, "change SWAP_DRAW_SURF macro" );
+	if ( sizeof(drawSurf_t) != sizeof(size_t)*2 ) {
+		Com_Error( ERR_DROP, "change SWAP_DRAW_SURF macro" );
 	}
 
     /* Note: the number of stack entries required is no more than
@@ -1239,8 +1245,6 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	// it is possible for some views to not have any surfaces
 	if ( numDrawSurfs < 1 ) {
-		// we still need to add it for hyperspace cases
-		R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
 		return;
 	}
 
@@ -1257,7 +1261,7 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	// check for any pass through drawing, which
 	// may cause another view to be rendered first
 	for ( i = 0 ; i < numDrawSurfs ; i++ ) {
-		R_DecomposeSort( (drawSurfs+i)->sort, &entityNum, &shader, &fogNum, &dlighted );
+		R_DecomposeSort( (unsigned) (drawSurfs+i)->sort, &entityNum, &shader, &fogNum, &dlighted );
 
 		if ( shader->sort > SS_PORTAL ) {
 			break;
@@ -1265,7 +1269,7 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 		// no shader should ever have this sort type
 		if ( shader->sort == SS_BAD ) {
-			ri.Error (ERR_DROP, "Shader '%s'with sort == SS_BAD", shader->name );
+			Com_Error (ERR_DROP, "Shader '%s'with sort == SS_BAD", shader->name );
 		}
 
 		// if the mirror was completely clipped away, we may need to check another surface
@@ -1277,8 +1281,6 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			break;		// only one mirror view at a time
 		}
 	}
-
-	R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
 }
 
 /*
@@ -1300,6 +1302,7 @@ void R_AddEntitySurfaces (void) {
 		ent = tr.currentEntity = &tr.refdef.entities[tr.currentEntityNum];
 
 		ent->needDlights = qfalse;
+        ent->dlightBits = 0;
 
 		// preshift the value we are going to OR into the drawsurf sort
 		tr.shiftedEntityNum = tr.currentEntityNum << QSORT_ENTITYNUM_SHIFT;
@@ -1358,13 +1361,13 @@ void R_AddEntitySurfaces (void) {
 					R_AddDrawSurf( &entitySurface, tr.defaultShader, 0, 0 );
 					break;
 				default:
-					ri.Error( ERR_DROP, "R_AddEntitySurfaces: Bad modeltype" );
+					Com_Error( ERR_DROP, "R_AddEntitySurfaces: Bad modeltype" );
 					break;
 				}
 			}
 			break;
 		default:
-			ri.Error( ERR_DROP, "R_AddEntitySurfaces: Bad reType" );
+			Com_Error( ERR_DROP, "R_AddEntitySurfaces: Bad reType" );
 		}
 	}
 
@@ -1392,37 +1395,6 @@ void R_GenerateDrawSurfs( void ) {
 }
 
 /*
-================
-R_DebugPolygon
-================
-*/
-void R_DebugPolygon( int color, int numPoints, float *points ) {
-	int		i;
-
-	GL_State( GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
-
-	// draw solid shade
-
-	qglColor3f( color&1, (color>>1)&1, (color>>2)&1 );
-	qglBegin( GL_POLYGON );
-	for ( i = 0 ; i < numPoints ; i++ ) {
-		qglVertex3fv( points + i * 3 );
-	}
-	qglEnd();
-
-	// draw wireframe outline
-	GL_State( GLS_POLYMODE_LINE | GLS_DEPTHMASK_TRUE | GLS_SRCBLEND_ONE | GLS_DSTBLEND_ONE );
-	qglDepthRange( 0, 0 );
-	qglColor3f( 1, 1, 1 );
-	qglBegin( GL_POLYGON );
-	for ( i = 0 ; i < numPoints ; i++ ) {
-		qglVertex3fv( points + i * 3 );
-	}
-	qglEnd();
-	qglDepthRange( 0, 1 );
-}
-
-/*
 ====================
 R_DebugGraphics
 
@@ -1430,6 +1402,10 @@ Visualization aid for movement clipping debugging
 ====================
 */
 void R_DebugGraphics( void ) {
+
+    // @pjb: tell the render thread to render debug overlays for the scene
+    R_DrawDebugCmd();
+
 	if ( !r_debugSurface->integer ) {
 		return;
 	}
@@ -1437,9 +1413,7 @@ void R_DebugGraphics( void ) {
 	// the render thread can't make callbacks to the main thread
 	R_SyncRenderThread();
 
-	GL_Bind( tr.whiteImage);
-	GL_Cull( CT_FRONT_SIDED );
-	ri.CM_DrawDebugSurface( R_DebugPolygon );
+	CM_DrawDebugSurface( GFX_DebugDrawPolygon );
 }
 
 
@@ -1452,7 +1426,9 @@ or a mirror / remote location
 ================
 */
 void R_RenderView (viewParms_t *parms) {
-	int		firstDrawSurf;
+	int		        firstDrawSurf;
+    drawSurf_t*     drawSurfs;
+    int             numDrawSurfs;
 
 	if ( parms->viewportWidth <= 0 || parms->viewportHeight <= 0 ) {
 		return;
@@ -1475,10 +1451,42 @@ void R_RenderView (viewParms_t *parms) {
 
 	R_GenerateDrawSurfs();
 
-	R_SortDrawSurfs( tr.refdef.drawSurfs + firstDrawSurf, tr.refdef.numDrawSurfs - firstDrawSurf );
+    // @pjb: get the surfaces for rendering
+    drawSurfs = tr.refdef.drawSurfs + firstDrawSurf;
+    numDrawSurfs = tr.refdef.numDrawSurfs - firstDrawSurf;
+
+    // @pjb: This used to also call R_AddDrawSurfCmd, but I chose to split it out so we can render it multiple times if necessary.
+	R_SortDrawSurfs( drawSurfs, numDrawSurfs );
+
+    // @pjb: open the command buffer if it isn't already open
+    R_OpenCommandBuffer();
+
+//#define PRE_Z
+#ifdef PRE_Z
+    // If we're doing a depth only pass, draw that
+    if (parms->passFeatures & PASSF_DEPTH) {
+        // Filter out everything but depth writes here
+        tr.viewParms.passFeatures = PASSF_DEPTH;
+	    R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
+    }
+
+    // If we're doing a pre-depth and color pass:
+    if (parms->passFeatures & PASSF_COLOR) {
+        // Filter out everything but color writes here
+        tr.viewParms.passFeatures = PASSF_COLOR;
+	    R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
+    }
+#else
+	R_AddDrawSurfCmd( drawSurfs, numDrawSurfs );
+#endif
+
+    // @pjb: todo: post-processes
 
 	// draw main system development information (surface outlines, etc)
-	R_DebugGraphics();
+    if (parms->passFeatures & PASSF_DEBUG) {
+        tr.viewParms.passFeatures = PASSF_COLOR | PASSF_DEBUG;
+    	R_DebugGraphics();
+    }
 }
 
 

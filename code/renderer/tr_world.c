@@ -96,7 +96,6 @@ static qboolean	R_CullGrid( srfGridMesh_t *cv ) {
 	{
 		tr.pc.c_sphere_cull_patch_in++;
 	}
-
 	return qfalse;
 }
 
@@ -181,7 +180,7 @@ static int R_DlightFace( srfSurfaceFace_t *face, int dlightBits ) {
 		tr.pc.c_dlightSurfacesCulled++;
 	}
 
-	face->dlightBits[ tr.smpFrame ] = dlightBits;
+	face->dlightBits[ tr.smpFrame ] |= dlightBits;
 	return dlightBits;
 }
 
@@ -209,14 +208,14 @@ static int R_DlightGrid( srfGridMesh_t *grid, int dlightBits ) {
 		tr.pc.c_dlightSurfacesCulled++;
 	}
 
-	grid->dlightBits[ tr.smpFrame ] = dlightBits;
+	grid->dlightBits[ tr.smpFrame ] |= dlightBits;
 	return dlightBits;
 }
 
 
 static int R_DlightTrisurf( srfTriangles_t *surf, int dlightBits ) {
 	// FIXME: more dlight culling to trisurfs...
-	surf->dlightBits[ tr.smpFrame ] = dlightBits;
+	surf->dlightBits[ tr.smpFrame ] |= dlightBits;
 	return dlightBits;
 #if 0
 	int			i;
@@ -242,7 +241,7 @@ static int R_DlightTrisurf( srfTriangles_t *surf, int dlightBits ) {
 		tr.pc.c_dlightSurfacesCulled++;
 	}
 
-	grid->dlightBits[ tr.smpFrame ] = dlightBits;
+	grid->dlightBits[ tr.smpFrame ] |= dlightBits;
 	return dlightBits;
 #endif
 }
@@ -274,6 +273,23 @@ static int R_DlightSurface( msurface_t *surf, int dlightBits ) {
 	return dlightBits;
 }
 
+/*
+====================
+@pjb: R_ResetDlightSurface
+
+Removes all lighting from a surface
+====================
+*/
+static void R_ResetDlightSurface( msurface_t *surf ) {
+	if ( *surf->data == SF_FACE ) {
+		( (srfSurfaceFace_t *)surf->data )->dlightBits[ tr.smpFrame ] = 0;
+	} else if ( *surf->data == SF_GRID ) {
+		( (srfGridMesh_t *)surf->data )->dlightBits[ tr.smpFrame ] = 0;
+	} else if ( *surf->data == SF_TRIANGLES ) {
+		( (srfTriangles_t *)surf->data )->dlightBits[ tr.smpFrame ] = 0;
+	}
+}
+
 
 
 /*
@@ -283,6 +299,10 @@ R_AddWorldSurface
 */
 static void R_AddWorldSurface( msurface_t *surf, int dlightBits ) {
 	if ( surf->viewCount == tr.viewCount ) {
+        
+        // @pjb: accumulate lights from this leaf
+        R_DlightSurface( surf, dlightBits );
+
 		return;		// already in this view
 	}
 
@@ -296,11 +316,16 @@ static void R_AddWorldSurface( msurface_t *surf, int dlightBits ) {
 
 	// check for dlighting
 	if ( dlightBits ) {
+        // @pjb: reset the lighting as we're going to accumulate lighting bits
+        R_ResetDlightSurface( surf );
+
+        // @pjb: accumulate lighting for this leaf
 		dlightBits = R_DlightSurface( surf, dlightBits );
 		dlightBits = ( dlightBits != 0 );
 	}
 
-	R_AddDrawSurf( surf->data, surf->shader, surf->fogIndex, dlightBits );
+    // @pjb: other leaves might mark this as having dlights later, so we just have to assume
+	R_AddDrawSurf( surf->data, surf->shader, surf->fogIndex, qtrue );
 }
 
 /*
@@ -504,7 +529,7 @@ static mnode_t *R_PointInLeaf( const vec3_t p ) {
 	cplane_t	*plane;
 	
 	if ( !tr.world ) {
-		ri.Error (ERR_DROP, "R_PointInLeaf: bad model");
+		Com_Error (ERR_DROP, "R_PointInLeaf: bad model");
 	}
 
 	node = tr.world->nodes;
@@ -592,7 +617,7 @@ static void R_MarkLeaves (void) {
 	if ( r_showcluster->modified || r_showcluster->integer ) {
 		r_showcluster->modified = qfalse;
 		if ( r_showcluster->integer ) {
-			ri.Printf( PRINT_ALL, "cluster:%i  area:%i\n", cluster, leaf->area );
+			RI_Printf( PRINT_ALL, "cluster:%i  area:%i\n", cluster, leaf->area );
 		}
 	}
 
@@ -661,8 +686,8 @@ void R_AddWorldSurfaces (void) {
 	ClearBounds( tr.viewParms.visBounds[0], tr.viewParms.visBounds[1] );
 
 	// perform frustum culling and add all the potentially visible surfaces
-	if ( tr.refdef.num_dlights > 32 ) {
-		tr.refdef.num_dlights = 32 ;
+	if ( tr.refdef.num_dlights > MAX_DLIGHTS ) {
+		tr.refdef.num_dlights = MAX_DLIGHTS ;
 	}
 	R_RecursiveWorldNode( tr.world->nodes, 15, ( 1 << tr.refdef.num_dlights ) - 1 );
 }

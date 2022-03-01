@@ -151,9 +151,26 @@ typedef enum {
 	K_AUX15,
 	K_AUX16,
 
+    // @pjb: gamepad buttons (must match up with Xinput.h)
+    K_GAMEPAD_DPAD_UP,
+    K_GAMEPAD_DPAD_DOWN,
+    K_GAMEPAD_DPAD_LEFT,
+    K_GAMEPAD_DPAD_RIGHT,
+    K_GAMEPAD_START,
+    K_GAMEPAD_BACK,
+    K_GAMEPAD_LSTICK,
+    K_GAMEPAD_RSTICK,
+    K_GAMEPAD_LBUMPER,
+    K_GAMEPAD_RBUMPER,
+    K_GAMEPAD_A,
+    K_GAMEPAD_B,
+    K_GAMEPAD_X,
+    K_GAMEPAD_Y,
+    K_GAMEPAD_LTRIGGER,
+    K_GAMEPAD_RTRIGGER,
+
 	K_LAST_KEY		// this had better be <256!
 } keyNum_t;
-
 
 // The menu code needs to get both key and char events, but
 // to avoid duplicating the paths, the char events are just

@@ -1,0 +1,7 @@
+%Q3INSTALLDIR%\baseq3\*.*                   -> baseq3
+%Q3INSTALLDIR%\missionpack\*.*              -> missionpack
+%CODEDIR%\..\baseq3\*.*                     -> baseq3
+%CODEDIR%\..\missionpack\*.*                -> missionpack
+%OUTDIR%\baseq3\*.dll                       -> 
+%OUTDIR%\missionpack\*.dll                  -> 
+%OUTDIR%\baseq3\hlsl\*.cso                  -> baseq3\hlsl

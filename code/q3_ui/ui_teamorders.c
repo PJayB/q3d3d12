@@ -181,6 +181,7 @@ sfxHandle_t UI_TeamOrdersMenu_Key( int key ) {
 
 		case K_KP_UPARROW:
 		case K_UPARROW:
+        case K_GAMEPAD_DPAD_UP:  // @pjb
 			l->oldvalue = l->curvalue;
 
 			if( l->curvalue == 0 ) {
@@ -193,6 +194,7 @@ sfxHandle_t UI_TeamOrdersMenu_Key( int key ) {
 
 		case K_KP_DOWNARROW:
 		case K_DOWNARROW:
+        case K_GAMEPAD_DPAD_DOWN:  // @pjb
 			l->oldvalue = l->curvalue;
 
 			if( l->curvalue == l->numitems - 1 ) {

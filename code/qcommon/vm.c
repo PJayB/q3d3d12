@@ -33,6 +33,12 @@ and one exported function: Perform
 
 */
 
+//#ifdef _WIN64
+#   define VM_ONLY_LOAD_DLLS 1
+//#else
+//#   define VM_ONLY_LOAD_DLLS 0
+//#endif
+
 #include "vm_local.h"
 
 
@@ -64,9 +70,9 @@ VM_Init
 ==============
 */
 void VM_Init( void ) {
-	Cvar_Get( "vm_cgame", "2", CVAR_ARCHIVE );	// !@# SHIP WITH SET TO 2
-	Cvar_Get( "vm_game", "2", CVAR_ARCHIVE );	// !@# SHIP WITH SET TO 2
-	Cvar_Get( "vm_ui", "2", CVAR_ARCHIVE );		// !@# SHIP WITH SET TO 2
+	Cvar_Get( "vm_cgame", "2", CVAR_ARCHIVE | CVAR_SYSTEM_SET );	// !@# SHIP WITH SET TO 2
+	Cvar_Get( "vm_game", "2", CVAR_ARCHIVE | CVAR_SYSTEM_SET );	// !@# SHIP WITH SET TO 2
+	Cvar_Get( "vm_ui", "2", CVAR_ARCHIVE | CVAR_SYSTEM_SET );		// !@# SHIP WITH SET TO 2
 
 	Cmd_AddCommand ("vmprofile", VM_VmProfile_f );
 	Cmd_AddCommand ("vminfo", VM_VmInfo_f );
@@ -264,7 +270,7 @@ void VM_LoadSymbols( vm_t *vm ) {
 			Com_Printf( "WARNING: incomplete line at end of file\n" );
 			break;
 		}
-		chars = strlen( token );
+		chars = (int) strlen( token );
 		sym = Hunk_Alloc( sizeof( *sym ) + chars, h_high );
 		*prev = sym;
 		prev = &sym->next;
@@ -324,24 +330,8 @@ Dlls will call this directly
  
 ============
 */
-int QDECL VM_DllSyscall( int arg, ... ) {
-#if ((defined __linux__) && (defined __powerpc__))
-  // rcg010206 - see commentary above
-  int args[16];
-  int i;
-  va_list ap;
-  
-  args[0] = arg;
-  
-  va_start(ap, arg);
-  for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
-    args[i] = va_arg(ap, int);
-  va_end(ap);
-  
-  return currentVM->systemCall( args );
-#else // original id code
-	return currentVM->systemCall( &arg );
-#endif
+int QDECL VM_DllSyscall( vmArg_t* args ) {
+	return currentVM->systemCall( args );
 }
 
 /*
@@ -362,7 +352,7 @@ vm_t *VM_Restart( vm_t *vm ) {
 	// DLL's can't be restarted in place
 	if ( vm->dllHandle ) {
 		char	name[MAX_QPATH];
-	    int			(*systemCall)( int *parms );
+	    int			(*systemCall)( vmArg_t *parms );
 		
 		systemCall = vm->systemCall;	
 		Q_strncpyz( name, vm->name, sizeof( name ) );
@@ -432,20 +422,22 @@ it will attempt to load as a system dll
 
 #define	STACK_SIZE	0x20000
 
-vm_t *VM_Create( const char *module, int (*systemCalls)(int *), 
-				vmInterpret_t interpret ) {
+vm_t *VM_Create( const char *module, size_t (*systemCalls)( vmArg_t *), vmInterpret_t interpret ) {
 	vm_t		*vm;
+#if !VM_ONLY_LOAD_DLLS
 	vmHeader_t	*header;
 	int			length;
 	int			dataLength;
-	int			i, remaining;
 	char		filename[MAX_QPATH];
+#endif
+	int			i, remaining;
+	vmEntryPoint_t entryPoint;
 
 	if ( !module || !module[0] || !systemCalls ) {
 		Com_Error( ERR_FATAL, "VM_Create: bad parms" );
 	}
 
-	remaining = Hunk_MemoryRemaining();
+	remaining = (int) Hunk_MemoryRemaining();
 
 	// see if we already have the VM
 	for ( i = 0 ; i < MAX_VM ; i++ ) {
@@ -471,6 +463,18 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 	Q_strncpyz( vm->name, module, sizeof( vm->name ) );
 	vm->systemCall = systemCalls;
 
+// @pjb: Force loading of DLLs until we get an X64 build of the QVM compiler and VM.
+#if VM_ONLY_LOAD_DLLS
+	Com_Printf( "Loading dll file %s.\n", vm->name );
+	vm->dllHandle = Sys_LoadDll( module, vm->fqpath , &entryPoint, VM_DllSyscall );
+	if ( vm->dllHandle ) {
+		vm->entryPoint = entryPoint;
+		return vm;
+	}
+    
+	Com_Printf( "Failed.\n" );
+	return NULL;
+#else
 	// never allow dll loading with a demo
 	if ( interpret == VMI_NATIVE ) {
 		if ( Cvar_VariableValue( "fs_restrict" ) ) {
@@ -562,6 +566,7 @@ vm_t *VM_Create( const char *module, int (*systemCalls)(int *),
 	Com_Printf("%s loaded in %d bytes on the hunk\n", module, remaining - Hunk_MemoryRemaining());
 
 	return vm;
+#endif
 }
 
 /*
@@ -604,7 +609,7 @@ void VM_Clear(void) {
 	lastVM = NULL;
 }
 
-void *VM_ArgPtr( int intValue ) {
+void *VM_ArgPtr( size_t intValue ) {
 	if ( !intValue ) {
 		return NULL;
 	}
@@ -620,7 +625,7 @@ void *VM_ArgPtr( int intValue ) {
 	}
 }
 
-void *VM_ExplicitArgPtr( vm_t *vm, int intValue ) {
+void *VM_ExplicitArgPtr( vm_t *vm, size_t intValue ) {
 	if ( !intValue ) {
 		return NULL;
 	}
@@ -665,13 +670,12 @@ locals from sp
 #define	MAX_STACK	256
 #define	STACK_MASK	(MAX_STACK-1)
 
-int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
-	vm_t	*oldVM;
-	int		r;
-	int i;
-	int args[16];
-	va_list ap;
-
+/*
+    @pjb: same as above only the array is passed directly to the caller
+*/
+int	QDECL VM_CallA( vm_t *vm, vmArg_t* args ) {
+	vm_t	    *oldVM;
+    int         r = 0;
 
 	if ( !vm ) {
 		Com_Error( ERR_FATAL, "VM_Call with NULL vm" );
@@ -682,33 +686,30 @@ int	QDECL VM_Call( vm_t *vm, int callnum, ... ) {
 	lastVM = vm;
 
 	if ( vm_debugLevel ) {
-	  Com_Printf( "VM_Call( %i )\n", callnum );
+	  Com_Printf( "VM_CallA( %x )\n", args[0].i );
 	}
 
 	// if we have a dll loaded, call it directly
 	if ( vm->entryPoint ) {
-		//rcg010207 -  see dissertation at top of VM_DllSyscall() in this file.
-		va_start(ap, callnum);
-		for (i = 0; i < sizeof (args) / sizeof (args[i]); i++) {
-			args[i] = va_arg(ap, int);
-		}
-		va_end(ap);
+		r = vm->entryPoint( args );
 
-		r = vm->entryPoint( callnum,  args[0],  args[1],  args[2], args[3],
-                            args[4],  args[5],  args[6], args[7],
-                            args[8],  args[9], args[10], args[11],
-                            args[12], args[13], args[14], args[15]);
+#if !VM_ONLY_LOAD_DLLS
+        // @pjb: TODO: this is likely not going to work :)
 	} else if ( vm->compiled ) {
-		r = VM_CallCompiled( vm, &callnum );
+		r = VM_CallCompiled( vm, args );
 	} else {
-		r = VM_CallInterpreted( vm, &callnum );
+		r = VM_CallInterpreted( vm, args );
 	}
+#else
+    } else {
+        Sys_Error( "Invalid DLL function call" );
+    }
+#endif
 
 	if ( oldVM != NULL ) // bk001220 - assert(currentVM!=NULL) for oldVM==NULL
 	  currentVM = oldVM;
 	return r;
 }
-
 //=================================================================
 
 static int QDECL VM_ProfileSort( const void *a, const void *b ) {

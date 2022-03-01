@@ -88,7 +88,6 @@ static void UI_NetworkOptionsMenu_Event( void* ptr, int event ) {
 		UI_PopMenu();
 		UI_GraphicsOptionsMenu();
 		break;
-
 	case ID_DISPLAY:
 		UI_PopMenu();
 		UI_DisplayOptionsMenu();
@@ -166,15 +165,17 @@ static void UI_NetworkOptionsMenu_Init( void ) {
 	networkOptionsInfo.framer.width				= 256;
 	networkOptionsInfo.framer.height			= 334;
 
-	networkOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
-	networkOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
-	networkOptionsInfo.graphics.generic.id			= ID_GRAPHICS;
-	networkOptionsInfo.graphics.generic.callback	= UI_NetworkOptionsMenu_Event;
-	networkOptionsInfo.graphics.generic.x			= 216;
-	networkOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
-	networkOptionsInfo.graphics.string				= "GRAPHICS";
-	networkOptionsInfo.graphics.style				= UI_RIGHT;
-	networkOptionsInfo.graphics.color				= color_red;
+    if (!UI_IsFixedGraphicsHardware()) {
+	    networkOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
+	    networkOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
+	    networkOptionsInfo.graphics.generic.id			= ID_GRAPHICS;
+	    networkOptionsInfo.graphics.generic.callback	= UI_NetworkOptionsMenu_Event;
+	    networkOptionsInfo.graphics.generic.x			= 216;
+	    networkOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
+	    networkOptionsInfo.graphics.string				= "GRAPHICS";
+	    networkOptionsInfo.graphics.style				= UI_RIGHT;
+	    networkOptionsInfo.graphics.color				= color_red;
+    }
 
 	networkOptionsInfo.display.generic.type			= MTYPE_PTEXT;
 	networkOptionsInfo.display.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -230,7 +231,11 @@ static void UI_NetworkOptionsMenu_Init( void ) {
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.banner );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.framel );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.framer );
-	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.graphics );
+
+    if (!UI_IsFixedGraphicsHardware()) {
+    	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.graphics );
+    }
+
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.display );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.sound );
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.network );

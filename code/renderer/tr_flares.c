@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_flares.c
 
 #include "tr_local.h"
+#include "tr_layer.h"
 
 /*
 =============================================================================
@@ -250,10 +251,11 @@ void RB_TestFlare( flare_t *f ) {
 
 	// doing a readpixels is as good as doing a glFinish(), so
 	// don't bother with another sync
-	glState.finishCalled = qfalse;
+	backEnd.finishCalled = qfalse;
 
 	// read back the z buffer contents
-	qglReadPixels( f->windowX, f->windowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth );
+	return;
+    // TODO: GFX_ReadDepth( f->windowX, f->windowY, 1, 1, &depth );
 
 	screenZ = backEnd.viewParms.projectionMatrix[14] / 
 		( ( 2*depth - 1 ) * backEnd.viewParms.projectionMatrix[11] - backEnd.viewParms.projectionMatrix[10] );
@@ -373,10 +375,16 @@ when occluded by something in the main view, and portal flares that should
 extend past the portal edge will be overwritten.
 ==================
 */
+
+extern void ConstructOrtho(float* m, float left, float right, float bottom, float top, float Near, float Far);
+
 void RB_RenderFlares (void) {
 	flare_t		*f;
 	flare_t		**prev;
 	qboolean	draw;
+    float cachedModelView[16];
+    float cachedProjection[16];
+    float ortho[16];
 
 	if ( !r_flares->integer ) {
 		return;
@@ -420,17 +428,21 @@ void RB_RenderFlares (void) {
 	}
 
 	if ( backEnd.viewParms.isPortal ) {
-		qglDisable (GL_CLIP_PLANE0);
+		GFX_SetPortalRendering( qfalse, NULL, NULL );
 	}
 
-	qglPushMatrix();
-    qglLoadIdentity();
-	qglMatrixMode( GL_PROJECTION );
-	qglPushMatrix();
-    qglLoadIdentity();
-	qglOrtho( backEnd.viewParms.viewportX, backEnd.viewParms.viewportX + backEnd.viewParms.viewportWidth,
-			  backEnd.viewParms.viewportY, backEnd.viewParms.viewportY + backEnd.viewParms.viewportHeight,
-			  -99999, 99999 );
+    GFX_GetModelViewMatrix( cachedModelView );
+    GFX_GetProjectionMatrix( cachedProjection );
+
+	ConstructOrtho( ortho,
+        backEnd.viewParms.viewportX, 
+        backEnd.viewParms.viewportX + backEnd.viewParms.viewportWidth,
+		backEnd.viewParms.viewportY, 
+        backEnd.viewParms.viewportY + backEnd.viewParms.viewportHeight,
+		-99999, 99999 );
+
+    GFX_SetModelViewMatrix( s_identityMatrix );
+    GFX_SetProjectionMatrix( ortho );
 
 	for ( f = r_activeFlares ; f ; f = f->next ) {
 		if ( f->frameSceneNum == backEnd.viewParms.frameSceneNum
@@ -440,8 +452,7 @@ void RB_RenderFlares (void) {
 		}
 	}
 
-	qglPopMatrix();
-	qglMatrixMode( GL_MODELVIEW );
-	qglPopMatrix();
+    GFX_SetModelViewMatrix( cachedModelView );
+    GFX_SetProjectionMatrix( cachedProjection );
 }
 

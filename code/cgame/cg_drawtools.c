@@ -33,8 +33,8 @@ Adjusted for resolution and screen aspect ratio
 void CG_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 #if 0
 	// adjust for wide screens
-	if ( cgs.glconfig.vidWidth * 480 > cgs.glconfig.vidHeight * 640 ) {
-		*x += 0.5 * ( cgs.glconfig.vidWidth - ( cgs.glconfig.vidHeight * 640 / 480 ) );
+	if ( cgs.vdconfig.vidWidth * 480 > cgs.vdconfig.vidHeight * 640 ) {
+		*x += 0.5 * ( cgs.vdconfig.vidWidth - ( cgs.vdconfig.vidHeight * 640 / 480 ) );
 	}
 #endif
 	// scale for screen sizes
@@ -292,8 +292,8 @@ void CG_TileClear( void ) {
 	int		top, bottom, left, right;
 	int		w, h;
 
-	w = cgs.glconfig.vidWidth;
-	h = cgs.glconfig.vidHeight;
+	w = cgs.vdconfig.vidWidth;
+	h = cgs.vdconfig.vidHeight;
 
 	if ( cg.refdef.x == 0 && cg.refdef.y == 0 && 
 		cg.refdef.width == w && cg.refdef.height == h ) {

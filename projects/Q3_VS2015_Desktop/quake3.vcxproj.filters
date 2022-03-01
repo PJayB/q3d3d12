@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<Filter Include="Source Files">
+			<UniqueIdentifier>{37BFB9FF-189D-4323-8F96-66C52FD8E7F7}</UniqueIdentifier>
+			<Extensions>c;cpp</Extensions>
+		</Filter>
+		<Filter Include="Include Files">
+			<UniqueIdentifier>{F028DAD3-BB31-443A-8D79-71B1960843D1}</UniqueIdentifier>
+			<Extensions>h;hpp</Extensions>
+		</Filter>
+		<Filter Include="Images">
+			<UniqueIdentifier>{DB5BA76E-1A70-4C98-89D3-45DE07841816}</UniqueIdentifier>
+			<Extensions>png;ico;tga;bmp</Extensions>
+		</Filter>
+		<Filter Include="Resources">
+			<UniqueIdentifier>{CC2AE72B-973D-46E9-9F05-9DE8C70D4377}</UniqueIdentifier>
+			<Extensions>rc;appxmanifest;pfx;txt;def;xml</Extensions>
+		</Filter>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="..\..\code\win32\win_input.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_main.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_net.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_snd.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_syscon.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_wndproc.c">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+		<ClCompile Include="..\..\code\win32\win_d3d.cpp">
+			<Filter>Source Files</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\..\code\win32\resource.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_d3d.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_local.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+		<ClInclude Include="..\..\code\win32\win_snd.h">
+			<Filter>Include Files</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<Image Include="..\..\code\win32\icon2.ico">
+			<Filter>Images</Filter>
+		</Image>
+		<Image Include="..\..\code\win32\qe3.ico">
+			<Filter>Images</Filter>
+		</Image>
+		<Image Include="..\..\code\win32\background.bmp">
+			<Filter>Images</Filter>
+		</Image>
+		<Image Include="..\..\code\win32\clear.bmp">
+			<Filter>Images</Filter>
+		</Image>
+	</ItemGroup>
+	<ItemGroup>
+		<Text Include="..\..\code\win32\readme-debug.txt">
+			<Filter>Resources</Filter>
+		</Text>
+	</ItemGroup>
+</Project>

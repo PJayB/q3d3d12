@@ -116,15 +116,15 @@ static void UI_SetupMenu_Event( void *ptr, int event ) {
 		break;
 
 	case ID_SYSTEMCONFIG:
-		UI_GraphicsOptionsMenu();
+        if (!UI_IsFixedGraphicsHardware()) {
+		    UI_GraphicsOptionsMenu();
+        } else {
+            UI_DisplayOptionsMenu();
+        }
 		break;
 
 	case ID_GAME:
 		UI_PreferencesMenu();
-		break;
-
-	case ID_CDKEY:
-		UI_CDKeyMenu();
 		break;
 
 //	case ID_LOAD:

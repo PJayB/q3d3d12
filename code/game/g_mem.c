@@ -31,9 +31,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define POOLSIZE	(256 * 1024)
 
 static char		memoryPool[POOLSIZE];
-static int		allocPoint;
+static size_t	allocPoint;
 
-void *G_Alloc( int size ) {
+void *G_Alloc( size_t size ) {
 	char	*p;
 
 	if ( g_debugAlloc.integer ) {

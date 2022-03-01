@@ -224,7 +224,7 @@ static void LoadConfig_MenuInit( void ) {
 		s_configs.list.itemnames[i] = configname;
 		
 		// strip extension
-		len = strlen( configname );
+		len = (int) strlen( configname );
 		if (!Q_stricmp(configname +  len - 4,".cfg"))
 			configname[len-4] = '\0';
 

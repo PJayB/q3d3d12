@@ -8,7 +8,7 @@
  * This file provides a really simple implementation of the system-
  * dependent portion of the JPEG memory manager.  This implementation
  * assumes that no backing-store files are needed: all required space
- * can be obtained from ri.Malloc().
+ * can be obtained from CL_RefMalloc().
  * This is very portable in the sense that it'll compile on almost anything,
  * but you'd better have lots of main memory (or virtual memory) if you want
  * to process big images.
@@ -23,20 +23,20 @@
 #include "../renderer/tr_local.h"
 
 /*
- * Memory allocation and ri.Freeing are controlled by the regular library
- * routines ri.Malloc() and ri.Free().
+ * Memory allocation and Z_Freeing are controlled by the regular library
+ * routines CL_RefMalloc() and Z_Free().
  */
 
 GLOBAL void *
 jpeg_get_small (j_common_ptr cinfo, size_t sizeofobject)
 {
-  return (void *) ri.Malloc(sizeofobject);
+  return (void *) RI_Malloc(sizeofobject);
 }
 
 GLOBAL void
 jpeg_free_small (j_common_ptr cinfo, void * object, size_t sizeofobject)
 {
-  ri.Free(object);
+  RI_Free(object);
 }
 
 
@@ -50,13 +50,13 @@ jpeg_free_small (j_common_ptr cinfo, void * object, size_t sizeofobject)
 GLOBAL void FAR *
 jpeg_get_large (j_common_ptr cinfo, size_t sizeofobject)
 {
-  return (void FAR *) ri.Malloc(sizeofobject);
+  return (void FAR *) RI_Malloc(sizeofobject);
 }
 
 GLOBAL void
 jpeg_free_large (j_common_ptr cinfo, void FAR * object, size_t sizeofobject)
 {
-  ri.Free(object);
+  Z_Free(object);
 }
 
 

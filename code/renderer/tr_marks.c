@@ -269,7 +269,7 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 	vec3_t			normal;
 	vec3_t			projectionDir;
 	vec3_t			v1, v2;
-	int				*indexes;
+	glIndex_t   	*indexes;
 
 	//increment view count for double check prevention
 	tr.viewCount++;
@@ -412,7 +412,7 @@ int R_MarkFragments( int numPoints, const vec3_t *points, const vec3_t projectio
 			VectorNormalize(normal);
 			if (DotProduct(normal, projectionDir) > -0.5) continue;
 			*/
-			indexes = (int *)( (byte *)surf + surf->ofsIndices );
+			indexes = (glIndex_t *)( (byte *)surf + surf->ofsIndices );
 			for ( k = 0 ; k < surf->numIndices ; k += 3 ) {
 				for ( j = 0 ; j < 3 ; j++ ) {
 					v = surf->points[0] + VERTEXSIZE * indexes[k+j];;

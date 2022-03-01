@@ -20,10 +20,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 #include "tr_local.h"
+#include "tr_layer.h"
 
 backEndData_t	*backEndData[SMP_FRAMES];
 backEndState_t	backEnd;
-
 
 static float	s_flipMatrix[16] = {
 	// convert from our coordinate system (looking down X)
@@ -34,358 +34,22 @@ static float	s_flipMatrix[16] = {
 	0, 0, 0, 1
 };
 
+const float s_identityMatrix[16] = {
+    1, 0, 0, 0,
+    0, 1, 0, 0, 
+    0, 0, 1, 0,
+    0, 0, 0, 1 
+};
 
-/*
-** GL_Bind
-*/
-void GL_Bind( image_t *image ) {
-	int texnum;
+void RB_UploadCinematic(int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
 
-	if ( !image ) {
-		ri.Printf( PRINT_WARNING, "GL_Bind: NULL image\n" );
-		texnum = tr.defaultImage->texnum;
-	} else {
-		texnum = image->texnum;
-	}
-
-	if ( r_nobind->integer && tr.dlightImage ) {		// performance evaluation option
-		texnum = tr.dlightImage->texnum;
-	}
-
-	if ( glState.currenttextures[glState.currenttmu] != texnum ) {
-		image->frameUsed = tr.frameCount;
-		glState.currenttextures[glState.currenttmu] = texnum;
-		qglBindTexture (GL_TEXTURE_2D, texnum);
-	}
+// @pjb: convenience functions for checking the pass features
+qboolean RB_IsDepthPass(void) { 
+    return (backEnd.viewParms.passFeatures & PASSF_DEPTH) != 0;
 }
-
-/*
-** GL_SelectTexture
-*/
-void GL_SelectTexture( int unit )
-{
-	if ( glState.currenttmu == unit )
-	{
-		return;
-	}
-
-	if ( unit == 0 )
-	{
-		qglActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE0_ARB )\n" );
-		qglClientActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE0_ARB )\n" );
-	}
-	else if ( unit == 1 )
-	{
-		qglActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE1_ARB )\n" );
-		qglClientActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE1_ARB )\n" );
-	} else {
-		ri.Error( ERR_DROP, "GL_SelectTexture: unit = %i", unit );
-	}
-
-	glState.currenttmu = unit;
+qboolean RB_IsColorPass(void) { 
+    return (backEnd.viewParms.passFeatures & (PASSF_DEBUG|PASSF_COLOR)) != 0;
 }
-
-
-/*
-** GL_BindMultitexture
-*/
-void GL_BindMultitexture( image_t *image0, GLuint env0, image_t *image1, GLuint env1 ) {
-	int		texnum0, texnum1;
-
-	texnum0 = image0->texnum;
-	texnum1 = image1->texnum;
-
-	if ( r_nobind->integer && tr.dlightImage ) {		// performance evaluation option
-		texnum0 = texnum1 = tr.dlightImage->texnum;
-	}
-
-	if ( glState.currenttextures[1] != texnum1 ) {
-		GL_SelectTexture( 1 );
-		image1->frameUsed = tr.frameCount;
-		glState.currenttextures[1] = texnum1;
-		qglBindTexture( GL_TEXTURE_2D, texnum1 );
-	}
-	if ( glState.currenttextures[0] != texnum0 ) {
-		GL_SelectTexture( 0 );
-		image0->frameUsed = tr.frameCount;
-		glState.currenttextures[0] = texnum0;
-		qglBindTexture( GL_TEXTURE_2D, texnum0 );
-	}
-}
-
-
-/*
-** GL_Cull
-*/
-void GL_Cull( int cullType ) {
-	if ( glState.faceCulling == cullType ) {
-		return;
-	}
-
-	glState.faceCulling = cullType;
-
-	if ( cullType == CT_TWO_SIDED ) 
-	{
-		qglDisable( GL_CULL_FACE );
-	} 
-	else 
-	{
-		qglEnable( GL_CULL_FACE );
-
-		if ( cullType == CT_BACK_SIDED )
-		{
-			if ( backEnd.viewParms.isMirror )
-			{
-				qglCullFace( GL_FRONT );
-			}
-			else
-			{
-				qglCullFace( GL_BACK );
-			}
-		}
-		else
-		{
-			if ( backEnd.viewParms.isMirror )
-			{
-				qglCullFace( GL_BACK );
-			}
-			else
-			{
-				qglCullFace( GL_FRONT );
-			}
-		}
-	}
-}
-
-/*
-** GL_TexEnv
-*/
-void GL_TexEnv( int env )
-{
-	if ( env == glState.texEnv[glState.currenttmu] )
-	{
-		return;
-	}
-
-	glState.texEnv[glState.currenttmu] = env;
-
-
-	switch ( env )
-	{
-	case GL_MODULATE:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		break;
-	case GL_REPLACE:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
-		break;
-	case GL_DECAL:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
-		break;
-	case GL_ADD:
-		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
-		break;
-	default:
-		ri.Error( ERR_DROP, "GL_TexEnv: invalid env '%d' passed\n", env );
-		break;
-	}
-}
-
-/*
-** GL_State
-**
-** This routine is responsible for setting the most commonly changed state
-** in Q3.
-*/
-void GL_State( unsigned long stateBits )
-{
-	unsigned long diff = stateBits ^ glState.glStateBits;
-
-	if ( !diff )
-	{
-		return;
-	}
-
-	//
-	// check depthFunc bits
-	//
-	if ( diff & GLS_DEPTHFUNC_EQUAL )
-	{
-		if ( stateBits & GLS_DEPTHFUNC_EQUAL )
-		{
-			qglDepthFunc( GL_EQUAL );
-		}
-		else
-		{
-			qglDepthFunc( GL_LEQUAL );
-		}
-	}
-
-	//
-	// check blend bits
-	//
-	if ( diff & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) )
-	{
-		GLenum srcFactor, dstFactor;
-
-		if ( stateBits & ( GLS_SRCBLEND_BITS | GLS_DSTBLEND_BITS ) )
-		{
-			switch ( stateBits & GLS_SRCBLEND_BITS )
-			{
-			case GLS_SRCBLEND_ZERO:
-				srcFactor = GL_ZERO;
-				break;
-			case GLS_SRCBLEND_ONE:
-				srcFactor = GL_ONE;
-				break;
-			case GLS_SRCBLEND_DST_COLOR:
-				srcFactor = GL_DST_COLOR;
-				break;
-			case GLS_SRCBLEND_ONE_MINUS_DST_COLOR:
-				srcFactor = GL_ONE_MINUS_DST_COLOR;
-				break;
-			case GLS_SRCBLEND_SRC_ALPHA:
-				srcFactor = GL_SRC_ALPHA;
-				break;
-			case GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA:
-				srcFactor = GL_ONE_MINUS_SRC_ALPHA;
-				break;
-			case GLS_SRCBLEND_DST_ALPHA:
-				srcFactor = GL_DST_ALPHA;
-				break;
-			case GLS_SRCBLEND_ONE_MINUS_DST_ALPHA:
-				srcFactor = GL_ONE_MINUS_DST_ALPHA;
-				break;
-			case GLS_SRCBLEND_ALPHA_SATURATE:
-				srcFactor = GL_SRC_ALPHA_SATURATE;
-				break;
-			default:
-				srcFactor = GL_ONE;		// to get warning to shut up
-				ri.Error( ERR_DROP, "GL_State: invalid src blend state bits\n" );
-				break;
-			}
-
-			switch ( stateBits & GLS_DSTBLEND_BITS )
-			{
-			case GLS_DSTBLEND_ZERO:
-				dstFactor = GL_ZERO;
-				break;
-			case GLS_DSTBLEND_ONE:
-				dstFactor = GL_ONE;
-				break;
-			case GLS_DSTBLEND_SRC_COLOR:
-				dstFactor = GL_SRC_COLOR;
-				break;
-			case GLS_DSTBLEND_ONE_MINUS_SRC_COLOR:
-				dstFactor = GL_ONE_MINUS_SRC_COLOR;
-				break;
-			case GLS_DSTBLEND_SRC_ALPHA:
-				dstFactor = GL_SRC_ALPHA;
-				break;
-			case GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA:
-				dstFactor = GL_ONE_MINUS_SRC_ALPHA;
-				break;
-			case GLS_DSTBLEND_DST_ALPHA:
-				dstFactor = GL_DST_ALPHA;
-				break;
-			case GLS_DSTBLEND_ONE_MINUS_DST_ALPHA:
-				dstFactor = GL_ONE_MINUS_DST_ALPHA;
-				break;
-			default:
-				dstFactor = GL_ONE;		// to get warning to shut up
-				ri.Error( ERR_DROP, "GL_State: invalid dst blend state bits\n" );
-				break;
-			}
-
-			qglEnable( GL_BLEND );
-			qglBlendFunc( srcFactor, dstFactor );
-		}
-		else
-		{
-			qglDisable( GL_BLEND );
-		}
-	}
-
-	//
-	// check depthmask
-	//
-	if ( diff & GLS_DEPTHMASK_TRUE )
-	{
-		if ( stateBits & GLS_DEPTHMASK_TRUE )
-		{
-			qglDepthMask( GL_TRUE );
-		}
-		else
-		{
-			qglDepthMask( GL_FALSE );
-		}
-	}
-
-	//
-	// fill/line mode
-	//
-	if ( diff & GLS_POLYMODE_LINE )
-	{
-		if ( stateBits & GLS_POLYMODE_LINE )
-		{
-			qglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-		}
-		else
-		{
-			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-		}
-	}
-
-	//
-	// depthtest
-	//
-	if ( diff & GLS_DEPTHTEST_DISABLE )
-	{
-		if ( stateBits & GLS_DEPTHTEST_DISABLE )
-		{
-			qglDisable( GL_DEPTH_TEST );
-		}
-		else
-		{
-			qglEnable( GL_DEPTH_TEST );
-		}
-	}
-
-	//
-	// alpha test
-	//
-	if ( diff & GLS_ATEST_BITS )
-	{
-		switch ( stateBits & GLS_ATEST_BITS )
-		{
-		case 0:
-			qglDisable( GL_ALPHA_TEST );
-			break;
-		case GLS_ATEST_GT_0:
-			qglEnable( GL_ALPHA_TEST );
-			qglAlphaFunc( GL_GREATER, 0.0f );
-			break;
-		case GLS_ATEST_LT_80:
-			qglEnable( GL_ALPHA_TEST );
-			qglAlphaFunc( GL_LESS, 0.5f );
-			break;
-		case GLS_ATEST_GE_80:
-			qglEnable( GL_ALPHA_TEST );
-			qglAlphaFunc( GL_GEQUAL, 0.5f );
-			break;
-		default:
-			assert( 0 );
-			break;
-		}
-	}
-
-	glState.glStateBits = stateBits;
-}
-
-
 
 /*
 ================
@@ -402,28 +66,31 @@ static void RB_Hyperspace( void ) {
 	}
 
 	c = ( backEnd.refdef.time & 255 ) / 255.0f;
-	qglClearColor( c, c, c, 1 );
-	qglClear( GL_COLOR_BUFFER_BIT );
+    {
+        float clearCol[] = { c, c, c, 1.0f };
+        GFX_Clear( CLEAR_COLOR, clearCol, CLEAR_DEFAULT_STENCIL, CLEAR_DEFAULT_DEPTH );
+    }
 
 	backEnd.isHyperspace = qtrue;
 }
 
 
-static void SetViewportAndScissor( void ) {
-	qglMatrixMode(GL_PROJECTION);
-	qglLoadMatrixf( backEnd.viewParms.projectionMatrix );
-	qglMatrixMode(GL_MODELVIEW);
+static void Set3DProjection( void ) {
+	GFX_SetProjectionMatrix( backEnd.viewParms.projectionMatrix );
 
 	// set the window clipping
-	qglViewport( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, 
+	GFX_SetViewport( 
+        backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, 
 		backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
-	qglScissor( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, 
-		backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
+
+    GFX_ResetState3D();
+
+    backEnd.allowPreZ = qtrue;
 }
 
 /*
 =================
-RB_BeginDrawingView
+GLRB_BeginDrawingView
 
 Any mirrored or portaled views have already been drawn, so prepare
 to actually render the visible surfaces for this view
@@ -431,44 +98,44 @@ to actually render the visible surfaces for this view
 */
 void RB_BeginDrawingView (void) {
 	int clearBits = 0;
+    float clearCol[4] = { 0, 0, 0, 0 };
 
-	// sync with gl if needed
-	if ( r_finish->integer == 1 && !glState.finishCalled ) {
-		qglFinish ();
-		glState.finishCalled = qtrue;
-	}
-	if ( r_finish->integer == 0 ) {
-		glState.finishCalled = qtrue;
-	}
-
-	// we will need to change the projection matrix before drawing
+    // we will need to change the projection matrix before drawing
 	// 2D images again
 	backEnd.projection2D = qfalse;
 
 	//
 	// set the modelview matrix for the viewer
-	//
-	SetViewportAndScissor();
-
 	// ensures that depth writes are enabled for the depth clear
-	GL_State( GLS_DEFAULT );
-	// clear relevant buffers
-	clearBits = GL_DEPTH_BUFFER_BIT;
+	//
+	Set3DProjection();
 
-	if ( r_measureOverdraw->integer || r_shadows->integer == 2 )
+    // clear relevant buffers
+    if ( RB_IsDepthPass() ) {
+	    clearBits = CLEAR_DEPTH;
+    }
+
+	if ( r_measureOverdraw->integer )
 	{
-		clearBits |= GL_STENCIL_BUFFER_BIT;
+		clearBits |= CLEAR_STENCIL;
 	}
-	if ( r_fastsky->integer && !( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) )
+
+	if ( !RB_IsDepthPass() && 
+         r_fastsky->integer && 
+         !( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) )
 	{
-		clearBits |= GL_COLOR_BUFFER_BIT;	// FIXME: only if sky shaders have been used
+		clearBits |= CLEAR_COLOR;	// FIXME: only if sky shaders have been used
 #ifdef _DEBUG
-		qglClearColor( 0.8f, 0.7f, 0.4f, 1.0f );	// FIXME: get color of sky
-#else
-		qglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );	// FIXME: get color of sky
+        clearCol[0] = 0.8f; // FIXME: get color of sky
+        clearCol[1] = 0.7f;
+        clearCol[2] = 0.4f;
+        clearCol[3] = 1.0f;
 #endif
 	}
-	qglClear( clearBits );
+
+    if ( clearBits != 0 ) {
+	    GFX_Clear( clearBits, clearCol, CLEAR_DEFAULT_STENCIL, CLEAR_DEFAULT_DEPTH );
+    }
 
 	if ( ( backEnd.refdef.rdflags & RDF_HYPERSPACE ) )
 	{
@@ -480,7 +147,9 @@ void RB_BeginDrawingView (void) {
 		backEnd.isHyperspace = qfalse;
 	}
 
-	glState.faceCulling = -1;		// force face culling to set next time
+	//glState.faceCulling = -1;		// force face culling to set next time
+    // @pjb: this should be guaranteed to be valid now that the shadowing code 
+    // doesn't call CullFace directly.
 
 	// we will only draw a sun if there was sky rendered in this view
 	backEnd.skyRenderedThisView = qfalse;
@@ -488,7 +157,7 @@ void RB_BeginDrawingView (void) {
 	// clip to the plane of the portal
 	if ( backEnd.viewParms.isPortal ) {
 		float	plane[4];
-		double	plane2[4];
+		float	plane2[4];
 
 		plane[0] = backEnd.viewParms.portalPlane.normal[0];
 		plane[1] = backEnd.viewParms.portalPlane.normal[1];
@@ -500,16 +169,12 @@ void RB_BeginDrawingView (void) {
 		plane2[2] = DotProduct (backEnd.viewParms.or.axis[2], plane);
 		plane2[3] = DotProduct (plane, backEnd.viewParms.or.origin) - plane[3];
 
-		qglLoadMatrixf( s_flipMatrix );
-		qglClipPlane (GL_CLIP_PLANE0, plane2);
-		qglEnable (GL_CLIP_PLANE0);
+		GFX_SetPortalRendering( qtrue, s_flipMatrix, plane2 );
 	} else {
-		qglDisable (GL_CLIP_PLANE0);
+		GFX_SetPortalRendering( qfalse, NULL, NULL );
 	}
 }
 
-
-#define	MAC_EVENT_PUMP_MSEC		5
 
 /*
 ==================
@@ -524,17 +189,8 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	qboolean		depthRange, oldDepthRange;
 	int				i;
 	drawSurf_t		*drawSurf;
-	int				oldSort;
+	size_t			oldSort;
 	float			originalTime;
-#ifdef __MACOS__
-	int				macEventTime;
-
-	Sys_PumpEvents();		// crutch up the mac's limited buffer queue size
-
-	// we don't want to pump the event loop too often and waste time, so
-	// we are going to check every shader change
-	macEventTime = ri.Milliseconds() + MAC_EVENT_PUMP_MSEC;
-#endif
 
 	// save original time for entity shader offsets
 	originalTime = backEnd.refdef.floatTime;
@@ -549,7 +205,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	oldFogNum = -1;
 	oldDepthRange = qfalse;
 	oldDlighted = qfalse;
-	oldSort = -1;
+	oldSort = ~0U; // @pjb: unsigned
 	depthRange = qfalse;
 
 	backEnd.pc.c_surfaces += numDrawSurfs;
@@ -561,7 +217,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			continue;
 		}
 		oldSort = drawSurf->sort;
-		R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
+		R_DecomposeSort( (unsigned) drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
 
 		//
 		// change the tess parameters if needed
@@ -570,21 +226,22 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		if (shader != oldShader || fogNum != oldFogNum || dlighted != oldDlighted 
 			|| ( entityNum != oldEntityNum && !shader->entityMergable ) ) {
 			if (oldShader != NULL) {
-#ifdef __MACOS__	// crutch up the mac's limited buffer queue size
-				int		t;
-
-				t = ri.Milliseconds();
-				if ( t > macEventTime ) {
-					macEventTime = t + MAC_EVENT_PUMP_MSEC;
-					Sys_PumpEvents();
-				}
-#endif
 				RB_EndSurface();
 			}
 			RB_BeginSurface( shader, fogNum );
 			oldShader = shader;
-			oldFogNum = fogNum;
-			oldDlighted = dlighted;
+
+            // @pjb: don't need to track these in depth only mode
+            if (RB_IsColorPass()) {
+			    oldFogNum = fogNum;
+			    oldDlighted = dlighted;
+            }
+
+            // @pjb: make sure dlightBits is propagated safely
+            // @pjb: only do that if we're in color mode
+            if (entityNum == oldEntityNum && RB_IsColorPass()) {
+                tess.dlightBits = backEnd.currentEntity->dlightBits;
+            }
 		}
 
 		//
@@ -604,7 +261,8 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 				R_RotateForEntity( backEnd.currentEntity, &backEnd.viewParms, &backEnd.or );
 
 				// set up the dynamic lighting if needed
-				if ( backEnd.currentEntity->needDlights ) {
+				if ( backEnd.currentEntity->needDlights && RB_IsColorPass()) {
+                    tess.dlightBits |= backEnd.currentEntity->dlightBits;
 					R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
 				}
 
@@ -619,19 +277,23 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 				// we have to reset the shaderTime as well otherwise image animations on
 				// the world (like water) continue with the wrong frame
 				tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
-				R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
+
+                // @pjb: no need to transform lights in depth mode
+                if (RB_IsColorPass()) {
+				    R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
+                }
 			}
 
-			qglLoadMatrixf( backEnd.or.modelMatrix );
+            GFX_SetModelViewMatrix( backEnd.or.modelMatrix );
 
 			//
 			// change depthrange if needed
 			//
 			if ( oldDepthRange != depthRange ) {
 				if ( depthRange ) {
-					qglDepthRange (0, 0.3);
+                    GFX_SetDepthRange( 0, 0.3f );
 				} else {
-					qglDepthRange (0, 1);
+                    GFX_SetDepthRange( 0, 1 );
 				}
 				oldDepthRange = depthRange;
 			}
@@ -651,23 +313,15 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	}
 
 	// go back to the world modelview matrix
-	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
+    GFX_SetModelViewMatrix( backEnd.viewParms.world.modelMatrix );
 	if ( depthRange ) {
-		qglDepthRange (0, 1);
+        GFX_SetDepthRange( 0, 1 );
 	}
 
-#if 0
-	RB_DrawSun();
-#endif
-	// darken down any stencil shadows
-	RB_ShadowFinish();		
-
 	// add light flares on lights that aren't obscured
-	RB_RenderFlares();
-
-#ifdef __MACOS__
-	Sys_PumpEvents();		// crutch up the mac's limited buffer queue size
-#endif
+    if (RB_IsColorPass()) {
+    	RB_RenderFlares();
+    }
 }
 
 
@@ -679,61 +333,85 @@ RENDER BACK END THREAD FUNCTIONS
 ============================================================================
 */
 
+// @pjb: constructs an orthographic matrix
+void ConstructOrtho(float* m, float left, float right, float bottom, float top, float Near, float Far)
+{
+	float x = -((right + left) / (right - left));
+	float y = -((top + bottom) / (top - bottom));
+	float z = -((Far + Near) / (Far - Near));
+		
+	m[ 0] = 2 / (right - left);
+	m[ 1] = 0;
+	m[ 2] = 0;
+	m[ 3] = 0;
+	
+	m[ 4] = 0;
+	m[ 5] = 2 / (top - bottom);
+	m[ 6] = 0;
+	m[ 7] = 0;
+	
+	m[ 8] = 0;
+	m[ 9] = 0;
+	m[10] = -2 / (Far - Near);
+	m[11] = 0;
+	
+	m[12] = x;
+	m[13] = y;
+	m[14] = z;
+	m[15] = 1;
+}
+
+
 /*
 ================
-RB_SetGL2D
+Set2DProjection
 
 ================
 */
-void	RB_SetGL2D (void) {
-	backEnd.projection2D = qtrue;
+static void	Set2DProjection(void) {
+    float orthoMatrix[16];
 
-	// set 2D virtual screen size
-	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
-	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
-	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
-	qglOrtho (0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, 1);
-	qglMatrixMode(GL_MODELVIEW);
-    qglLoadIdentity ();
+    backEnd.projection2D = qtrue;
 
-	GL_State( GLS_DEPTHTEST_DISABLE |
-			  GLS_SRCBLEND_SRC_ALPHA |
-			  GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
+    GFX_SetViewport( 0, 0, vdConfig.vidWidth, vdConfig.vidHeight );
 
-	qglDisable( GL_CULL_FACE );
-	qglDisable( GL_CLIP_PLANE0 );
+    // @pjb: generate orthographic projection matrix manually and pass to
+    // GFX_SetProjection
+    ConstructOrtho( orthoMatrix, 0, vdConfig.vidWidth, vdConfig.vidHeight, 0, 0, 1 ); 
+    GFX_SetProjectionMatrix( orthoMatrix );
+
+    // Reset the state for 2D rendering
+    GFX_ResetState2D();
 
 	// set time for 2D shaders
-	backEnd.refdef.time = ri.Milliseconds();
+	backEnd.refdef.time = RI_ScaledMilliseconds();
 	backEnd.refdef.floatTime = backEnd.refdef.time * 0.001f;
+    backEnd.allowPreZ = qfalse; // @pjb: disallow prepass
 }
 
 
 /*
 =============
-RE_StretchRaw
+@pjb: RB_StretchRaw
 
-FIXME: not exactly backend
 Stretches a raw 32 bit power of 2 bitmap image over the given screen rectangle.
 Used for cinematics.
 =============
 */
-void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
+void RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
 	int			i, j;
 	int			start, end;
 
 	if ( !tr.registered ) {
 		return;
 	}
-	R_SyncRenderThread();
 
-	// we definately want to sync every frame for the cinematics
-	qglFinish();
+    // we definately want to sync every frame for the cinematics
+	GFX_Flush();
 
 	start = end = 0;
 	if ( r_speeds->integer ) {
-		start = ri.Milliseconds();
+		start = RI_ScaledMilliseconds();
 	}
 
 	// make sure rows and cols are powers of 2
@@ -742,71 +420,74 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 	for ( j = 0 ; ( 1 << j ) < rows ; j++ ) {
 	}
 	if ( ( 1 << i ) != cols || ( 1 << j ) != rows) {
-		ri.Error (ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows);
+		Com_Error (ERR_DROP, "Draw_StretchRaw: size not a power of 2: %i by %i", cols, rows);
 	}
 
-	GL_Bind( tr.scratchImage[client] );
-
-	// if the scratchImage isn't in the format we want, specify it as a new texture
-	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
-		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
-		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );	
-	} else {
-		if (dirty) {
-			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
-			// it and don't try and do a texture compression
-			qglTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		}
-	}
+    RB_UploadCinematic( w, h, cols, rows, data, client, dirty );
 
 	if ( r_speeds->integer ) {
-		end = ri.Milliseconds();
-		ri.Printf( PRINT_ALL, "qglTexSubImage2D %i, %i: %i msec\n", cols, rows, end - start );
+		end = RI_ScaledMilliseconds();
+		RI_Printf( PRINT_ALL, "UploadCinematic %i, %i: %i msec\n", cols, rows, end - start );
 	}
 
-	RB_SetGL2D();
+	Set2DProjection();
 
-	qglColor3f( tr.identityLight, tr.identityLight, tr.identityLight );
+    {
+        float coords[4] = {
+            x, y,
+            x+w, y+h 
+        };
+        float texcoords[4] = {
+            0.5f / cols, 0.5f / rows,
+            ( cols - 0.5f ) / cols, ( rows - 0.5f ) / rows
+        };
+        float color[3] = {
+            tr.identityLight,
+            tr.identityLight,
+            tr.identityLight 
+        };
 
-	qglBegin (GL_QUADS);
-	qglTexCoord2f ( 0.5f / cols,  0.5f / rows );
-	qglVertex2f (x, y);
-	qglTexCoord2f ( ( cols - 0.5f ) / cols ,  0.5f / rows );
-	qglVertex2f (x+w, y);
-	qglTexCoord2f ( ( cols - 0.5f ) / cols, ( rows - 0.5f ) / rows );
-	qglVertex2f (x+w, y+h);
-	qglTexCoord2f ( 0.5f / cols, ( rows - 0.5f ) / rows );
-	qglVertex2f (x, y+h);
-	qglEnd ();
+        GFX_DrawImage( tr.scratchImage[client], coords, texcoords, color );
+    }
 }
 
-void RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
+const void* RB_StretchRawCmd( const void* data )
+{
+	const stretchRawCommand_t* cmd = (const stretchRawCommand_t*) data;
 
-	GL_Bind( tr.scratchImage[client] );
+    RB_StretchRaw(
+        cmd->x, cmd->y,
+        cmd->w, cmd->h,
+        cmd->cols, cmd->rows,
+        cmd->data, cmd->client,
+        cmd->dirty );
 
-	// if the scratchImage isn't in the format we want, specify it as a new texture
-	if ( cols != tr.scratchImage[client]->width || rows != tr.scratchImage[client]->height ) {
-		tr.scratchImage[client]->width = tr.scratchImage[client]->uploadWidth = cols;
-		tr.scratchImage[client]->height = tr.scratchImage[client]->uploadHeight = rows;
-		qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGB8, cols, rows, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );	
-	} else {
-		if (dirty) {
-			// otherwise, just subimage upload it so that drivers can tell we are going to be changing
-			// it and don't try and do a texture compression
-			qglTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, cols, rows, GL_RGBA, GL_UNSIGNED_BYTE, data );
-		}
-	}
+	return cmd + 1;
 }
 
+/*
+=============
+@pjb: RB_UploadCinematic
+=============
+*/
+void RB_UploadCinematic(int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty) {
+    GFX_UpdateCinematic( tr.scratchImage[client], data, cols, rows, dirty );
+    tr.scratchImage[client]->width = cols;
+    tr.scratchImage[client]->height = rows;
+}
+
+const void* RB_UploadCinematicCmd( const void* data )
+{
+	const uploadCineCommand_t* cmd = (const uploadCineCommand_t*) data;
+
+    RB_UploadCinematic(
+        cmd->w, cmd->h,
+        cmd->cols, cmd->rows,
+        cmd->data, cmd->client,
+        cmd->dirty );
+
+	return cmd + 1;
+}
 
 /*
 =============
@@ -839,8 +520,12 @@ const void *RB_StretchPic ( const void *data ) {
 
 	cmd = (const stretchPicCommand_t *)data;
 
+    if ( !RB_IsColorPass() ) {
+        goto end;
+    }
+
 	if ( !backEnd.projection2D ) {
-		RB_SetGL2D();
+		Set2DProjection();
 	}
 
 	shader = cmd->shader;
@@ -849,6 +534,13 @@ const void *RB_StretchPic ( const void *data ) {
 			RB_EndSurface();
 		}
 		backEnd.currentEntity = &backEnd.entity2D;
+
+        // @pjb: this can be called without any kind of setup when rendering UI, so
+        // set it up now.
+        if ( !RB_IsColorPass() ) {
+            backEnd.viewParms.passFeatures |= PASSF_COLOR;
+        }
+
 		RB_BeginSurface( shader, 0 );
 	}
 
@@ -899,9 +591,28 @@ const void *RB_StretchPic ( const void *data ) {
 	tess.texCoords[ numVerts + 3 ][0][0] = cmd->s1;
 	tess.texCoords[ numVerts + 3 ][0][1] = cmd->t2;
 
+end:
 	return (const void *)(cmd + 1);
 }
 
+
+/*
+@pjb: RB_CheckForFlush
+*/
+const void	*RB_Flush( const void *data ) {
+	const flushCommand_t	*cmd = (const flushCommand_t*)data;
+
+	// sync with gl if needed
+	if ( r_finish->integer == 1 && !backEnd.finishCalled ) {
+		GFX_Flush();
+		backEnd.finishCalled = qtrue;
+	}
+	if ( r_finish->integer == 0 ) {
+		backEnd.finishCalled = qtrue;
+	}
+
+	return (const void *)(cmd + 1);
+}
 
 /*
 =============
@@ -912,7 +623,7 @@ RB_DrawSurfs
 const void	*RB_DrawSurfs( const void *data ) {
 	const drawSurfsCommand_t	*cmd;
 
-	// finish any 2D drawing if needed
+    // finish any 2D drawing if needed
 	if ( tess.numIndexes ) {
 		RB_EndSurface();
 	}
@@ -923,7 +634,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 	backEnd.viewParms = cmd->viewParms;
 
 	RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs );
-
+    
 	return (const void *)(cmd + 1);
 }
 
@@ -939,12 +650,12 @@ const void	*RB_DrawBuffer( const void *data ) {
 
 	cmd = (const drawBufferCommand_t *)data;
 
-	qglDrawBuffer( cmd->buffer );
+    // TODO: GFX_SetDrawBuffer( cmd->buffer );
 
 	// clear screen for debugging
 	if ( r_clear->integer ) {
-		qglClearColor( 1, 0, 0.5, 1 );
-		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        const float clearCol[] = { 1, 0, 0.5f, 1 };
+        GFX_Clear( CLEAR_COLOR | CLEAR_DEPTH, clearCol, CLEAR_DEFAULT_STENCIL, CLEAR_DEFAULT_DEPTH );
 	}
 
 	return (const void *)(cmd + 1);
@@ -967,47 +678,40 @@ void RB_ShowImages( void ) {
 	int		start, end;
 
 	if ( !backEnd.projection2D ) {
-		RB_SetGL2D();
+		Set2DProjection();
 	}
 
-	qglClear( GL_COLOR_BUFFER_BIT );
+    GFX_Clear( CLEAR_COLOR, CLEAR_DEFAULT_COLOR, CLEAR_DEFAULT_STENCIL, CLEAR_DEFAULT_DEPTH );
+	GFX_Flush();
 
-	qglFinish();
-
-	start = ri.Milliseconds();
+	start = RI_ScaledMilliseconds();
 
 	for ( i=0 ; i<tr.numImages ; i++ ) {
 		image = tr.images[i];
 
-		w = glConfig.vidWidth / 20;
-		h = glConfig.vidHeight / 15;
+		w = vdConfig.vidWidth / 20;
+		h = vdConfig.vidHeight / 15;
 		x = i % 20 * w;
 		y = i / 20 * h;
 
 		// show in proportional size in mode 2
 		if ( r_showImages->integer == 2 ) {
-			w *= image->uploadWidth / 512.0f;
-			h *= image->uploadHeight / 512.0f;
+            // @pjb: todo: check me
+			w *= image->width / 512.0f;
+			h *= image->height / 512.0f;
 		}
 
-		GL_Bind( image );
-		qglBegin (GL_QUADS);
-		qglTexCoord2f( 0, 0 );
-		qglVertex2f( x, y );
-		qglTexCoord2f( 1, 0 );
-		qglVertex2f( x + w, y );
-		qglTexCoord2f( 1, 1 );
-		qglVertex2f( x + w, y + h );
-		qglTexCoord2f( 0, 1 );
-		qglVertex2f( x, y + h );
-		qglEnd();
+        {
+            float coords[] = { x, y, x + w, y + h };
+            float texcoords[] = { 0, 0, 1, 1 };   
+            GFX_DrawImage( image, coords, texcoords, NULL );
+        }
 	}
 
-	qglFinish();
+	GFX_Flush();
 
-	end = ri.Milliseconds();
-	ri.Printf( PRINT_ALL, "%i msec to draw all images\n", end - start );
-
+	end = RI_ScaledMilliseconds();
+	RI_Printf( PRINT_ALL, "%i msec to draw all images\n", end - start );
 }
 
 
@@ -1032,36 +736,136 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	cmd = (const swapBuffersCommand_t *)data;
 
-	// we measure overdraw by reading back the stencil buffer and
-	// counting up the number of increments that have happened
-	if ( r_measureOverdraw->integer ) {
-		int i;
-		long sum = 0;
-		unsigned char *stencilReadback;
-
-		stencilReadback = ri.Hunk_AllocateTempMemory( glConfig.vidWidth * glConfig.vidHeight );
-		qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, stencilReadback );
-
-		for ( i = 0; i < glConfig.vidWidth * glConfig.vidHeight; i++ ) {
-			sum += stencilReadback[i];
-		}
-
-		backEnd.pc.c_overDraw += sum;
-		ri.Hunk_FreeTempMemory( stencilReadback );
+	if ( !backEnd.finishCalled ) {
+		GFX_Flush();
 	}
 
-
-	if ( !glState.finishCalled ) {
-		qglFinish();
-	}
-
-	GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
-
-	GLimp_EndFrame();
+    GFX_EndFrame();
 
 	backEnd.projection2D = qfalse;
-
 	return (const void *)(cmd + 1);
+}
+
+/* 
+============================================================================== 
+ 
+						SCREEN SHOTS 
+
+NOTE TTimo
+some thoughts about the screenshots system:
+screenshots get written in fs_homepath + fs_gamedir
+vanilla q3 .. baseq3/screenshots/ *.tga
+team arena .. missionpack/screenshots/ *.tga
+
+two commands: "screenshot" and "screenshotJPEG"
+we use statics to store a count and start writing the first screenshot/screenshot????.tga (.jpg) available
+(with FS_FileExists / FS_FOpenFileWrite calls)
+FIXME: the statics don't get a reinit between fs_game changes
+
+============================================================================== 
+*/ 
+
+/* 
+================== 
+RB_TakeScreenshot
+================== 
+*/  
+void RB_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
+	byte		*buffer;
+	int			i, c, temp;
+		
+	buffer = Hunk_AllocateTempMemory(vdConfig.vidWidth*vdConfig.vidHeight*3+18);
+
+	Com_Memset (buffer, 0, 18);
+	buffer[2] = 2;		// uncompressed type
+	buffer[12] = width & 255;
+	buffer[13] = width >> 8;
+	buffer[14] = height & 255;
+	buffer[15] = height >> 8;
+	buffer[16] = 24;	// pixel size
+
+	// TODO: GFX_ReadPixels( x, y, width, height, IMAGEFORMAT_RGB, buffer+18 ); 
+	RI_Printf( PRINT_WARNING, "TODO: Screenshots not implemented.\n" );
+
+	// swap rgb to bgr
+	c = 18 + width * height * 3;
+	for (i=18 ; i<c ; i+=3) {
+		temp = buffer[i];
+		buffer[i] = buffer[i+2];
+		buffer[i+2] = temp;
+	}
+
+	FS_WriteFile( fileName, buffer, c );
+
+	Hunk_FreeTempMemory( buffer );
+}
+
+/* 
+================== 
+RB_TakeScreenshotJPEG
+================== 
+*/  
+void RB_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName ) {
+	byte		*buffer;
+
+	buffer = Hunk_AllocateTempMemory(vdConfig.vidWidth*vdConfig.vidHeight*4);
+
+	//TODO: GFX_ReadPixels( x, y, width, height, IMAGEFORMAT_RGBA, buffer ); 
+	RI_Printf(PRINT_WARNING, "TODO: Screenshots not implemented.\n");
+
+	FS_WriteFile( fileName, buffer, 1 );		// create path
+	SaveJPG( fileName, 95, vdConfig.vidWidth, vdConfig.vidHeight, buffer);
+
+	Hunk_FreeTempMemory( buffer );
+}
+
+/*
+==================
+RB_TakeScreenshotCmd
+==================
+*/
+const void *RB_TakeScreenshotCmd( const void *data ) {
+	const screenshotCommand_t	*cmd;
+	
+	cmd = (const screenshotCommand_t *)data;
+	
+	if (cmd->jpeg)
+		RB_TakeScreenshotJPEG( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
+	else
+		RB_TakeScreenshot( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
+	
+	return (const void *)(cmd + 1);	
+}
+
+/*
+==================
+@pjb: RB_DrawDebugCmd
+==================
+*/
+const void *RB_DrawDebugCmd( const void *data ) {
+	const drawDebugCommand_t	*cmd;
+	
+	cmd = (const drawDebugCommand_t *)data;
+
+    Set2DProjection();
+    GFX_DebugDraw();
+	
+	return (const void *)(cmd + 1);	
+}
+
+/*
+==================
+@pjb: RB_OpenList()
+==================
+*/
+const void *RB_OpenList( const void *data ) {
+	const startOfListCommand_t	*cmd;
+	
+	cmd = (const startOfListCommand_t *)data;
+
+    GFX_BeginFrame();
+	
+	return (const void *)(cmd + 1);	
 }
 
 /*
@@ -1074,14 +878,28 @@ smp extensions, or asynchronously by another thread.
 */
 void RB_ExecuteRenderCommands( const void *data ) {
 	int		t1, t2;
+#ifdef _DEBUG
+	int cmdID;
+    static qboolean frameStarted = qfalse;
+#endif
 
-	t1 = ri.Milliseconds ();
+	t1 = RI_ScaledMilliseconds ();
 
 	if ( !r_smp->integer || data == backEndData[0]->commands.cmds ) {
 		backEnd.smpFrame = 0;
 	} else {
 		backEnd.smpFrame = 1;
 	}
+    
+#ifdef _DEBUG
+    cmdID = *(const int *)data;
+    if (frameStarted == qfalse && 
+        cmdID != RC_START_OF_LIST &&
+        cmdID != RC_END_OF_LIST) {
+        Com_Error(ERR_FATAL, "Need to open the render command list before calling draw commands (%d).", cmdID);
+    }
+    frameStarted = qtrue;
+#endif
 
 	while ( 1 ) {
 		switch ( *(const int *)data ) {
@@ -1091,6 +909,15 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_STRETCH_PIC:
 			data = RB_StretchPic( data );
 			break;
+		case RC_STRETCH_RAW: // @pjb
+			data = RB_StretchRawCmd( data );
+			break;
+		case RC_UPLOAD_CINE: // @pjb
+			data = RB_UploadCinematicCmd( data );
+			break;
+        case RC_FLUSH:
+            data = RB_Flush( data );
+            break;
 		case RC_DRAW_SURFS:
 			data = RB_DrawSurfs( data );
 			break;
@@ -1103,16 +930,25 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_SCREENSHOT:
 			data = RB_TakeScreenshotCmd( data );
 			break;
+        case RC_DEBUG: // @pjb: draw debug rendering
+			data = RB_DrawDebugCmd( data );
+			break;
 
-		case RC_END_OF_LIST:
+        case RC_START_OF_LIST: // @pjb
+            data = RB_OpenList( data );
+            break;
+        case RC_END_OF_LIST:
 		default:
+#ifdef _DEBUG
+            // @pjb:
+            frameStarted = qfalse;
+#endif
 			// stop rendering on this thread
-			t2 = ri.Milliseconds ();
+			t2 = RI_ScaledMilliseconds ();
 			backEnd.pc.msec = t2 - t1;
 			return;
 		}
 	}
-
 }
 
 
@@ -1127,7 +963,7 @@ void RB_RenderThread( void ) {
 	// wait for either a rendering command or a quit command
 	while ( 1 ) {
 		// sleep until we have work to do
-		data = GLimp_RendererSleep();
+		data = RSMP_RendererSleep();
 
 		if ( !data ) {
 			return;	// all done, renderer is shutting down

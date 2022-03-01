@@ -179,15 +179,17 @@ static void UI_SoundOptionsMenu_Init( void ) {
 	soundOptionsInfo.framer.width				= 256;
 	soundOptionsInfo.framer.height				= 334;
 
-	soundOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
-	soundOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
-	soundOptionsInfo.graphics.generic.id		= ID_GRAPHICS;
-	soundOptionsInfo.graphics.generic.callback	= UI_SoundOptionsMenu_Event;
-	soundOptionsInfo.graphics.generic.x			= 216;
-	soundOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
-	soundOptionsInfo.graphics.string			= "GRAPHICS";
-	soundOptionsInfo.graphics.style				= UI_RIGHT;
-	soundOptionsInfo.graphics.color				= color_red;
+    if (!UI_IsFixedGraphicsHardware()) {
+	    soundOptionsInfo.graphics.generic.type		= MTYPE_PTEXT;
+	    soundOptionsInfo.graphics.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
+	    soundOptionsInfo.graphics.generic.id		= ID_GRAPHICS;
+	    soundOptionsInfo.graphics.generic.callback	= UI_SoundOptionsMenu_Event;
+	    soundOptionsInfo.graphics.generic.x			= 216;
+	    soundOptionsInfo.graphics.generic.y			= 240 - 2 * PROP_HEIGHT;
+	    soundOptionsInfo.graphics.string			= "GRAPHICS";
+	    soundOptionsInfo.graphics.style				= UI_RIGHT;
+	    soundOptionsInfo.graphics.color				= color_red;
+    }
 
 	soundOptionsInfo.display.generic.type		= MTYPE_PTEXT;
 	soundOptionsInfo.display.generic.flags		= QMF_RIGHT_JUSTIFY|QMF_PULSEIFFOCUS;
@@ -274,7 +276,11 @@ static void UI_SoundOptionsMenu_Init( void ) {
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.banner );
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.framel );
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.framer );
-	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.graphics );
+
+    if (!UI_IsFixedGraphicsHardware()) {
+    	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.graphics );
+    }
+
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.display );
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.sound );
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * ) &soundOptionsInfo.network );

@@ -1,0 +1,44 @@
+#include "common.qabi"
+
+// Engine types
+typedef int clipHandle_t;
+typedef int sfxHandle_t;
+typedef int qhandle_t;
+typedef int e_status;
+typedef int fsMode_t;
+typedef int fileHandle_t;
+
+// Engine exports
+abi (trap_Print) void Com_Print( const char *fmt );
+abi (trap_Error) void Com_Error( int errLevel = ERR_DROP, const char *fmt );
+
+abi (trap_Milliseconds) int Sys_Milliseconds( void );
+abi (trap_RealTime) int Com_RealTime(qtime_t *qtime);
+
+abi (trap_Argc) int Cmd_Argc( void );
+abi (trap_Argv) void Cmd_ArgvBuffer( int n, char *buffer, int bufferLength );
+abi (trap_Args) void Cmd_ArgsBuffer( char *buffer, int bufferLength );
+
+abi (trap_FS_FOpenFile) int FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
+abi (trap_FS_Read) int FS_Read2( void *buffer, int len, fileHandle_t f );
+abi (trap_FS_Write) int FS_Write( const void *buffer, int len, fileHandle_t f );
+abi (trap_FS_FCloseFile) void FS_FCloseFile( fileHandle_t f );
+abi (trap_FS_Seek) int FS_Seek( fileHandle_t f, long offset, int origin );
+abi (trap_FS_GetFileList) int FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );
+
+abi (trap_Cvar_Register) void Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags );
+abi (trap_Cvar_Update) void Cvar_Update( vmCvar_t *vmCvar );
+abi (trap_Cvar_Set) void Cvar_Set( const char *var_name, const char *value );
+abi (trap_Cvar_VariableIntegerValue) int Cvar_VariableIntegerValue( const char *var_name );
+abi (trap_Cvar_VariableStringBuffer) void Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+abi (trap_Cmd_ExecuteText) void Cbuf_ExecuteText( int exec_when, const char *text );
+abi (trap_Cvar_SetValue) void Cvar_SetValue( const char *var_name, float value );
+abi (trap_Cvar_VariableValue) float Cvar_VariableValue( const char *var_name );
+abi (trap_Cvar_Reset) void Cvar_Reset( const char* var_name );
+
+abi (trap_SnapVector) void Sys_SnapVector( float *v );
+
+
+
+
+

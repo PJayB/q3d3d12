@@ -100,7 +100,7 @@ int SV_ReplacePendingServerCommands( client_t *client, const char *cmd ) {
 	for ( i = client->reliableSent+1; i <= client->reliableSequence; i++ ) {
 		index = i & ( MAX_RELIABLE_COMMANDS - 1 );
 		//
-		if ( !Q_strncmp(cmd, client->reliableCommands[ index ], strlen("cs")) ) {
+		if ( !Q_strncmp(cmd, client->reliableCommands[ index ], (int) strlen("cs")) ) {
 			sscanf(cmd, "cs %i", &csnum1);
 			sscanf(client->reliableCommands[ index ], "cs %i", &csnum2);
 			if ( csnum1 == csnum2 ) {
@@ -343,7 +343,7 @@ void SVC_Status( netadr_t from ) {
 			ps = SV_GameClientNum( i );
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n", 
 				ps->persistant[PERS_SCORE], cl->ping, cl->name);
-			playerLength = strlen(player);
+			playerLength = (int) strlen(player);
 			if (statusLength + playerLength >= sizeof(status) ) {
 				break;		// can't hold any more
 			}
@@ -705,6 +705,39 @@ void SV_CheckTimeouts( void ) {
 	}
 }
 
+/*
+==================
+SV_IsMultiplayerSession
+
+@pjb: added this so we can handle things slightly differently in multiplayer
+e.g. in Win8 don't disconnect if in single player and the app is suspended
+==================
+*/
+qboolean SV_IsMultiplayerSession( void ) {
+	int		count;
+	client_t	*cl;
+	int		i;
+
+	// If it's paused it can't possibly be a multiplayer session
+	if ( cl_paused->integer ) {
+		return qfalse;
+	}
+
+	// If the server isn't running locally it must be
+	if ( !com_sv_running->integer ) {
+		return qtrue;
+	}
+
+	// not MP if there is just a single client connected
+	count = 0;
+	for (i=0,cl=svs.clients ; i < sv_maxclients->integer ; i++,cl++) {
+		if ( cl && cl->state >= CS_CONNECTED && cl->netchan.remoteAddress.type != NA_BOT ) {
+			count++;
+		}
+	}
+
+	return ( count > 1 ) ? qtrue : qfalse;
+}
 
 /*
 ==================
@@ -834,7 +867,7 @@ void SV_Frame( int msec ) {
 		svs.time += frameMsec;
 
 		// let everything in the world think and move
-		VM_Call( gvm, GAME_RUN_FRAME, svs.time );
+		GVM_RunFrame( svs.time );
 	}
 
 	if ( com_speeds->integer ) {

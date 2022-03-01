@@ -28,10 +28,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/qfiles.h"
 #include "../qcommon/qcommon.h"
 #include "tr_public.h"
-#include "qgl.h"
 
-#define GL_INDEX_TYPE		GL_UNSIGNED_INT
-typedef unsigned int glIndex_t;
+// @pjb: d3d9 compatibility (plus why int anyway?)
+typedef unsigned short        glIndex_t;
 
 // fast float to int conversion
 #if id386 && !( (defined __linux__ || defined __FreeBSD__ ) && (defined __i386__ ) ) // rb010123
@@ -39,7 +38,6 @@ long myftol( float f );
 #else
 #define	myftol(x) ((int)(x))
 #endif
-
 
 // everything that is needed by the backend needs
 // to be double buffered to allow it to run in
@@ -80,6 +78,7 @@ typedef struct {
 	vec3_t		ambientLight;	// color normalized to 0-255
 	int			ambientLightInt;	// 32 bit rgba packed
 	vec3_t		directedLight;
+    int         dlightBits;     // @pjb: dynamic lights that affect this entity
 } trRefEntity_t;
 
 
@@ -90,20 +89,55 @@ typedef struct {
 	float		modelMatrix[16];
 } orientationr_t;
 
+// @pjb: need to make R_CreateImage's interface platform agnostic
+typedef enum {
+    WRAPMODE_CLAMP,
+    WRAPMODE_REPEAT
+} wrapClampMode_t;
+
+// @pjb: used in tr_shader.c for the texture environment
+typedef enum {
+    TEXENV_MODULATE,
+    TEXENV_REPLACE,
+    TEXENV_DECAL,
+    TEXENV_ADD
+} texEnvMode_t;
+
+// @pjb: we can't use GL internal formats any more: here's some common ground
+typedef enum {
+    IMAGEFORMAT_UNKNOWN,
+    IMAGEFORMAT_I,
+    IMAGEFORMAT_IA,
+    IMAGEFORMAT_RGB,
+    IMAGEFORMAT_RGBA,
+    IMAGEFORMAT_RGBA8,
+    IMAGEFORMAT_RGB8,
+    IMAGEFORMAT_S3TC,
+    IMAGEFORMAT_RGBA4,
+    IMAGEFORMAT_RGB5
+} imageFormat_t;
+
+// @pjb: different clearing types
+typedef enum {
+    CLEAR_COLOR   = 1,
+    CLEAR_DEPTH   = 2,
+    CLEAR_STENCIL = 4
+} clearBits_t;
+
+#define CLEAR_DEFAULT_COLOR NULL
+#define CLEAR_DEFAULT_STENCIL 0
+#define CLEAR_DEFAULT_DEPTH 1.0f // @pjb: check me
+
 typedef struct image_s {
-	char		imgName[MAX_QPATH];		// game path, including extension
-	int			width, height;				// source image
-	int			uploadWidth, uploadHeight;	// after power of two and picmip but not including clamp to MAX_TEXTURE_SIZE
-	GLuint		texnum;					// gl texture binding
+	char		    imgName[MAX_QPATH];		// game path, including extension
+	int			    width, height;				// source image
+	unsigned int    index;					// unique index for the image
 
-	int			frameUsed;			// for texture usage in frame statistics
+    imageFormat_t   format;
 
-	int			internalFormat;
-	int			TMU;				// only needed for voodoo2
-
-	qboolean	mipmap;
-	qboolean	allowPicmip;
-	int			wrapClampMode;		// GL_CLAMP or GL_REPEAT
+	qboolean	    mipmap;
+	qboolean	    allowPicmip;
+	wrapClampMode_t wrapClampMode;		// WRAPMODE_CLAMP or WRAPMODE_REPEAT
 
 	struct image_s*	next;
 } image_t;
@@ -330,7 +364,8 @@ struct shaderCommands_s;
 typedef enum {
 	CT_FRONT_SIDED,
 	CT_BACK_SIDED,
-	CT_TWO_SIDED
+	CT_TWO_SIDED,
+	CT_ALL_CULL_BITS = 0x3 // @pjb
 } cullType_t;
 
 typedef enum {
@@ -387,11 +422,6 @@ typedef struct shader_s {
 
 	fogPass_t	fogPass;				// draw a blended pass, possibly with depth test equals
 
-	qboolean	needsNormal;			// not all shaders will need all data to be gathered
-	qboolean	needsST1;
-	qboolean	needsST2;
-	qboolean	needsColor;
-
 	int			numDeforms;
 	deformStage_t	deforms[MAX_SHADER_DEFORMS];
 
@@ -399,19 +429,12 @@ typedef struct shader_s {
 	shaderStage_t	*stages[MAX_SHADER_STAGES];		
 
 	void		(*optimalStageIteratorFunc)( void );
+	void		(*depthStageIteratorFunc)( void ); // @pjb: depth rendering selection
 
   float clampTime;                                  // time this shader is clamped to
   float timeOffset;                                 // current time offset for this shader
 
-  int numStates;                                    // if non-zero this is a state shader
-  struct shader_s *currentShader;                   // current state if this is a state shader
-  struct shader_s *parentShader;                    // current state if this is a state shader
-  int currentState;                                 // current state index for cycle purposes
-  long expireTime;                                  // time in milliseconds this expires
-
   struct shader_s *remappedShader;                  // current shader this one is remapped too
-
-  int shaderStates[MAX_STATES_PER_SHADER];          // index to valid shader states
 
 	struct	shader_s	*next;
 } shader_t;
@@ -424,6 +447,12 @@ typedef struct shaderState_s {
   shader_t *shader;
 } shaderState_t;
 
+// @pjb: adding a constant for this
+#ifndef MAX_DLIGHTS
+#   define MAX_DLIGHTS 32
+#else
+static_assert(MAX_DLIGHTS == 32, "MAX_DLIGHTS conflict.");
+#endif
 
 // trRefdef_t holds everything that comes in refdef_t,
 // as well as the locally generated scene information
@@ -489,6 +518,15 @@ typedef struct {
 	float		surface[4];
 } fog_t;
 
+// @pjb: rendering stages have different ways of drawing
+typedef enum {
+    PASSF_DEPTH = 1,    // draw depth
+    PASSF_COLOR = 2,    // draw color
+    PASSF_DEBUG = 4,    // debug rendering
+    PASSF_POST  = 8,    // post-processes
+    PASSF_ALL = ~0
+} passFeatures_t;
+
 typedef struct {
 	orientationr_t	or;
 	orientationr_t	world;
@@ -504,6 +542,7 @@ typedef struct {
 	cplane_t	frustum[4];
 	vec3_t		visBounds[2];
 	float		zFar;
+    int         passFeatures;       // @pjb: what elements are we rendering?
 } viewParms_t;
 
 
@@ -533,10 +572,13 @@ typedef enum {
 	SF_MAX = 0x7fffffff			// ensures that sizeof( surfaceType_t ) == sizeof( int )
 } surfaceType_t;
 
+// @pjb: changing to two uint64s
+#pragma pack(push, 8)
 typedef struct drawSurf_s {
-	unsigned			sort;			// bit combination for fast compares
+	size_t 			    sort;			// bit combination for fast compares
 	surfaceType_t		*surface;		// any of surface*_t
 } drawSurf_t;
+#pragma pack(pop)
 
 #define	MAX_FACE_POINTS		64
 
@@ -625,7 +667,7 @@ typedef struct {
 
 	// triangle definitions
 	int				numIndexes;
-	int				*indexes;
+	glIndex_t   	*indexes;
 
 	int				numVerts;
 	drawVert_t		*verts;
@@ -764,9 +806,36 @@ void		R_ModelBounds( qhandle_t handle, vec3_t mins, vec3_t maxs );
 
 void		R_Modellist_f (void);
 
-//====================================================
-extern	refimport_t		ri;
+/*
+==============================================================================
 
+SKY
+
+==============================================================================
+*/
+
+#define SKY_SUBDIVISIONS		8
+
+typedef struct {
+    unsigned short offset;
+    unsigned short length;
+} bufferRange_t;
+
+typedef struct {
+    struct image_s* image;
+    bufferRange_t stripInfo[SKY_SUBDIVISIONS];
+    unsigned short stripCount;
+} skyboxSideDrawInfo_t;
+
+typedef struct {
+    skyboxSideDrawInfo_t sides[6];
+    const float* vbuffer;
+    const float* tbuffer;
+} skyboxDrawInfo_t;
+
+
+
+//====================================================
 #define	MAX_DRAWIMAGES			2048
 #define	MAX_LIGHTMAPS			256
 #define	MAX_SKINS				1024
@@ -798,8 +867,6 @@ the bits are allocated as follows:
 #define	QSORT_ENTITYNUM_SHIFT	7
 #define	QSORT_FOGNUM_SHIFT		2
 
-extern	int			gl_filter_min, gl_filter_max;
-
 /*
 ** performanceCounters_t
 */
@@ -819,16 +886,6 @@ typedef struct {
 #define FUNCTABLE_SIZE2		10
 #define FUNCTABLE_MASK		(FUNCTABLE_SIZE-1)
 
-
-// the renderer front end should never modify glstate_t
-typedef struct {
-	int			currenttextures[2];
-	int			currenttmu;
-	qboolean	finishCalled;
-	int			texEnv[2];
-	int			faceCulling;
-	unsigned long	glStateBits;
-} glstate_t;
 
 
 typedef struct {
@@ -857,10 +914,15 @@ typedef struct {
 	trRefEntity_t	*currentEntity;
 	qboolean	skyRenderedThisView;	// flag for drawing sun
 
+    // @pjb: moved this out of glState
+    qboolean    finishCalled;
+
 	qboolean	projection2D;	// if qtrue, drawstretchpic doesn't need to change modes
 	byte		color2D[4];
 	qboolean	vertexes2D;		// shader needs to be finished
 	trRefEntity_t	entity2D;	// currentEntity will point at this when doing 2D rendering
+
+    qboolean    allowPreZ;      // @pjb: true if we're rendering 3D stuff; allow pre-color depth pass
 } backEndState_t;
 
 /*
@@ -898,8 +960,6 @@ typedef struct {
 	image_t					*identityLightImage;	// full of tr.identityLightByte
 
 	shader_t				*defaultShader;
-	shader_t				*shadowShader;
-	shader_t				*projectionShadowShader;
 
 	shader_t				*flareShader;
 	shader_t				*sunShader;
@@ -959,11 +1019,9 @@ typedef struct {
 	float					fogTable[FOG_TABLE_SIZE];
 } trGlobals_t;
 
-extern backEndState_t	backEnd;
-extern trGlobals_t	tr;
-extern glconfig_t	glConfig;		// outside of TR since it shouldn't be cleared during ref re-init
-extern glstate_t	glState;		// outside of TR since it shouldn't be cleared during ref re-init
-
+extern backEndState_t	    backEnd;
+extern trGlobals_t	        tr;
+extern vdconfig_t	        vdConfig;		// outside of TR since it shouldn't be cleared during ref re-init
 
 //
 // cvars
@@ -1047,6 +1105,7 @@ extern	cvar_t	*r_offsetUnits;
 
 extern	cvar_t	*r_fullbright;					// avoid lightmap pass
 extern	cvar_t	*r_lightmap;					// render lightmaps only
+extern	cvar_t	*r_showlighting;				// @pjb: render lightmaps and dynamic lighting only
 extern	cvar_t	*r_vertexLight;					// vertex lighting mode for better performance
 extern	cvar_t	*r_uiFullScreen;				// ui is running fullscreen
 
@@ -1056,7 +1115,7 @@ extern	cvar_t	*r_showsky;						// forces sky in front of all surfaces
 extern	cvar_t	*r_shownormals;					// draws wireframe normals
 extern	cvar_t	*r_clear;						// force screen clear every frame
 
-extern	cvar_t	*r_shadows;						// controls shadows: 0 = none, 1 = blur, 2 = stencil, 3 = black planar projection
+extern	cvar_t	*r_shadows;						// controls shadows: 0 = none, 1 = blur
 extern	cvar_t	*r_flares;						// light flares
 
 extern	cvar_t	*r_intensity;
@@ -1119,63 +1178,30 @@ int R_CullLocalPointAndRadius( vec3_t origin, float radius );
 
 void R_RotateForEntity( const trRefEntity_t *ent, const viewParms_t *viewParms, orientationr_t *or );
 
-/*
-** GL wrapper/helper functions
-*/
-void	GL_Bind( image_t *image );
-void	GL_SetDefaultState (void);
-void	GL_SelectTexture( int unit );
-void	GL_TextureMode( const char *string );
-void	GL_CheckErrors( void );
-void	GL_State( unsigned long stateVector );
-void	GL_TexEnv( int env );
-void	GL_Cull( int cullType );
-
-#define GLS_SRCBLEND_ZERO						0x00000001
-#define GLS_SRCBLEND_ONE						0x00000002
-#define GLS_SRCBLEND_DST_COLOR					0x00000003
-#define GLS_SRCBLEND_ONE_MINUS_DST_COLOR		0x00000004
-#define GLS_SRCBLEND_SRC_ALPHA					0x00000005
-#define GLS_SRCBLEND_ONE_MINUS_SRC_ALPHA		0x00000006
-#define GLS_SRCBLEND_DST_ALPHA					0x00000007
-#define GLS_SRCBLEND_ONE_MINUS_DST_ALPHA		0x00000008
-#define GLS_SRCBLEND_ALPHA_SATURATE				0x00000009
-#define		GLS_SRCBLEND_BITS					0x0000000f
-
-#define GLS_DSTBLEND_ZERO						0x00000010
-#define GLS_DSTBLEND_ONE						0x00000020
-#define GLS_DSTBLEND_SRC_COLOR					0x00000030
-#define GLS_DSTBLEND_ONE_MINUS_SRC_COLOR		0x00000040
-#define GLS_DSTBLEND_SRC_ALPHA					0x00000050
-#define GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA		0x00000060
-#define GLS_DSTBLEND_DST_ALPHA					0x00000070
-#define GLS_DSTBLEND_ONE_MINUS_DST_ALPHA		0x00000080
-#define		GLS_DSTBLEND_BITS					0x000000f0
-
-#define GLS_DEPTHMASK_TRUE						0x00000100
-
-#define GLS_POLYMODE_LINE						0x00001000
-
-#define GLS_DEPTHTEST_DISABLE					0x00010000
-#define GLS_DEPTHFUNC_EQUAL						0x00020000
-
-#define GLS_ATEST_GT_0							0x10000000
-#define GLS_ATEST_LT_80							0x20000000
-#define GLS_ATEST_GE_80							0x40000000
-#define		GLS_ATEST_BITS						0x70000000
-
-#define GLS_DEFAULT			GLS_DEPTHMASK_TRUE
 
 void	RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
 void	RE_UploadCinematic (int w, int h, int cols, int rows, const byte *data, int client, qboolean dirty);
 
 void		RE_BeginFrame( stereoFrame_t stereoFrame );
-void		RE_BeginRegistration( glconfig_t *glconfig );
+void		RE_BeginRegistration( vdconfig_t *glconfig );
 void		RE_LoadWorldMap( const char *mapname );
 void		RE_SetWorldVisData( const byte *vis );
 qhandle_t	RE_RegisterModel( const char *name );
 qhandle_t	RE_RegisterSkin( const char *name );
 void		RE_Shutdown( qboolean destroyWindow );
+
+void*       RI_Malloc( size_t size );
+void        RI_Free( void* ptr );
+void*       RI_AllocateTempMemory( size_t size );
+void        RI_FreeTempMemory( void* ptr );
+void        RI_Printf( int print_level, const char *fmt, ... );
+void        RI_Error( int err_level, const char* fmt, ... );
+int         RI_ScaledMilliseconds( void );
+
+int         CIN_PlayCinematic( const char *arg0, int xpos, int ypos, int width, int height, int bits);
+e_status    CIN_RunCinematic( int handle );
+e_status    CIN_StopCinematic( int handle );
+void        CIN_UploadCinematic( int handle );
 
 qboolean	R_GetEntityToken( char *buffer, int size );
 
@@ -1184,12 +1210,14 @@ model_t		*R_AllocModel( void );
 void    	R_Init( void );
 image_t		*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmip, int glWrapClampMode );
 
+// @pjb: need to make R_CreateImage's interface platform agnostic
 image_t		*R_CreateImage( const char *name, const byte *pic, int width, int height, qboolean mipmap
-					, qboolean allowPicmip, int wrapClampMode );
+					, qboolean allowPicmip, wrapClampMode_t wrapClampMode );
+
+
 qboolean	R_GetModeInfo( int *width, int *height, float *windowAspect, int mode );
 
 void		R_SetColorMappings( void );
-void		R_GammaCorrect( byte *buffer, int bufSize );
 
 void	R_ImageList_f( void );
 void	R_SkinList_f( void );
@@ -1201,10 +1229,14 @@ void	R_InitFogTable( void );
 float	R_FogFactor( float s, float t );
 void	R_InitImages( void );
 void	R_DeleteTextures( void );
-int		R_SumOfUsedImages( void );
 void	R_InitSkins( void );
 skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
+// @pjb: todo: find a better home for this
+void R_MipMap (byte *in, int width, int height);
+void R_MipMap2( unsigned *in, int inWidth, int inHeight );
+void R_ResampleTexture( unsigned *in, int inwidth, int inheight, unsigned *out, int outwidth, int outheight );
+void R_BlendOverTexture( byte *data, int pixelCount, byte blend[4] );
 
 //
 // tr_shader.c
@@ -1225,32 +1257,6 @@ void    R_RemapShader(const char *oldShader, const char *newShader, const char *
 /*
 ====================================================================
 
-IMPLEMENTATION SPECIFIC FUNCTIONS
-
-====================================================================
-*/
-
-void		GLimp_Init( void );
-void		GLimp_Shutdown( void );
-void		GLimp_EndFrame( void );
-
-qboolean	GLimp_SpawnRenderThread( void (*function)( void ) );
-void		*GLimp_RendererSleep( void );
-void		GLimp_FrontEndSleep( void );
-void		GLimp_WakeRenderer( void *data );
-
-void		GLimp_LogComment( char *comment );
-
-// NOTE TTimo linux works with float gamma value, not the gamma table
-//   the params won't be used, getting the r_gamma cvar directly
-void		GLimp_SetGamma( unsigned char red[256], 
-						    unsigned char green[256],
-							unsigned char blue[256] );
-
-
-/*
-====================================================================
-
 TESSELATOR/SHADER DECLARATIONS
 
 ====================================================================
@@ -1263,6 +1269,18 @@ typedef struct stageVars
 	vec2_t		texcoords[NUM_TEXTURE_BUNDLES][SHADER_MAX_VERTEXES];
 } stageVars_t;
 
+typedef struct {
+    float       texCoordsArray[SHADER_MAX_VERTEXES][2];
+    byte        colorArray[SHADER_MAX_VERTEXES][4];
+    glIndex_t   hitIndexes[SHADER_MAX_INDEXES];
+    const image_t* dlImage;
+    int         numIndexes;
+    vec3_t      origin; // @pjb: {xyz}, passed to GPU
+    vec3_t      color;  // @pjb: {rgb}, passed to GPU
+	float		radius; // @pjb: light radius, passed to GPU
+    qboolean    additive;
+} dlightProjectionInfo_t;
+
 typedef struct shaderCommands_s 
 {
 	glIndex_t	indexes[SHADER_MAX_INDEXES];
@@ -1272,9 +1290,14 @@ typedef struct shaderCommands_s
 	color4ub_t	vertexColors[SHADER_MAX_VERTEXES];
 	int			vertexDlightBits[SHADER_MAX_VERTEXES];
 
-	stageVars_t	svars;
+	stageVars_t	svars[MAX_SHADER_STAGES];
+    stageVars_t fogVars;
 
 	color4ub_t	constantColor255[SHADER_MAX_VERTEXES];
+
+    // @pjb: hack: need to precompute these before we hand over to the graphics layer
+    dlightProjectionInfo_t dlightInfo[MAX_DLIGHTS];
+    int         dlightCount;
 
 	shader_t	*shader;
   float   shaderTime;
@@ -1285,6 +1308,8 @@ typedef struct shaderCommands_s
 	int			numIndexes;
 	int			numVertexes;
 
+    qboolean    allowPreZ;  // @pjb: for 3D rendering, allow pre-depth for color pass
+    
 	// info extracted from current shader
 	int			numPasses;
 	void		(*currentStageIteratorFunc)( void );
@@ -1298,6 +1323,11 @@ void RB_EndSurface(void);
 void RB_CheckOverflow( int verts, int indexes );
 #define RB_CHECKOVERFLOW(v,i) if (tess.numVertexes + (v) >= SHADER_MAX_VERTEXES || tess.numIndexes + (i) >= SHADER_MAX_INDEXES ) {RB_CheckOverflow(v,i);}
 
+// @pjb: for mimicing behavior of StageIteratorGeneric
+void RB_GenericStageIteratorPrep( shaderCommands_t* input );
+
+void RB_StageIteratorNull( void );
+void RB_StageIteratorDepth( void );
 void RB_StageIteratorGeneric( void );
 void RB_StageIteratorSky( void );
 void RB_StageIteratorVertexLitTexture( void );
@@ -1306,8 +1336,22 @@ void RB_StageIteratorLightmappedMultitexture( void );
 void RB_AddQuadStamp( vec3_t origin, vec3_t left, vec3_t up, byte *color );
 void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, float s1, float t1, float s2, float t2 );
 
-void RB_ShowImages( void );
+// @pjb: for determining pass features.
+qboolean RB_IsDepthPass( void );
+qboolean RB_IsColorPass( void );
 
+/*
+============================================================
+
+SMP
+
+============================================================
+*/
+
+void* RSMP_RendererSleep( void );
+qboolean RSMP_SpawnRenderThread( void (*function)( void ) );
+void RSMP_WakeRenderer( void *data );
+void RSMP_FrontEndSleep( void );
 
 /*
 ============================================================
@@ -1348,19 +1392,6 @@ void R_DlightBmodel( bmodel_t *bmodel );
 void R_SetupEntityLighting( const trRefdef_t *refdef, trRefEntity_t *ent );
 void R_TransformDlights( int count, dlight_t *dl, orientationr_t *or );
 int R_LightForPoint( vec3_t point, vec3_t ambientLight, vec3_t directedLight, vec3_t lightDir );
-
-
-/*
-============================================================
-
-SHADOWS
-
-============================================================
-*/
-
-void RB_ShadowTessEnd( void );
-void RB_ShadowFinish( void );
-void RB_ProjectionShadowDeform( void );
 
 /*
 ============================================================
@@ -1441,7 +1472,7 @@ void	R_TransformModelToClip( const vec3_t src, const float *modelMatrix, const f
 							vec4_t eye, vec4_t dst );
 void	R_TransformClipToWindow( const vec4_t clip, const viewParms_t *view, vec4_t normalized, vec4_t window );
 
-void	RB_DeformTessGeometry( void );
+void	RB_DeformTessGeometry( shaderCommands_t* input );
 
 void	RB_CalcEnvironmentTexCoords( float *dstTexCoords );
 void	RB_CalcFogTexCoords( float *dstTexCoords );
@@ -1463,16 +1494,6 @@ void	RB_CalcColorFromOneMinusEntity( unsigned char *dstColors );
 void	RB_CalcSpecularAlpha( unsigned char *alphas );
 void	RB_CalcDiffuseColor( unsigned char *colors );
 
-/*
-=============================================================
-
-RENDERER BACK END FUNCTIONS
-
-=============================================================
-*/
-
-void RB_RenderThread( void );
-void RB_ExecuteRenderCommands( const void *data );
 
 /*
 =============================================================
@@ -1488,6 +1509,15 @@ typedef struct {
 	byte	cmds[MAX_RENDER_COMMANDS];
 	int		used;
 } renderCommandList_t;
+
+// @pjb
+typedef struct {
+    int     commandId;
+} startOfListCommand_t;
+
+typedef struct {
+	int		commandId;
+} flushCommand_t;
 
 typedef struct {
 	int		commandId;
@@ -1527,6 +1557,27 @@ typedef struct {
 
 typedef struct {
 	int		commandId;
+	shader_t	*shader;
+	int		x, y;
+	int		w, h;
+	int		cols, rows;
+	const byte* data;
+	int		client;
+	qboolean dirty;
+} stretchRawCommand_t;
+
+typedef struct {
+	int		commandId;
+	shader_t	*shader;
+	int		w, h;
+	int		cols, rows;
+	const byte* data;
+	int		client;
+	qboolean dirty;
+} uploadCineCommand_t;
+
+typedef struct {
+	int		commandId;
 	trRefdef_t	refdef;
 	viewParms_t	viewParms;
 	drawSurf_t *drawSurfs;
@@ -1543,16 +1594,33 @@ typedef struct {
 	qboolean jpeg;
 } screenshotCommand_t;
 
+typedef struct {
+	int commandId;
+} drawDebugCommand_t;
+
 typedef enum {
-	RC_END_OF_LIST,
-	RC_SET_COLOR,
+    RC_END_OF_LIST,
+    RC_START_OF_LIST,// @pjb: decouple "frame start" from other events
+    RC_SET_COLOR,
 	RC_STRETCH_PIC,
+	RC_STRETCH_RAW,	 // @pjb: replacement for RE_StretchRaw
+	RC_UPLOAD_CINE,  // @pjb: upload a cinematic frame
 	RC_DRAW_SURFS,
 	RC_DRAW_BUFFER,
 	RC_SWAP_BUFFERS,
-	RC_SCREENSHOT
+    RC_SCREENSHOT,
+    RC_FLUSH,        // @pjb: force a call to GFX_Flush
+    RC_DEBUG,        // @pjb: draw debug rendering
 } renderCommand_t;
 
+
+// @pjb: no access to the GL buffer constants any more, so these replace those
+typedef enum {
+    DRAW_BUFFER_BACK,
+    DRAW_BUFFER_FRONT,
+    DRAW_BUFFER_BACK_LEFT,
+    DRAW_BUFFER_BACK_RIGHT
+} drawBufferSide_t;
 
 // these are sort of arbitrary limits.
 // the limits apply to the sum of all scenes in a frame --
@@ -1571,6 +1639,7 @@ typedef struct {
 	srfPoly_t	*polys;//[MAX_POLYS];
 	polyVert_t	*polyVerts;//[MAX_POLYVERTS];
 	renderCommandList_t	commands;
+    qboolean    open; //@pjb
 } backEndData_t;
 
 extern	int		max_polys;
@@ -1584,7 +1653,6 @@ extern	volatile qboolean	renderThreadActive;
 
 
 void *R_GetCommandBuffer( int bytes );
-void RB_ExecuteRenderCommands( const void *data );
 
 void R_InitCommandBuffers( void );
 void R_ShutdownCommandBuffers( void );
@@ -1592,6 +1660,9 @@ void R_ShutdownCommandBuffers( void );
 void R_SyncRenderThread( void );
 
 void R_AddDrawSurfCmd( drawSurf_t *drawSurfs, int numDrawSurfs );
+
+void R_AddFlushCmd( void );
+void R_DrawDebugCmd( void );
 
 void RE_SetColor( const float *rgba );
 void RE_StretchPic ( float x, float y, float w, float h, 
@@ -1605,5 +1676,8 @@ void R_InitFreeType();
 void R_DoneFreeType();
 void RE_RegisterFont(const char *fontName, int pointSize, fontInfo_t *font);
 
+void RB_ShowImages( void );
+void RB_RenderThread( void );
+void RB_ExecuteRenderCommands( const void *data );
 
 #endif //TR_LOCAL_H

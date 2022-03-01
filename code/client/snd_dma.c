@@ -147,9 +147,9 @@ void S_Init( void ) {
 	s_separation = Cvar_Get ("s_separation", "0.5", CVAR_ARCHIVE);
 	s_doppler = Cvar_Get ("s_doppler", "1", CVAR_ARCHIVE);
 	s_khz = Cvar_Get ("s_khz", "22", CVAR_ARCHIVE);
-	s_mixahead = Cvar_Get ("s_mixahead", "0.2", CVAR_ARCHIVE);
+	s_mixahead = Cvar_Get ("s_mixahead", "0.2", CVAR_ARCHIVE | CVAR_SYSTEM_SET);
 
-	s_mixPreStep = Cvar_Get ("s_mixPreStep", "0.05", CVAR_ARCHIVE);
+	s_mixPreStep = Cvar_Get ("s_mixPreStep", "0.05", CVAR_ARCHIVE | CVAR_SYSTEM_SET);
 	s_show = Cvar_Get ("s_show", "0", CVAR_CHEAT);
 	s_testsound = Cvar_Get ("s_testsound", "0", CVAR_CHEAT);
 
@@ -672,14 +672,17 @@ void S_ClearSoundBuffer( void ) {
 	else
 		clear = 0;
 
-	SNDDMA_BeginPainting ();
-	if (dma.buffer)
-    // TTimo: due to a particular bug workaround in linux sound code,
-    //   have to optionally use a custom C implementation of Com_Memset
-    //   not affecting win32, we have #define Snd_Memset Com_Memset
-    // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371
-		Snd_Memset(dma.buffer, clear, dma.samples * dma.samplebits/8);
-	SNDDMA_Submit ();
+    // @pjb: this is redundant on triple-buffered sound buffers
+    if ( !dma.manybuffered ) {
+	    SNDDMA_BeginPainting ( dma.samples );
+	    if (dma.buffer)
+        // TTimo: due to a particular bug workaround in linux sound code,
+        //   have to optionally use a custom C implementation of Com_Memset
+        //   not affecting win32, we have #define Snd_Memset Com_Memset
+        // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=371
+		    Snd_Memset(dma.buffer, clear, dma.samples * dma.samplebits/8);
+        SNDDMA_Submit ( 0, dma.samples );
+    }
 }
 
 /*
@@ -1193,7 +1196,7 @@ void S_GetSoundtime(void)
 	static	int		oldsamplepos;
 	int		fullsamples;
 	
-	fullsamples = dma.samples / dma.channels;
+	fullsamples = dma.channels == 0 ? 0 : dma.samples / dma.channels;
 
 	// it is possible to miscount buffers if it has wrapped twice between
 	// calls to S_Update.  Oh well.
@@ -1231,6 +1234,7 @@ void S_GetSoundtime(void)
 
 
 void S_Update_(void) {
+    unsigned        starttime;
 	unsigned        endtime;
 	int				samps;
 	static			float	lastTime = 0.0f;
@@ -1247,7 +1251,8 @@ void S_Update_(void) {
 	// Updates s_soundtime
 	S_GetSoundtime();
 
-	if (s_soundtime == ot) {
+    // @pjb: xaudio can drop frames
+	if (!dma.manybuffered && s_soundtime == ot) {
 		return;
 	}
 	ot = s_soundtime;
@@ -1280,13 +1285,13 @@ void S_Update_(void) {
 	if (endtime - s_soundtime > samps)
 		endtime = s_soundtime + samps;
 
+    starttime = s_paintedtime;
 
-
-	SNDDMA_BeginPainting ();
+	SNDDMA_BeginPainting ( ma );
 
 	S_PaintChannels (endtime);
 
-	SNDDMA_Submit ();
+	SNDDMA_Submit ( starttime, endtime - starttime );
 
 	lastTime = thisTime;
 }

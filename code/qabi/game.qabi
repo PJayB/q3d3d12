@@ -1,0 +1,13 @@
+#include "common.qabi"
+
+abi (GVM_Init) void G_InitGame( int clientNum, int randomSeed, int restart );
+abi (GVM_Shutdown) void G_ShutdownGame( int restart );
+abi (GVM_ClientConnect) char* ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
+abi (GVM_ClientBegin) void ClientBegin( int clientNum );
+abi (GVM_ClientUserinfoChanged) void ClientUserinfoChanged( int clientNum );
+abi (GVM_ClientDisconnect) void ClientDisconnect( int clientNum );
+abi (GVM_ClientCommand) void ClientCommand( int clientNum );
+abi (GVM_ClientThink) void ClientThink( int clientNum );
+abi (GVM_RunFrame) void G_RunFrame( int levelTime );
+abi (GVM_ConsoleComand) int ConsoleCommand( void );
+abi (GVM_BotAIStartFrame) int BotAIStartFrame( int time );

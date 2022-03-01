@@ -97,10 +97,10 @@ static void DriverInfo_MenuDraw( void )
 	UI_DrawString( 320, 152, "PIXELFORMAT", UI_CENTER|UI_SMALLFONT, color_red );
 	UI_DrawString( 320, 192, "EXTENSIONS", UI_CENTER|UI_SMALLFONT, color_red );
 
-	UI_DrawString( 320, 80+16, uis.glconfig.vendor_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
-	UI_DrawString( 320, 96+16, uis.glconfig.version_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
-	UI_DrawString( 320, 112+16, uis.glconfig.renderer_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
-	UI_DrawString( 320, 152+16, va ("color(%d-bits) Z(%d-bits) stencil(%d-bits)", uis.glconfig.colorBits, uis.glconfig.depthBits, uis.glconfig.stencilBits), UI_CENTER|UI_SMALLFONT, text_color_normal );
+	UI_DrawString( 320, 80+16, uis.vdconfig.vendor_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
+	UI_DrawString( 320, 96+16, uis.vdconfig.version_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
+	UI_DrawString( 320, 112+16, uis.vdconfig.renderer_string, UI_CENTER|UI_SMALLFONT, text_color_normal );
+	UI_DrawString( 320, 152+16, va ("color(%d-bits) Z(%d-bits) stencil(%d-bits)", uis.vdconfig.colorBits, uis.vdconfig.depthBits, uis.vdconfig.stencilBits), UI_CENTER|UI_SMALLFONT, text_color_normal );
 
 	// double column
 	y = 192+16;
@@ -139,9 +139,9 @@ UI_DriverInfo_Menu
 */
 static void UI_DriverInfo_Menu( void )
 {
-	char*	eptr;
-	int		i;
-	int		len;
+	//char*	eptr;
+	//int		i;
+	//int		len;
 
 	// zero set all our globals
 	memset( &s_driverinfo, 0 ,sizeof(driverinfo_t) );
@@ -185,11 +185,12 @@ static void UI_DriverInfo_Menu( void )
 	s_driverinfo.back.height  		   = 64;
 	s_driverinfo.back.focuspic         = DRIVERINFO_BACK1;
 
+    /*
   // TTimo: overflow with particularly long GL extensions (such as the gf3)
   // https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=399
   // NOTE: could have pushed the size of stringbuff, but the list is already out of the screen
   // (no matter what your resolution)
-  Q_strncpyz(s_driverinfo.stringbuff, uis.glconfig.extensions_string, 1024);
+  Q_strncpyz(s_driverinfo.stringbuff, uis.vdconfig.extensions_string, 1024);
 
 	// build null terminated extension strings
 	eptr = s_driverinfo.stringbuff;
@@ -208,12 +209,18 @@ static void UI_DriverInfo_Menu( void )
 
 	// safety length strings for display
 	for (i=0; i<s_driverinfo.numstrings; i++) {
-		len = strlen(s_driverinfo.strings[i]);
+		len = (int) strlen(s_driverinfo.strings[i]);
 		if (len > 32) {
 			s_driverinfo.strings[i][len-1] = '>';
 			s_driverinfo.strings[i][len]   = '\0';
 		}
 	}
+    */
+
+    // @pjb: todo: hack this back in with some agnostic interface
+
+    s_driverinfo.numstrings = 0;
+    s_driverinfo.stringbuff[0] = 0;
 
 	Menu_AddItem( &s_driverinfo.menu, &s_driverinfo.banner );
 	Menu_AddItem( &s_driverinfo.menu, &s_driverinfo.framel );
@@ -383,18 +390,9 @@ GraphicsOptions_UpdateMenuItems
 */
 static void GraphicsOptions_UpdateMenuItems( void )
 {
-	if ( s_graphicsoptions.driver.curvalue == 1 )
-	{
-		s_graphicsoptions.fs.curvalue = 1;
-		s_graphicsoptions.fs.generic.flags |= QMF_GRAYED;
-		s_graphicsoptions.colordepth.curvalue = 1;
-	}
-	else
-	{
-		s_graphicsoptions.fs.generic.flags &= ~QMF_GRAYED;
-	}
+    s_graphicsoptions.fs.generic.flags &= ~QMF_GRAYED;
 
-	if ( s_graphicsoptions.fs.curvalue == 0 || s_graphicsoptions.driver.curvalue == 1 )
+	if ( s_graphicsoptions.fs.curvalue == 0 )
 	{
 		s_graphicsoptions.colordepth.curvalue = 0;
 		s_graphicsoptions.colordepth.generic.flags |= QMF_GRAYED;
@@ -706,10 +704,6 @@ static void GraphicsOptions_SetMenuItems( void )
 	{
 		s_graphicsoptions.colordepth.curvalue = 0;
 	}
-	if ( s_graphicsoptions.driver.curvalue == 1 )
-	{
-		s_graphicsoptions.colordepth.curvalue = 1;
-	}
 }
 
 /*
@@ -886,7 +880,7 @@ void GraphicsOptions_MenuInit( void )
 	s_graphicsoptions.driver.generic.x     = 400;
 	s_graphicsoptions.driver.generic.y     = y;
 	s_graphicsoptions.driver.itemnames     = s_driver_names;
-	s_graphicsoptions.driver.curvalue      = (uis.glconfig.driverType == GLDRV_VOODOO);
+	s_graphicsoptions.driver.curvalue      = 0;
 	y += BIGCHAR_HEIGHT+2;
 
 	// references/modifies "r_allowExtensions"
@@ -1033,12 +1027,6 @@ void GraphicsOptions_MenuInit( void )
 
 	GraphicsOptions_SetMenuItems();
 	GraphicsOptions_GetInitialVideo();
-
-	if ( uis.glconfig.driverType == GLDRV_ICD &&
-		 uis.glconfig.hardwareType == GLHW_3DFX_2D3D )
-	{
-		s_graphicsoptions.driver.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
-	}
 }
 
 
@@ -1067,4 +1055,3 @@ void UI_GraphicsOptionsMenu( void ) {
 	UI_PushMenu( &s_graphicsoptions.menu );
 	Menu_SetCursorToItem( &s_graphicsoptions.menu, &s_graphicsoptions.graphics );
 }
-

@@ -55,6 +55,7 @@ vec4_t text_color_disabled  = {0.50f, 0.50f, 0.50f, 1.00f};	// light gray
 vec4_t text_color_normal    = {1.00f, 0.43f, 0.00f, 1.00f};	// light orange
 vec4_t text_color_highlight = {1.00f, 1.00f, 0.00f, 1.00f};	// bright yellow
 vec4_t listbar_color        = {1.00f, 0.43f, 0.00f, 0.30f};	// transluscent orange
+vec4_t listbar_color_cur    = {1.00f, 0.43f, 0.00f, 0.60f};	// transluscent orange
 vec4_t text_color_status    = {1.00f, 1.00f, 1.00f, 1.00f};	// bright white	
 
 // action widget
@@ -372,7 +373,7 @@ static void Action_Init( menuaction_s *a )
 
 	// calculate bounds
 	if (a->generic.name)
-		len = strlen(a->generic.name);
+		len = (int) strlen(a->generic.name);
 	else
 		len = 0;
 
@@ -438,7 +439,7 @@ static void RadioButton_Init( menuradiobutton_s *rb )
 
 	// calculate bounds
 	if (rb->generic.name)
-		len = strlen(rb->generic.name);
+		len = (int) strlen(rb->generic.name);
 	else
 		len = 0;
 
@@ -467,10 +468,7 @@ static sfxHandle_t RadioButton_Key( menuradiobutton_s *rb, int key )
 		case K_JOY4:
 		case K_ENTER:
 		case K_KP_ENTER:
-		case K_KP_LEFTARROW:
-		case K_LEFTARROW:
-		case K_KP_RIGHTARROW:
-		case K_RIGHTARROW:
+        case K_GAMEPAD_A:  // @pjb
 			rb->curvalue = !rb->curvalue;
 			if ( rb->generic.callback )
 				rb->generic.callback( rb, QM_ACTIVATED );
@@ -549,7 +547,7 @@ static void Slider_Init( menuslider_s *s )
 
 	// calculate bounds
 	if (s->generic.name)
-		len = strlen(s->generic.name);
+		len = (int) strlen(s->generic.name);
 	else
 		len = 0;
 
@@ -589,6 +587,7 @@ static sfxHandle_t Slider_Key( menuslider_s *s, int key )
 
 		case K_KP_LEFTARROW:
 		case K_LEFTARROW:
+        case K_GAMEPAD_DPAD_LEFT:  // @pjb
 			if (s->curvalue > s->minvalue)
 			{
 				s->curvalue--;
@@ -600,6 +599,7 @@ static sfxHandle_t Slider_Key( menuslider_s *s, int key )
 
 		case K_KP_RIGHTARROW:
 		case K_RIGHTARROW:
+        case K_GAMEPAD_DPAD_RIGHT:  // @pjb
 			if (s->curvalue < s->maxvalue)
 			{
 				s->curvalue++;
@@ -766,7 +766,7 @@ static void SpinControl_Init( menulist_s *s ) {
 	const char* str;
 
 	if (s->generic.name)
-		len = strlen(s->generic.name) * SMALLCHAR_WIDTH;
+		len = (int) strlen(s->generic.name) * SMALLCHAR_WIDTH;
 	else
 		len = 0;
 
@@ -775,7 +775,7 @@ static void SpinControl_Init( menulist_s *s ) {
 	len = s->numitems = 0;
 	while ( (str = s->itemnames[s->numitems]) != 0 )
 	{
-		l = strlen(str);
+		l = (int) strlen(str);
 		if (l > len)
 			len = l;
 
@@ -806,26 +806,11 @@ static sfxHandle_t SpinControl_Key( menulist_s *s, int key )
 			sound = menu_move_sound;
 			break;
 		
-		case K_KP_LEFTARROW:
-		case K_LEFTARROW:
-			if (s->curvalue > 0)
-			{
-				s->curvalue--;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
-			break;
-
-		case K_KP_RIGHTARROW:
-		case K_RIGHTARROW:
-			if (s->curvalue < s->numitems-1)
-			{
-				s->curvalue++;
-				sound = menu_move_sound;
-			}
-			else
-				sound = menu_buzz_sound;
+		case K_KP_ENTER:
+        case K_ENTER:
+        case K_GAMEPAD_A: // @pjb
+			s->curvalue = (s->curvalue+1) % s->numitems;
+			sound = menu_move_sound;
 			break;
 	}
 
@@ -891,6 +876,8 @@ static void ScrollList_Init( menulist_s *l )
 	l->oldvalue = 0;
 	l->curvalue = 0;
 	l->top      = 0;
+    l->highlight = 0;
+    l->oldHighlight = 0;
 
 	if( !l->columns ) {
 		l->columns = 1;
@@ -911,6 +898,47 @@ static void ScrollList_Init( menulist_s *l )
 		l->generic.left -= w / 2;
 		l->generic.right -= w / 2;
 	}
+}
+
+/*
+=================
+ScrollList_Update
+@pjb: The scroll list was updated
+=================
+*/
+qboolean ScrollList_Update( menulist_s* l )
+{
+    l->oldvalue = l->curvalue;
+    l->curvalue = l->highlight;
+
+	if (l->oldvalue != l->curvalue && l->generic.callback) {
+        l->generic.callback( l, QM_GOTFOCUS );
+        return qtrue;
+    }
+
+    return qfalse;
+}
+
+/*
+=================
+ScrollList_Set
+@pjb: The scroll list highlight moved
+=================
+*/
+qboolean ScrollList_Set( menulist_s* l, int newhl )
+{
+    l->oldHighlight = l->highlight;
+    l->highlight = newhl;
+
+    // If navigable is set to false, update the item immediately
+	if (l->oldHighlight != l->highlight && !l->navigable) {
+        l->oldvalue = l->oldHighlight;
+        l->curvalue = l->highlight;
+        l->generic.callback( l, QM_GOTFOCUS );
+        return qtrue;
+    }
+
+    return qfalse;
 }
 
 /*
@@ -951,12 +979,8 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 					index = column * l->height + cursory;
 					if (l->top + index < l->numitems)
 					{
-						l->oldvalue = l->curvalue;
-						l->curvalue = l->top + index;
-
-						if (l->oldvalue != l->curvalue && l->generic.callback)
+						if (ScrollList_Set(l, l->top + index))
 						{
-							l->generic.callback( l, QM_GOTFOCUS );
 							return (menu_move_sound);
 						}
 					}
@@ -967,96 +991,109 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 			}
 			break;
 
-		case K_KP_HOME:
-		case K_HOME:
-			l->oldvalue = l->curvalue;
-			l->curvalue = 0;
-			l->top      = 0;
+        // @pjb: enter forces a selection
+        case K_ENTER:
+        case K_KP_ENTER:
+        case K_GAMEPAD_A:
+            if ( l->navigable ) {
+                ScrollList_Update( l ); 
+                return (menu_move_sound);
+            }
+            return (0);
 
-			if (l->oldvalue != l->curvalue && l->generic.callback)
+        case K_KP_HOME:
+		case K_HOME:
+			l->top = 0;
+
+			if (ScrollList_Set(l, 0))
 			{
-				l->generic.callback( l, QM_GOTFOCUS );
 				return (menu_move_sound);
 			}
 			return (menu_buzz_sound);
 
 		case K_KP_END:
 		case K_END:
-			l->oldvalue = l->curvalue;
-			l->curvalue = l->numitems-1;
+        {
+			int value = l->numitems-1;
 			if( l->columns > 1 ) {
-				c = (l->curvalue / l->height + 1) * l->height;
+				c = (value / l->height + 1) * l->height;
 				l->top = c - (l->columns * l->height);
 			}
 			else {
-				l->top = l->curvalue - (l->height - 1);
+				l->top = value - (l->height - 1);
 			}
 			if (l->top < 0)
 				l->top = 0;			
 
-			if (l->oldvalue != l->curvalue && l->generic.callback)
+			if (ScrollList_Set(l, value))
 			{
-				l->generic.callback( l, QM_GOTFOCUS );
 				return (menu_move_sound);
 			}
 			return (menu_buzz_sound);
-
+        }
 		case K_PGUP:
 		case K_KP_PGUP:
+        {
+            int value = l->highlight;
+
 			if( l->columns > 1 ) {
 				return menu_null_sound;
 			}
 
-			if (l->curvalue > 0)
+			if (value > 0)
 			{
-				l->oldvalue = l->curvalue;
-				l->curvalue -= l->height-1;
-				if (l->curvalue < 0)
-					l->curvalue = 0;
-				l->top = l->curvalue;
+				value -= l->height-1;
+				if (value < 0)
+					value = 0;
+				l->top = value;
 				if (l->top < 0)
 					l->top = 0;
 
-				if (l->generic.callback)
-					l->generic.callback( l, QM_GOTFOCUS );
+				ScrollList_Set(l, value);
 
 				return (menu_move_sound);
 			}
 			return (menu_buzz_sound);
-
+        }
 		case K_PGDN:
 		case K_KP_PGDN:
+        {
+            int value = l->highlight;
+
 			if( l->columns > 1 ) {
 				return menu_null_sound;
 			}
 
-			if (l->curvalue < l->numitems-1)
+			if (value < l->numitems-1)
 			{
-				l->oldvalue = l->curvalue;
-				l->curvalue += l->height-1;
-				if (l->curvalue > l->numitems-1)
-					l->curvalue = l->numitems-1;
-				l->top = l->curvalue - (l->height-1);
+				l->oldvalue = value;
+				value += l->height-1;
+				if (value > l->numitems-1)
+					value = l->numitems-1;
+				l->top = value - (l->height-1);
 				if (l->top < 0)
 					l->top = 0;
 
-				if (l->generic.callback)
-					l->generic.callback( l, QM_GOTFOCUS );
+				ScrollList_Set(l, value);
 
 				return (menu_move_sound);
 			}
 			return (menu_buzz_sound);
-
+        }
 		case K_KP_UPARROW:
 		case K_UPARROW:
-			if( l->curvalue == 0 ) {
-				return menu_buzz_sound;
+        case K_GAMEPAD_DPAD_UP:  // @pjb
+        {
+            int value = l->highlight;
+
+			if( value == 0 ) {
+				return 0;
 			}
 
-			l->oldvalue = l->curvalue;
-			l->curvalue--;
+			l->oldvalue = value;
+			value--;
 
-			if( l->curvalue < l->top ) {
+			if( value < l->top ) {
 				if( l->columns == 1 ) {
 					l->top--;
 				}
@@ -1065,22 +1102,24 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				}
 			}
 
-			if( l->generic.callback ) {
-				l->generic.callback( l, QM_GOTFOCUS );
-			}
+			ScrollList_Set(l, value);
 
 			return (menu_move_sound);
-
+        }
 		case K_KP_DOWNARROW:
 		case K_DOWNARROW:
-			if( l->curvalue == l->numitems - 1 ) {
-				return menu_buzz_sound;
+        case K_GAMEPAD_DPAD_DOWN:  // @pjb
+        {
+            int value = l->highlight;
+
+			if( value == l->numitems - 1 ) {
+				return 0;
 			}
 
-			l->oldvalue = l->curvalue;
-			l->curvalue++;
+			l->oldvalue = value;
+			value++;
 
-			if( l->curvalue >= l->top + l->columns * l->height ) {
+			if( value >= l->top + l->columns * l->height ) {
 				if( l->columns == 1 ) {
 					l->top++;
 				}
@@ -1089,59 +1128,62 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				}
 			}
 
-			if( l->generic.callback ) {
-				l->generic.callback( l, QM_GOTFOCUS );
-			}
+			ScrollList_Set(l, value);
 
 			return menu_move_sound;
-
+        }
 		case K_KP_LEFTARROW:
 		case K_LEFTARROW:
+        case K_GAMEPAD_DPAD_LEFT:  // @pjb
+        {
+            int value = l->highlight;
+
 			if( l->columns == 1 ) {
-				return menu_null_sound;
+				return 0;
 			}
 
-			if( l->curvalue < l->height ) {
-				return menu_buzz_sound;
+			if( value < l->height ) {
+				return 0;
 			}
 
-			l->oldvalue = l->curvalue;
-			l->curvalue -= l->height;
+			l->oldvalue = value;
+			value -= l->height;
 
-			if( l->curvalue < l->top ) {
+			if( value < l->top ) {
 				l->top -= l->height;
 			}
 
-			if( l->generic.callback ) {
-				l->generic.callback( l, QM_GOTFOCUS );
-			}
+			ScrollList_Set(l, value);
 
 			return menu_move_sound;
-
+        }
 		case K_KP_RIGHTARROW:
 		case K_RIGHTARROW:
+        case K_GAMEPAD_DPAD_RIGHT:  // @pjb
+        {
+            int value = l->highlight;
+
 			if( l->columns == 1 ) {
-				return menu_null_sound;
+				return 0;
 			}
 
-			c = l->curvalue + l->height;
+			c = value + l->height;
 
 			if( c >= l->numitems ) {
-				return menu_buzz_sound;
+				return 0;
 			}
 
-			l->oldvalue = l->curvalue;
-			l->curvalue = c;
+			l->oldvalue = value;
+			value = c;
 
-			if( l->curvalue > l->top + l->columns * l->height - 1 ) {
+			if( value > l->top + l->columns * l->height - 1 ) {
 				l->top += l->height;
 			}
 
-			if( l->generic.callback ) {
-				l->generic.callback( l, QM_GOTFOCUS );
-			}
+			ScrollList_Set(l, value);
 
 			return menu_move_sound;
+        }
 	}
 
 	// cycle look for ascii key inside list items
@@ -1157,7 +1199,8 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 	// iterate list items
 	for (i=1; i<=l->numitems; i++)
 	{
-		j = (l->curvalue + i) % l->numitems;
+        int value = l->highlight;
+		j = (value + i) % l->numitems;
 		c = l->itemnames[j][0];
 		if ( Q_isupper( c ) )
 		{
@@ -1178,12 +1221,9 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				l->top = (j+1) - l->height;
 			}
 			
-			if (l->curvalue != j)
+			if (value != j)
 			{
-				l->oldvalue = l->curvalue;
-				l->curvalue = j;
-				if (l->generic.callback)
-					l->generic.callback( l, QM_GOTFOCUS );
+				ScrollList_Set(l, value);
 				return ( menu_move_sound );			
 			}
 
@@ -1228,14 +1268,33 @@ void ScrollList_Draw( menulist_s *l )
 					u -= (l->width * SMALLCHAR_WIDTH) / 2 + 1;
 				}
 
-				UI_FillRect(u,y,l->width*SMALLCHAR_WIDTH,SMALLCHAR_HEIGHT+2,listbar_color);
 				color = text_color_highlight;
+				style = UI_LEFT|UI_SMALLFONT;
 
-				if (hasfocus)
-					style = UI_PULSE|UI_LEFT|UI_SMALLFONT;
-				else
-					style = UI_LEFT|UI_SMALLFONT;
+                if ( hasfocus && i == l->highlight )
+				    style |= UI_PULSE;
+
+                if (l->navigable)
+                {
+    				UI_FillRect(u,y,l->width*SMALLCHAR_WIDTH,SMALLCHAR_HEIGHT+2,listbar_color_cur);
+                }
+                else
+                {
+    				UI_FillRect(u,y,l->width*SMALLCHAR_WIDTH,SMALLCHAR_HEIGHT+2,listbar_color);
+                }
 			}
+            else if ( l->navigable && hasfocus && i == l->highlight )
+            {
+				u = x - 2;
+				if( l->generic.flags & QMF_CENTER_JUSTIFY ) {
+					u -= (l->width * SMALLCHAR_WIDTH) / 2 + 1;
+				}
+
+				color = text_color_highlight;
+				style = UI_PULSE|UI_LEFT|UI_SMALLFONT;
+
+                UI_FillRect(u,y,l->width*SMALLCHAR_WIDTH,SMALLCHAR_HEIGHT+2,listbar_color);
+            }
 			else
 			{
 				color = text_color_normal;
@@ -1395,13 +1454,13 @@ void Menu_SetCursorToItem( menuframework_s *m, void* ptr )
 }
 
 /*
-** Menu_AdjustCursor
+** Menu_AdjustCursorDefault
 **
 ** This function takes the given menu, the direction, and attempts
 ** to adjust the menu's cursor so that it's at the next available
 ** slot.
 */
-void Menu_AdjustCursor( menuframework_s *m, int dir ) {
+void Menu_AdjustCursorDefault( menuframework_s *m, int dir ) {
 	menucommon_s	*item = NULL;
 	qboolean		wrapped = qfalse;
 
@@ -1444,6 +1503,128 @@ wrap:
 			m->cursor = m->cursor_prev;
 		}
 	}
+}
+
+/*
+** @pjb: updates the cursor based on the item
+*/
+qboolean Menu_UpdateCursor( menuframework_s* m, const menucommon_s *item ) {
+    int i;
+
+    for ( i = 0; i < m->nitems; ++i ) {
+        if ( m->items[i] == item ) {
+            m->cursor = i;
+            return qtrue;
+        }
+    }
+
+    return qfalse;
+}
+
+qboolean Menu_SelectItem( menuframework_s* m, menucommon_s *item, QNAV dir );
+
+/*
+** @pjb: tries to set the focus to a particular item. If it fails, it navigates in a specific
+** direction until it can't any longer.
+*/
+qboolean Menu_MoveCursor( menuframework_s* m, menucommon_s *item, QNAV dir ) {
+
+    menucommon_s *callback = NULL;
+
+    // Now check for callbacks
+    switch ( dir )
+    {
+    case QNAV_LEFT : callback = (menucommon_s*) item->navLeft ; break;
+    case QNAV_RIGHT: callback = (menucommon_s*) item->navRight; break;
+    case QNAV_UP   : callback = (menucommon_s*) item->navUp   ; break;
+    case QNAV_DOWN : callback = (menucommon_s*) item->navDown ; break;
+    default: callback = NULL;
+    }
+
+    // If there wasn't one, we can't go anywhere
+    if ( callback == NULL )
+    {
+        return qfalse;
+    }
+
+    // What kind of callback is it?
+    switch ( callback->type )
+    {
+    case MTYPE_NULL			:
+    case MTYPE_SLIDER		:
+    case MTYPE_ACTION		:
+    case MTYPE_SPINCONTROL	:
+    case MTYPE_FIELD		:
+    case MTYPE_RADIOBUTTON	:
+    case MTYPE_BITMAP		:
+    case MTYPE_TEXT			:
+    case MTYPE_SCROLLLIST	:
+    case MTYPE_PTEXT		:
+    case MTYPE_BTEXT	    :
+        // Set focus to this item
+        return Menu_SelectItem( m, callback, dir );
+    default:
+        {
+            // It's a callback function
+            menucommon_s* newItem = ( (QNav_Callback) (size_t) callback )( m, item, dir );
+            if ( newItem != NULL )
+                return Menu_SelectItem( m, newItem, dir );
+            else
+                return qfalse;
+        }
+    }
+}
+
+/*
+** @pjb: tries to set the focus to a particular item. If it fails, it navigates in a specific
+** direction until it can't any longer.
+*/
+qboolean Menu_SelectItem( menuframework_s* m, menucommon_s *item, QNAV dir ) {
+
+    // Can we set focus to this item?
+    if ( item->type != MTYPE_NULL && !( item->flags & (QMF_INACTIVE|QMF_HIDDEN|QMF_GRAYED|QMF_MOUSEONLY) ) ) {
+        return Menu_UpdateCursor( m, item );
+    } else {
+        // We can't land here, so move on
+        return Menu_MoveCursor( m, item, dir );
+    }
+}
+
+/*
+** Menu_AdjustCursor
+**
+** @pjb: detects if there are nav callbacks. If not, fall back to normal nav.
+*/
+void Menu_AdjustCursor( menuframework_s *m, QNAV dir ) {
+
+    // Cache the previous cursor state
+	m->cursor_prev = m->cursor;
+
+    // Skip menus that don't use the new nav system
+    if ( m->custom_nav == qfalse ) {
+        if ( dir == QNAV_UP ) {
+			m->cursor--;
+            Menu_AdjustCursorDefault( m, -1 );
+        }
+        else if ( dir == QNAV_DOWN ) {
+            m->cursor++;
+            Menu_AdjustCursorDefault( m, 1 );
+        }
+        return;
+    }
+
+    // First, make sure the cursor is on a valid item
+	if ( Menu_SelectItem( m, m->items[m->cursor], dir ) )
+    {
+        // Now move the cursor
+        if ( Menu_MoveCursor( m, m->items[m->cursor], dir ) )
+        {
+            return;
+        }
+    }
+
+    // If we get here, we can't find a square to land on
+    m->cursor = m->cursor_prev;
 }
 
 /*
@@ -1591,8 +1772,14 @@ sfxHandle_t Menu_DefaultKey( menuframework_s *m, int key )
 	{
 		case K_MOUSE2:
 		case K_ESCAPE:
+        case K_GAMEPAD_B: // @pjb
 			UI_PopMenu();
 			return menu_out_sound;
+
+        // @pjb: close all menus if start is pressed
+        case K_GAMEPAD_START:
+            UI_ForceMenuOff();
+            return menu_out_sound;
 	}
 
 	if (!m || !m->nitems)
@@ -1645,10 +1832,31 @@ sfxHandle_t Menu_DefaultKey( menuframework_s *m, int key )
 #endif
 		case K_KP_UPARROW:
 		case K_UPARROW:
+        case K_GAMEPAD_DPAD_UP: // @pjb
 			cursor_prev    = m->cursor;
-			m->cursor_prev = m->cursor;
-			m->cursor--;
-			Menu_AdjustCursor( m, -1 );
+			Menu_AdjustCursor( m, QNAV_UP );
+			if ( cursor_prev != m->cursor ) {
+				Menu_CursorMoved( m );
+				sound = menu_move_sound;
+			}
+			break;
+
+		case K_KP_DOWNARROW:
+		case K_DOWNARROW:
+        case K_GAMEPAD_DPAD_DOWN: // @pjb
+			cursor_prev    = m->cursor;
+			Menu_AdjustCursor( m, QNAV_DOWN );
+			if ( cursor_prev != m->cursor ) {
+				Menu_CursorMoved( m );
+				sound = menu_move_sound;
+			}
+			break;
+
+		case K_KP_LEFTARROW:
+		case K_LEFTARROW:
+        case K_GAMEPAD_DPAD_LEFT: // @pjb
+			cursor_prev    = m->cursor;
+			Menu_AdjustCursor( m, QNAV_LEFT );
 			if ( cursor_prev != m->cursor ) {
 				Menu_CursorMoved( m );
 				sound = menu_move_sound;
@@ -1656,12 +1864,11 @@ sfxHandle_t Menu_DefaultKey( menuframework_s *m, int key )
 			break;
 
 		case K_TAB:
-		case K_KP_DOWNARROW:
-		case K_DOWNARROW:
+		case K_KP_RIGHTARROW:
+		case K_RIGHTARROW:
+        case K_GAMEPAD_DPAD_RIGHT: // @pjb
 			cursor_prev    = m->cursor;
-			m->cursor_prev = m->cursor;
-			m->cursor++;
-			Menu_AdjustCursor( m, 1 );
+			Menu_AdjustCursor( m, QNAV_RIGHT );
 			if ( cursor_prev != m->cursor ) {
 				Menu_CursorMoved( m );
 				sound = menu_move_sound;
@@ -1696,6 +1903,7 @@ sfxHandle_t Menu_DefaultKey( menuframework_s *m, int key )
 		case K_AUX15:
 		case K_AUX16:
 		case K_KP_ENTER:
+        case K_GAMEPAD_A: // @pjb
 		case K_ENTER:
 			if (item)
 				if (!(item->flags & (QMF_MOUSEONLY|QMF_GRAYED|QMF_INACTIVE)))
@@ -1722,12 +1930,7 @@ void Menu_Cache( void )
 	uis.rb_off          = trap_R_RegisterShaderNoMip( "menu/art/switch_off" );
 
 	uis.whiteShader = trap_R_RegisterShaderNoMip( "white" );
-	if ( uis.glconfig.hardwareType == GLHW_RAGEPRO ) {
-		// the blend effect turns to shit with the normal 
-		uis.menuBackShader	= trap_R_RegisterShaderNoMip( "menubackRagePro" );
-	} else {
-		uis.menuBackShader	= trap_R_RegisterShaderNoMip( "menuback" );
-	}
+    uis.menuBackShader	= trap_R_RegisterShaderNoMip( "menuback" );
 	uis.menuBackNoLogoShader = trap_R_RegisterShaderNoMip( "menubacknologo" );
 
 	menu_in_sound	= trap_S_RegisterSound( "sound/misc/menu1.wav", qfalse );

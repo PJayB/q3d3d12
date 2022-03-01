@@ -70,7 +70,7 @@ error_exit (j_common_ptr cinfo)
   /* Let the memory manager delete any temp files before we die */
   jpeg_destroy(cinfo);
 
-  ri.Error( ERR_FATAL, "%s\n", buffer );
+  Com_Error( ERR_FATAL, "%s\n", buffer );
 }
 
 
@@ -89,7 +89,7 @@ output_message (j_common_ptr cinfo)
   (*cinfo->err->format_message) (cinfo, buffer);
 
   /* Send it to stderr, adding a newline */
-  ri.Printf(PRINT_ALL, "%s\n", buffer);
+  RI_Printf(PRINT_ALL, "%s\n", buffer);
 }
 
 

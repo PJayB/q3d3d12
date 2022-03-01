@@ -1,0 +1,11 @@
+#include "common.qabi"
+
+abi (CGVM_Init) int CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum );  
+abi (CGVM_Shutdown) void CG_Shutdown( void );
+abi (CGVM_ConsoleCommand) qboolean CG_ConsoleCommand( void );
+abi (CGVM_DrawActiveFrame) void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback );
+abi (CGVM_CrosshairPlayer) int CG_CrosshairPlayer( void );
+abi (CGVM_LastAttacker) int CG_LastAttacker( void );
+abi (CGVM_KeyEvent) void CG_KeyEvent( int key, qboolean down );
+abi (CGVM_MouseEvent) void CG_MouseEventProxy( int dx, int dy );
+abi (CGVM_EventHandling) void CG_EventHandling( int type );

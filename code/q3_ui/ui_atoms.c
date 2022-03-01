@@ -748,13 +748,13 @@ void UI_DrawString( int x, int y, const char* str, int style, vec4_t color )
 	{
 		case UI_CENTER:
 			// center justify at x
-			len = strlen(str);
+			len = (int) strlen(str);
 			x   = x - len*charw/2;
 			break;
 
 		case UI_RIGHT:
 			// right justify at x
-			len = strlen(str);
+			len = (int) strlen(str);
 			x   = x - len*charw;
 			break;
 
@@ -817,6 +817,9 @@ void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 	case UIMENU_NONE:
 		UI_ForceMenuOff();
 		return;
+    case UIMENU_START:
+        UI_StartScreen(); // @pjb: Return to the "Press Start" screen
+        return;
 	case UIMENU_MAIN:
 		UI_MainMenu();
 		return;
@@ -852,7 +855,7 @@ void UI_SetActiveMenu( uiMenuCommand_t menu ) {
 UI_KeyEvent
 =================
 */
-void UI_KeyEvent( int key, int down ) {
+void UI_KeyEvent( int userIndex, int key, int down ) {
 	sfxHandle_t		s;
 
 	if (!uis.activemenu) {
@@ -863,7 +866,9 @@ void UI_KeyEvent( int key, int down ) {
 		return;
 	}
 
-	if (uis.activemenu->key)
+    if (uis.activemenu->userKey)
+        s = uis.activemenu->userKey( key, userIndex );
+	else if (uis.activemenu->key)
 		s = uis.activemenu->key( key );
 	else
 		s = Menu_DefaultKey( uis.activemenu, key );
@@ -877,7 +882,7 @@ void UI_KeyEvent( int key, int down ) {
 UI_MouseEvent
 =================
 */
-void UI_MouseEvent( int dx, int dy )
+void UI_MouseEvent( int userIndex, int dx, int dy )
 {
 	int				i;
 	menucommon_s*	m;
@@ -886,17 +891,21 @@ void UI_MouseEvent( int dx, int dy )
 		return;
 
 	// update mouse screen position
-	uis.cursorx += dx;
-	if (uis.cursorx < 0)
-		uis.cursorx = 0;
-	else if (uis.cursorx > SCREEN_WIDTH)
-		uis.cursorx = SCREEN_WIDTH;
+	uis.nativecursorx += dx;
+	if (uis.nativecursorx < 0)
+		uis.nativecursorx = 0;
+	else if (uis.nativecursorx > uis.vdconfig.vidWidth)
+		uis.nativecursorx = uis.vdconfig.vidWidth;
 
-	uis.cursory += dy;
-	if (uis.cursory < 0)
-		uis.cursory = 0;
-	else if (uis.cursory > SCREEN_HEIGHT)
-		uis.cursory = SCREEN_HEIGHT;
+	uis.nativecursory += dy;
+	if (uis.nativecursory < 0)
+		uis.nativecursory = 0;
+	else if (uis.nativecursory > uis.vdconfig.vidHeight)
+		uis.nativecursory = uis.vdconfig.vidHeight;
+
+    // @pjb: Convert cursor position to "menu space"
+    uis.cursorx = (uis.nativecursorx - uis.bias) / uis.scale;
+    uis.cursory = uis.nativecursory / uis.scale;
 
 	// region test the active menu items
 	for (i=0; i<uis.activemenu->nitems; i++)
@@ -934,6 +943,46 @@ void UI_MouseEvent( int dx, int dy )
 		// out of any region
 		((menucommon_s*)(uis.activemenu->items[uis.activemenu->cursor]))->flags &= ~QMF_HASMOUSEFOCUS;
 	}
+}
+
+/*
+=================
+@pjb: UI_GamepadEvent
+=================
+*/
+void UI_GamepadEvent( int userIndex, int axis, int value )
+{
+	if (!uis.activemenu)
+		return;
+
+    if ( axis == 1 )
+    {
+        int threshold = ui_thumbstickThreshold.value;
+
+        if ( value >= threshold && uis.lthumbstickY < threshold )
+            UI_KeyEvent( userIndex, K_UPARROW, qtrue );
+        if ( value < threshold && uis.lthumbstickY >= threshold )
+            UI_KeyEvent( userIndex, K_UPARROW, qfalse );
+        if ( value <= -threshold && uis.lthumbstickY > -threshold )
+            UI_KeyEvent( userIndex, K_DOWNARROW, qtrue );
+        if ( value > -threshold && uis.lthumbstickY <= -threshold )
+            UI_KeyEvent( userIndex, K_DOWNARROW, qfalse );
+        uis.lthumbstickY = value;
+    }
+    else if ( axis == 0 )
+    {
+        int threshold = ui_thumbstickThreshold.value;
+
+        if ( value >= threshold && uis.lthumbstickX < threshold )
+            UI_KeyEvent( userIndex, K_RIGHTARROW, qtrue );
+        if ( value < threshold && uis.lthumbstickX >= threshold )
+            UI_KeyEvent( userIndex, K_RIGHTARROW, qfalse );
+        if ( value <= -threshold && uis.lthumbstickX > -threshold )
+            UI_KeyEvent( userIndex, K_LEFTARROW, qtrue );
+        if ( value > -threshold && uis.lthumbstickX <= -threshold )
+            UI_KeyEvent( userIndex, K_LEFTARROW, qfalse );
+        uis.lthumbstickX = value;
+    }
 }
 
 char *UI_Argv( int arg ) {
@@ -989,7 +1038,6 @@ void UI_Cache_f( void ) {
 //	UI_LoadConfig_Cache();
 //	UI_SaveConfigMenu_Cache();
 	UI_BotSelectMenu_Cache();
-	UI_CDKeyMenu_Cache();
 	UI_ModsMenu_Cache();
 
 }
@@ -1043,11 +1091,6 @@ qboolean UI_ConsoleCommand( int realTime ) {
 		return qtrue;
 	}
 
-	if ( Q_stricmp (cmd, "ui_cdkey") == 0 ) {
-		UI_CDKeyMenu_f();
-		return qtrue;
-	}
-
 	return qfalse;
 }
 
@@ -1064,19 +1107,19 @@ void UI_Shutdown( void ) {
 UI_Init
 =================
 */
-void UI_Init( void ) {
+void UI_Init( qboolean _reserved_ ) {
 	UI_RegisterCvars();
 
 	UI_InitGameinfo();
 
 	// cache redundant calulations
-	trap_GetGlconfig( &uis.glconfig );
+	trap_GetVideoConfig( &uis.vdconfig );
 
 	// for 640x480 virtualized screen
-	uis.scale = uis.glconfig.vidHeight * (1.0/480.0);
-	if ( uis.glconfig.vidWidth * 480 > uis.glconfig.vidHeight * 640 ) {
+	uis.scale = uis.vdconfig.vidHeight * (1.0/480.0);
+	if ( uis.vdconfig.vidWidth * 480 > uis.vdconfig.vidHeight * 640 ) {
 		// wide screen
-		uis.bias = 0.5 * ( uis.glconfig.vidWidth - ( uis.glconfig.vidHeight * (640.0/480.0) ) );
+		uis.bias = 0.5 * ( uis.vdconfig.vidWidth - ( uis.vdconfig.vidHeight * (640.0/480.0) ) );
 	}
 	else {
 		// no wide screen
@@ -1140,6 +1183,37 @@ void UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ) {
 	}
 	
 	UI_AdjustFrom640( &x, &y, &w, &h );
+	trap_R_DrawStretchPic( x, y, w, h, s0, t0, s1, t1, hShader );
+}
+
+// @pjb: draw at native res
+void UI_DrawHandlePicNative( float x, float y, float w, float h, qhandle_t hShader ) {
+	float	s0;
+	float	s1;
+	float	t0;
+	float	t1;
+
+	if( w < 0 ) {	// flip about vertical
+		w  = -w;
+		s0 = 1;
+		s1 = 0;
+	}
+	else {
+		s0 = 0;
+		s1 = 1;
+	}
+
+	if( h < 0 ) {	// flip about horizontal
+		h  = -h;
+		t0 = 1;
+		t1 = 0;
+	}
+	else {
+		t0 = 0;
+		t1 = 1;
+	}
+	
+	//UI_AdjustFrom640( &x, &y, &w, &h );
 	trap_R_DrawStretchPic( x, y, w, h, s0, t0, s1, t1, hShader );
 }
 
@@ -1207,12 +1281,10 @@ void UI_Refresh( int realtime )
 	{
 		if (uis.activemenu->fullscreen)
 		{
-			// draw the background
+			// @pjb: always draw the background
+			UI_DrawHandlePicNative( 0, 0, uis.vdconfig.vidWidth, uis.vdconfig.vidHeight, uis.menuBackNoLogoShader );
 			if( uis.activemenu->showlogo ) {
 				UI_DrawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.menuBackShader );
-			}
-			else {
-				UI_DrawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.menuBackNoLogoShader );
 			}
 		}
 
@@ -1222,14 +1294,14 @@ void UI_Refresh( int realtime )
 			Menu_Draw( uis.activemenu );
 
 		if( uis.firstdraw ) {
-			UI_MouseEvent( 0, 0 );
+			UI_MouseEvent( Q_USER_ALL, 0, 0 );
 			uis.firstdraw = qfalse;
 		}
 	}
 
 	// draw cursor
 	UI_SetColor( NULL );
-	UI_DrawHandlePic( uis.cursorx-16, uis.cursory-16, 32, 32, uis.cursor);
+	UI_DrawHandlePicNative( uis.nativecursorx-16, uis.nativecursory-16, 32, 32, uis.cursor);
 
 #ifndef NDEBUG
 	if (uis.debug)

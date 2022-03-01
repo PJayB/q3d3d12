@@ -141,6 +141,7 @@ static void Demos_MenuInit( void ) {
 
 	s_demos.menu.fullscreen = qtrue;
 	s_demos.menu.wrapAround = qtrue;
+    s_demos.menu.custom_nav = qtrue;
 
 	s_demos.banner.generic.type		= MTYPE_BTEXT;
 	s_demos.banner.generic.x		= 320;
@@ -203,6 +204,8 @@ static void Demos_MenuInit( void ) {
 	s_demos.back.width				= 128;
 	s_demos.back.height				= 64;
 	s_demos.back.focuspic			= ART_BACK1;
+    s_demos.back.generic.navUp      = &s_demos.list;
+    s_demos.back.generic.navRight   = &s_demos.go;
 
 	s_demos.go.generic.type			= MTYPE_BITMAP;
 	s_demos.go.generic.name			= ART_GO0;
@@ -214,6 +217,8 @@ static void Demos_MenuInit( void ) {
 	s_demos.go.width				= 128;
 	s_demos.go.height				= 64;
 	s_demos.go.focuspic				= ART_GO1;
+    s_demos.go.generic.navUp        = &s_demos.list;
+    s_demos.go.generic.navLeft      = &s_demos.back;
 
 	s_demos.list.generic.type		= MTYPE_SCROLLLIST;
 	s_demos.list.generic.flags		= QMF_PULSEIFFOCUS;
@@ -223,10 +228,12 @@ static void Demos_MenuInit( void ) {
 	s_demos.list.generic.y			= 130;
 	s_demos.list.width				= 16;
 	s_demos.list.height				= 14;
+    s_demos.list.navigable          = qtrue;
 	Com_sprintf(extension, sizeof(extension), "dm_%d", (int)trap_Cvar_VariableValue( "protocol" ) );
 	s_demos.list.numitems			= trap_FS_GetFileList( "demos", extension, s_demos.names, NAMEBUFSIZE );
 	s_demos.list.itemnames			= (const char **)s_demos.demolist;
 	s_demos.list.columns			= 3;
+    s_demos.list.generic.navDown    = &s_demos.go;
 
 	if (!s_demos.list.numitems) {
 		strcpy( s_demos.names, "No Demos Found." );
@@ -243,7 +250,7 @@ static void Demos_MenuInit( void ) {
 		s_demos.list.itemnames[i] = demoname;
 		
 		// strip extension
-		len = strlen( demoname );
+		len = (int) strlen( demoname );
 		if (!Q_stricmp(demoname +  len - 4,".dm3"))
 			demoname[len-4] = '\0';
 
