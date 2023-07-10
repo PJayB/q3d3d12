@@ -1,0 +1,19 @@
+add_library(qcommon
+    STATIC
+    cm_load.c
+    cm_patch.c
+    cm_polylib.c
+    cm_test.c
+    cm_trace.c
+    cmd.c
+    common.c
+    cvar.c
+    files.c
+    huffman.c
+    md4.c
+    msg.c
+    net_chan.c
+    unzip.c
+    vm.c
+    vm_interpreted.c
+)
