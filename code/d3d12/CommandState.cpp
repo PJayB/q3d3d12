@@ -1,5 +1,5 @@
 #include "CommandState.h"
-
+#include "Device.h"
 #include "RootSignature.h"
 
 namespace QD3D12

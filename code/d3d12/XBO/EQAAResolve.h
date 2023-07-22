@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Shader.h"
-#include "PipelineState.h"
+#include "../Shader.h"
+#include "../PipelineState.h"
 
 namespace QD3D12
 {

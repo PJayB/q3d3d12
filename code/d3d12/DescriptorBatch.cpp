@@ -1,4 +1,5 @@
 #include "DescriptorBatch.h"
+#include "Device.h"
 
 namespace QD3D12
 {

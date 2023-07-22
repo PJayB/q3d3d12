@@ -1,5 +1,5 @@
 #include "GlobalCommandList.h"
-
+#include "Device.h"
 
 namespace QD3D12
 {

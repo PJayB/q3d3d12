@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include "D3D12Core.h"
 
 namespace QD3D12
 {

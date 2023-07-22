@@ -1,7 +1,5 @@
 #include "SwapChain.h"
 
-#include <xutility>
-
 namespace QD3D12
 {
 	QDXGISwapChain* SwapChain::s_pSwapChain = nullptr;
@@ -15,7 +13,7 @@ namespace QD3D12
 	{
 		s_pSwapChain = SAFE_ADDREF(swapChain);
 		s_presentIndex = 0;
-	
+
 		for (UINT i = 0; i < QD3D12_NUM_BUFFERS; ++i)
 		{
 			// Get back buffer target
@@ -61,13 +59,15 @@ namespace QD3D12
 	}
 
 	void SwapChain::GetMsaaDescFromConfig(
-        ID3D12Device* pDevice, 
+        ID3D12Device* pDevice,
         DXGI_FORMAT format,
         DXGI_SAMPLE_DESC* scDesc)
 	{
+		// todo: fix me
 	    scDesc->Count = 1;
 	    scDesc->Quality = 0;
 
+#ifndef __MINGW32__
 		cvar_t* d3d_multisamples = Cvar_Get("dx12_msaa", "32", CVAR_ARCHIVE | CVAR_LATCH);
 		if (d3d_multisamples->integer == 0) 
 			return;
@@ -108,6 +108,10 @@ namespace QD3D12
 		// Clamp the max MSAA to user settings
 		if (d3d_multisamples->integer > 0 && scDesc->Count >= d3d_multisamples->integer)
 			scDesc->Count = d3d_multisamples->integer;
+#else
+		(void)pDevice;
+#		pragma message("Fix me: MSAA")
+#endif
 	}
 
 #ifdef _XBOX_ONE

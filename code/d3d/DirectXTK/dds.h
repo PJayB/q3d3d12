@@ -19,9 +19,7 @@
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
 
-#if defined(_MSC_VER)
 #pragma once
-#endif
 
 #if defined(_XBOX_ONE) && defined(_TITLE)
 #include <d3d11_x.h>

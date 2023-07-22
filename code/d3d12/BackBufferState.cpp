@@ -1,6 +1,6 @@
 #include "BackBufferState.h"
 #include "SwapChain.h"
-#include "BackBufferState.h"
+#include "Device.h"
 
 namespace QD3D12
 {
@@ -15,7 +15,7 @@ namespace QD3D12
 		Destroy();
 	}
 
-	void BackBufferState::Init(ID3D12GraphicsCommandList* cmdList, UINT bufferIndex)
+	void BackBufferState::Init(ID3D12GraphicsCommandList* /* cmdList */, UINT bufferIndex)
 	{
 		ID3D12Device* pDevice = Device::Get();
 		QDXGISwapChain* pSwapChain = SwapChain::Get();
@@ -189,7 +189,7 @@ namespace QD3D12
 
 	UINT BackBufferState::GetRenderTargetFormats(DXGI_FORMAT formats[], UINT count)
 	{
-		count = min(count, m_scDesc.BufferCount);
+		count = std::min(count, m_scDesc.BufferCount);
 
 		for (UINT i = 0; i < count; ++i)
 		{

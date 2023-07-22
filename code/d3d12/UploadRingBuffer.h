@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Fence.h"
+
 namespace QD3D12
 {
 	class UploadRingBuffer
@@ -16,7 +18,7 @@ namespace QD3D12
 		{
 			return total % m_size;
 		}
-	
+
 	public:
 		UploadRingBuffer();
 		~UploadRingBuffer();

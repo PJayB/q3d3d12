@@ -1,6 +1,7 @@
 #include "EQAAResolve.h"
-#include "RootSignature.h"
-#include "Frame.h"
+#include "../RootSignature.h"
+#include "../Frame.h"
+#include "../Device.h"
 
 #ifndef _XBOX_ONE
 #   error EQAAResolve is only supported on Xbox One

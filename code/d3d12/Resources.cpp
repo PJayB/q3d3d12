@@ -1,5 +1,6 @@
 #include "Resources.h"
 #include "Upload.h"
+#include "Device.h"
 
 namespace QD3D12
 {

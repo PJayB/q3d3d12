@@ -1,6 +1,7 @@
 #include "BlurPP.h"
 #include "RootSignature.h"
 #include "Frame.h"
+#include "Device.h"
 
 namespace QD3D12
 {

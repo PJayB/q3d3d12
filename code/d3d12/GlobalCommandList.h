@@ -1,5 +1,7 @@
 #pragma once
 
+#include "D3D12Core.h"
+
 namespace QD3D12
 {
     // For loading and stuff

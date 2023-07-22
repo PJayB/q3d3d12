@@ -52,7 +52,9 @@ struct CD3DX12_RECT : public D3D12_RECT
         bottom = Bottom;
     }
     ~CD3DX12_RECT() {}
+#ifndef __MINGW32__
     operator const D3D12_RECT&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -103,7 +105,9 @@ struct CD3DX12_BOX : public D3D12_BOX
         back = Back;
     }
     ~CD3DX12_BOX() {}
+#ifndef __MINGW32__
     operator const D3D12_BOX&() const { return *this; }
+#endif
 };
 inline bool operator==( const D3D12_BOX& l, const D3D12_BOX& r )
 {
@@ -166,7 +170,9 @@ struct CD3DX12_DEPTH_STENCIL_DESC : public D3D12_DEPTH_STENCIL_DESC
         BackFace.StencilFunc = backStencilFunc;
     }
     ~CD3DX12_DEPTH_STENCIL_DESC() {}
+#ifndef __MINGW32__
     operator const D3D12_DEPTH_STENCIL_DESC&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -193,7 +199,9 @@ struct CD3DX12_BLEND_DESC : public D3D12_BLEND_DESC
             RenderTarget[ i ] = defaultRenderTargetBlendDesc;
     }
     ~CD3DX12_BLEND_DESC() {}
+#ifndef __MINGW32__
     operator const D3D12_BLEND_DESC&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -244,7 +252,9 @@ struct CD3DX12_RASTERIZER_DESC : public D3D12_RASTERIZER_DESC
         ConservativeRaster = conservativeRaster;
     }
     ~CD3DX12_RASTERIZER_DESC() {}
+#ifndef __MINGW32__
     operator const D3D12_RASTERIZER_DESC&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -262,7 +272,9 @@ struct CD3DX12_RESOURCE_ALLOCATION_INFO : public D3D12_RESOURCE_ALLOCATION_INFO
         SizeInBytes = size;
         Alignment = alignment;
     }
+#ifndef __MINGW32__
     operator const D3D12_RESOURCE_ALLOCATION_INFO&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -296,7 +308,9 @@ struct CD3DX12_HEAP_PROPERTIES : public D3D12_HEAP_PROPERTIES
         CreationNodeMask = creationNodeMask;
         VisibleNodeMask = nodeMask;
     }
+#ifndef __MINGW32__
     operator const D3D12_HEAP_PROPERTIES&() const { return *this; }
+#endif
     bool IsCPUAccessible() const
     {
         return Type == D3D12_HEAP_TYPE_UPLOAD || Type == D3D12_HEAP_TYPE_READBACK || (Type == D3D12_HEAP_TYPE_CUSTOM &&
@@ -386,7 +400,9 @@ struct CD3DX12_HEAP_DESC : public D3D12_HEAP_DESC
         Alignment = resAllocInfo.Alignment;
         Flags = flags;
     }
+#ifndef __MINGW32__
     operator const D3D12_HEAP_DESC&() const { return *this; }
+#endif
     bool IsCPUAccessible() const
     { return static_cast< const CD3DX12_HEAP_PROPERTIES* >( &Properties )->IsCPUAccessible(); }
 };
@@ -416,7 +432,9 @@ struct CD3DX12_CLEAR_VALUE : public D3D12_CLEAR_VALUE
         memcpy( &DepthStencil.Depth, &depth, sizeof( depth ) );
         DepthStencil.Stencil = stencil;
     }
+#ifndef __MINGW32__
     operator const D3D12_CLEAR_VALUE&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -434,7 +452,9 @@ struct CD3DX12_RANGE : public D3D12_RANGE
         Begin = begin;
         End = end;
     }
+#ifndef __MINGW32__
     operator const D3D12_RANGE&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -456,7 +476,9 @@ struct CD3DX12_TILED_RESOURCE_COORDINATE : public D3D12_TILED_RESOURCE_COORDINAT
         Z = z;
         Subresource = subresource;
     }
+#ifndef __MINGW32__
     operator const D3D12_TILED_RESOURCE_COORDINATE&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -480,7 +502,9 @@ struct CD3DX12_TILE_REGION_SIZE : public D3D12_TILE_REGION_SIZE
         Height = height;
         Depth = depth;
     }
+#ifndef __MINGW32__
     operator const D3D12_TILE_REGION_SIZE&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -502,7 +526,9 @@ struct CD3DX12_SUBRESOURCE_TILING : public D3D12_SUBRESOURCE_TILING
         DepthInTiles = depthInTiles;
         StartTileIndexInOverallResource = startTileIndexInOverallResource;
     }
+#ifndef __MINGW32__
     operator const D3D12_SUBRESOURCE_TILING&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -522,7 +548,9 @@ struct CD3DX12_TILE_SHAPE : public D3D12_TILE_SHAPE
         HeightInTexels = heightInTexels;
         DepthInTexels = depthInTexels;
     }
+#ifndef __MINGW32__
     operator const D3D12_TILE_SHAPE&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -570,7 +598,9 @@ struct CD3DX12_RESOURCE_BARRIER : public D3D12_RESOURCE_BARRIER
         barrier.UAV.pResource = pResource;
         return result;
     }
+#ifndef __MINGW32__
     operator const D3D12_RESOURCE_BARRIER&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -592,7 +622,9 @@ struct CD3DX12_PACKED_MIP_INFO : public D3D12_PACKED_MIP_INFO
         NumTilesForPackedMips = numTilesForPackedMips;
         StartTileIndexInOverallResource = startTileIndexInOverallResource;
     }
+#ifndef __MINGW32__
     operator const D3D12_PACKED_MIP_INFO&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -626,7 +658,9 @@ struct CD3DX12_SUBRESOURCE_FOOTPRINT : public D3D12_SUBRESOURCE_FOOTPRINT
         Depth = (resDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? resDesc.DepthOrArraySize : 1);
         RowPitch = rowPitch;
     }
+#ifndef __MINGW32__
     operator const D3D12_SUBRESOURCE_FOOTPRINT&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------
@@ -1188,7 +1222,7 @@ inline UINT8 D3D12GetFormatPlaneCount(
     DXGI_FORMAT Format
     )
 {
-    D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = {Format};
+    D3D12_FEATURE_DATA_FORMAT_INFO formatInfo = { Format, 0 };
     if (FAILED(pDevice->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &formatInfo, sizeof(formatInfo))))
     {
         return 0;
@@ -1294,7 +1328,9 @@ struct CD3DX12_RESOURCE_DESC : public D3D12_RESOURCE_DESC
     { return MipLevels * ArraySize() * PlaneCount(pDevice); }
     inline UINT CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice)
     { return D3D12CalcSubresource(MipSlice, ArraySlice, PlaneSlice, MipLevels, ArraySize()); }
+#ifndef __MINGW32__
     operator const D3D12_RESOURCE_DESC&() const { return *this; }
+#endif
 };
 
 //------------------------------------------------------------------------------------------------

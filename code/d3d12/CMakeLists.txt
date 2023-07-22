@@ -75,6 +75,6 @@ add_library(d3d12
     UploadRingBuffer.h
     UploadScratch.cpp
     UploadScratch.h
-    XBO/EQAAResolve.cpp
-    XBO/EQAAResolve.h
+    # XBO/EQAAResolve.cpp
+    # XBO/EQAAResolve.h
 )

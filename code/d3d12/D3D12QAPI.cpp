@@ -81,7 +81,7 @@ D3D_PUBLIC void D3D12API_CreateImage(const image_t* image, const byte *pic, qboo
 		    }
 
 		    // Don't allow zero mips
-		    mipLevels = max(1, mipLevels);
+		    mipLevels = std::max(1, mipLevels);
 	    }
 
 	    Image::Load(image, mipLevels, pic );
@@ -120,7 +120,7 @@ D3D_PUBLIC void D3D12API_UpdateCinematic(const image_t* image, const byte* pic, 
 	}
 }
 
-D3D_PUBLIC imageFormat_t D3D12API_GetImageFormat(const image_t* image)
+D3D_PUBLIC imageFormat_t D3D12API_GetImageFormat(const image_t* /* image */)
 {
 	// @pjb: hack: all images are RGBA8 for now
 	return IMAGEFORMAT_RGBA;
@@ -200,19 +200,19 @@ D3D_PUBLIC void D3D12API_DebugDrawAxis(void)
 
 }
 
-D3D_PUBLIC void D3D12API_DebugDrawTris(const shaderCommands_t *input)
+D3D_PUBLIC void D3D12API_DebugDrawTris(const shaderCommands_t * /* input */)
 {
 	PROFILE_FUNC();
 
 }
 
-D3D_PUBLIC void D3D12API_DebugDrawNormals(const shaderCommands_t *input)
+D3D_PUBLIC void D3D12API_DebugDrawNormals(const shaderCommands_t * /* input */)
 {
 	PROFILE_FUNC();
 
 }
 
-D3D_PUBLIC void D3D12API_DebugDrawPolygon(int color, int numPoints, const float* points)
+D3D_PUBLIC void D3D12API_DebugDrawPolygon(int /* color */, int /* numPoints */, const float* /* points */)
 {
 	PROFILE_FUNC();
 
@@ -330,10 +330,10 @@ D3D_PUBLIC void D3D12API_SetViewport( int left, int top, int width, int height )
 	auto bb_height = bbState->SwapChainDesc()->BufferDesc.Height;
 
 	D3D12_VIEWPORT viewport;
-	viewport.TopLeftX = max(0, left);
-	viewport.TopLeftY = max(0, (int)bb_height - top - height);
-	viewport.Width = min((int)bb_width - viewport.TopLeftX, width);
-	viewport.Height = min((int)bb_height - viewport.TopLeftY, height);
+	viewport.TopLeftX = std::max(0, left);
+	viewport.TopLeftY = std::max(0, (int)bb_height - top - height);
+	viewport.Width = std::min((int)(bb_width - viewport.TopLeftX), width);
+	viewport.Height = std::min((int)(bb_height - viewport.TopLeftY), height);
 	viewport.MinDepth = 0;
 	viewport.MaxDepth = 1;
 
@@ -447,7 +447,7 @@ D3D_PUBLIC void D3D12API_EndFrame( void )
 	if ( r_swapInterval->integer > 0 ) 
     {
         assert( vdConfig.displayFrequency == 60 || vdConfig.displayFrequency == 30 );
-		frequency = max( 60 / vdConfig.displayFrequency, r_swapInterval->integer );
+		frequency = std::max( 60 / vdConfig.displayFrequency, r_swapInterval->integer );
     }
 
 	// Fence the end of this frame
@@ -561,7 +561,12 @@ static void SetupVideoConfig()
         RI_Error( ERR_FATAL, "Bad bit depth supplied for depth-stencil (%x)\n", depthBufferDesc.Format );
 
     vdConfig.maxTextureSize = D3D12_REQ_TEXTURE2D_U_OR_V_DIMENSION;
+#ifdef __MINGW32__
+#   pragma message("Fix me: D3D12_REQ_SAMPLER_OBJECT_COUNT_PER_DEVICE")
+    vdConfig.maxActiveTextures = 4096;
+#else
     vdConfig.maxActiveTextures = D3D12_REQ_SAMPLER_OBJECT_COUNT_PER_DEVICE;
+#endif
     vdConfig.colorBits = (int) colorDepth;
     vdConfig.depthBits = (int) depthDepth;
     vdConfig.stencilBits = (int) stencilDepth;

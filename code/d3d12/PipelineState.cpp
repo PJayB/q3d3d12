@@ -2,6 +2,7 @@
 #include "BackBufferState.h" // TODO: move?
 #include "Frame.h" // TODO: move?
 #include "PSODB.h"
+#include "Device.h"
 
 using namespace Microsoft::WRL;
 

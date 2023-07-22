@@ -27,12 +27,14 @@
 #include <memory>
 #include <algorithm>
 #include <d3d11.h>
+#include <d3d12.h>
+#include <assert.h>
 
 #include "DDSTextureLoader.h"
 
-#include "../d3d/DirectXTK/dds.h"
+#include "../../d3d/DirectXTK/dds.h"
 //#include "DirectXHelpers.h"
-#include "../d3d/DirectXTK/PlatformHelpers.h"
+#include "../../d3d/DirectXTK/PlatformHelpers.h"
 
 using namespace DirectX;
 

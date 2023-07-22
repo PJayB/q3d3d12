@@ -1,4 +1,5 @@
 #include "RootSignature.h"
+#include "Device.h"
 
 namespace QD3D12
 {

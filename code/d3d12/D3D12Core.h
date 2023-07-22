@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\d3d\Direct3DCommon.h"
+#include "../d3d/Direct3DCommon.h"
 
 #ifdef _XBOX_ONE
 #	include <d3d11_x.h>
@@ -8,7 +8,7 @@
 #	include <d3dx12_x.h>
 #else
 #	include <d3d12.h>
-#	include "DirectXTK12\d3dx12.h"
+#	include "DirectXTK12/d3dx12.h"
 #endif
 
 #define QD3D12_CONSTANT_BUFFER_ALIGNMENT	256
@@ -38,9 +38,6 @@
 #else
 #	define QD3D12_PROFILE_NAMES				0
 #endif
-
-#include "Fence.h"
-#include "Device.h"
 
 namespace QD3D12
 {

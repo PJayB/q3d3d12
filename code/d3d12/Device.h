@@ -1,5 +1,8 @@
 #pragma once
 
+#include "D3D12Core.h"
+#include "Fence.h"
+
 namespace QD3D12
 {
 	class Device

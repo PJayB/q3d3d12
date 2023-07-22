@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "../d3d/DirectXTK/dds.h"
+#include "../../d3d/DirectXTK/dds.h"
 
 #pragma warning(push)
 #pragma warning(disable : 4005)

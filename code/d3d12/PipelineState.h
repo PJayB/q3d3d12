@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include "D3D12Core.h"
 
 namespace QD3D12
 {

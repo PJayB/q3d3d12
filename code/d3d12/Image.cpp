@@ -1,6 +1,7 @@
 #include "Image.h"
 #include "Upload.h"
-#include "../d3d/DirectXTK/DDS.h"
+#include "Device.h"
+#include "../d3d/DirectXTK/dds.h"
 #include "DirectXTK12/DDSTextureLoader.h"
 
 namespace QD3D12
@@ -233,8 +234,8 @@ namespace QD3D12
 			if (mip != 0) {
 				// We downsample the lightscaledCopy each time
 				R_MipMap((byte*)lightscaledCopy, mipWidth, mipHeight);
-				mipWidth = max(1, mipWidth >> 1);
-				mipHeight = max(1, mipHeight >> 1);
+				mipWidth = std::max(1, mipWidth >> 1);
+				mipHeight = std::max(1, mipHeight >> 1);
 			}
 
 			int mipSize = mipWidth * mipHeight * sizeof(UINT);
