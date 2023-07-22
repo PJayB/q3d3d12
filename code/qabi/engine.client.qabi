@@ -1,5 +1,10 @@
 #include "common.qabi"
 
+typedef int clipHandle_t;
+typedef int sfxHandle_t;
+typedef int qhandle_t;
+typedef int e_status;
+
 // Engine exports
 abi (trap_SendConsoleCommand) void Cbuf_AddText( const char *text );
 abi (trap_RemoveCommand) void Cmd_RemoveCommand( const char *cmdName );
