@@ -2,11 +2,12 @@ set(MINGW32 1)
 set(WIN32 1)
 set(CMAKE_SYSTEM_NAME Windows)
 
-add_definitions(-D_USE_MATH_DEFINES)
-add_definitions(-DNOMINMAX)
+add_definitions(-DWIN32)
 add_definitions(-D_WIN32)
 add_definitions(-DWINVER=_WIN32_WINNT_WIN10)
 add_definitions(-D_WIN32_WINNT=_WIN32_WINNT_WIN10)
+add_definitions(-D_USE_MATH_DEFINES)
+add_definitions(-DNOMINMAX)
 
 #
 # todo: detect whether we're building in Msys or not
