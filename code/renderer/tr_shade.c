@@ -270,7 +270,7 @@ static void ComputeColors( shaderCommands_t* input, int stage, shaderStage_t *pS
 				float len;
 				vec3_t v;
 
-				VectorSubtract( input->xyz[i], backEnd.viewParms.or.origin, v );
+				VectorSubtract( input->xyz[i], backEnd.viewParms.orientation.origin, v );
 				len = VectorLength( v );
 
 				len /= input->shader->portalRange;

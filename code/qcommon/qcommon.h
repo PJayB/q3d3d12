@@ -19,7 +19,7 @@ along with Foobar; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-// qcommon.h -- definitions common between client and server, but not game.or ref modules
+// qcommon.h -- definitions common between client and server, but not game or ref modules
 #ifndef _QCOMMON_H_
 #define _QCOMMON_H_
 
