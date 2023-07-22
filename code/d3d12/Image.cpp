@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Image.h"
 #include "Upload.h"
 #include "../d3d/DirectXTK/DDS.h"

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "BlurPP.h"
 #include "RootSignature.h"
 #include "Frame.h"

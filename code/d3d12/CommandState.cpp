@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "CommandState.h"
 
 #include "RootSignature.h"

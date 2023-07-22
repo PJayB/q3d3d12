@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "BackBufferState.h"
 #include "SwapChain.h"
 #include "BackBufferState.h"
 

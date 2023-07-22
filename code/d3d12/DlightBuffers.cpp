@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "DlightBuffers.h"
 
 namespace QD3D12

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "ConstantBuffer.h"
 #include "Frame.h"
 

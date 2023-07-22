@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GenericDrawStage.h"
 #include "RenderState.h"
 #include "ConstantBuffer.h"

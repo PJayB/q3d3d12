@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "D3D11Image.h"
 #include <float.h>
 
 static d3dImage_t s_d3dImages[MAX_DRAWIMAGES];

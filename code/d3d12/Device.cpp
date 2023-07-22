@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "D3D12QAPI.h"
 #include "Device.h"
 #include "GlobalCommandList.h"

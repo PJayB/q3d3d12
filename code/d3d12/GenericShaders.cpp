@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GenericShaders.h"
 
 namespace QD3D12

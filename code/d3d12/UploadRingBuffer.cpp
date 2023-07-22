@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "UploadRingBuffer.h"
 
 namespace QD3D12

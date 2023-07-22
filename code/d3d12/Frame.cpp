@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Frame.h"
 #include "TessBuffers.h"
 #include "Resources.h"

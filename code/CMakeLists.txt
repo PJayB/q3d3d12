@@ -1,32 +1,44 @@
-cmake_minimum_required(VERSION 3.22)
+#
+# Common
+#
+add_subdirectory(qabi)
+add_subdirectory(qcommon)
+add_subdirectory(qshared)
+target_link_libraries(qcommon cgame_public_qabi)
 
-project(quake3
-    VERSION 1.0.0
-    LANGUAGES C CXX
-    HOMEPAGE_URL "https://github.com/PJayB/q3d3d12"
-)
+add_subdirectory(server)
+target_link_libraries(server game_public_qabi)
 
-if (WIN32)
-	add_definitions(-D_USE_MATH_DEFINES)
-	add_definitions(-DNOMINMAX)
-    add_definitions(-D_WIN32)
-    add_definitions(-DWINVER=0x500)
-endif()
+add_subdirectory(d3d)
+
+add_subdirectory(d3d12)
+target_link_libraries(d3d12 d3d)
+
+add_subdirectory(renderer)
+target_link_libraries(renderer d3d12)
+
+add_subdirectory(client)
+target_link_libraries(client cgame_public_qabi renderer)
+
+add_subdirectory(botlib)
+target_link_libraries(botlib qcommon qshared server client)
+
+#add_subdirectory(game)
+
 
 #
 # VMs
 #
-add_subdirectory(cgame)
+#add_subdirectory(cgame)
 
 #
 # Libraries
 #
-add_subdirectory(qcommon)
-add_subdirectory(account)
+#add_subdirectory(account)
 
-target_link_libraries(qcommon cgame)
+#target_link_libraries(qcommon cgame)
 
 #
-# Main exectuable
+# Main executable
 #
 

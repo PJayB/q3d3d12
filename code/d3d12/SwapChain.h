@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.h"
-
 namespace QD3D12
 {
 	class SwapChain

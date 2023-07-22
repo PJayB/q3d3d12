@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "DescriptorBatch.h"
 
 namespace QD3D12

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "FSQ.h"
 #include "Resources.h"
 #include "RootSignature.h"

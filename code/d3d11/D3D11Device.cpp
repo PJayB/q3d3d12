@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "D3D11Device.h"
 
 QD3D11Device* g_pDevice = nullptr;
 ID3D11DeviceContext1* g_pImmediateContext = nullptr;

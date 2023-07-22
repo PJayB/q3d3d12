@@ -168,11 +168,9 @@ static ID_INLINE float BigFloat(const float *l) { FloatSwap(l); }
 
 #define	PATH_SEP '\\'
 
-#endif
-
 //======================= MAC OS X DEFINES =====================
 
-#if defined(MACOS_X)
+#elif defined(MACOS_X)
 
 #define MAC_STATIC
 #define __cdecl
@@ -222,11 +220,9 @@ static inline int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
 static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 
-#endif
-
 //======================= MAC DEFINES =================================
 
-#ifdef __MACOS__
+#elif defined(__MACOS__)
 
 #include <MacTypes.h>
 #define	MAC_STATIC
@@ -245,13 +241,11 @@ static inline int LittleLong (int l) { return LongSwap(l); }
 #define BigFloat
 static inline float LittleFloat (const float l) { return FloatSwap(&l); }
 
-#endif
-
 //======================= LINUX DEFINES =================================
 
 // the mac compiler can't handle >32k of locals, so we
 // just waste space and make big arrays static...
-#ifdef __linux__
+#elif defined(__linux__)
 
 // bk001205 - from Makefile
 #define stricmp strcasecmp
@@ -293,10 +287,9 @@ inline static int LittleLong (int l) { return LongSwap(l); }
 inline static float LittleFloat (const float *l) { return FloatSwap(l); }
 #endif
 
-#endif
-
 //======================= FreeBSD DEFINES =====================
-#ifdef __FreeBSD__ // rb010123
+
+#elif defined(__FreeBSD__) // rb010123
 
 #define stricmp strcasecmp
 
@@ -331,9 +324,11 @@ static int LittleLong (int l) { return LongSwap(l); }
 static float LittleFloat (const float *l) { return FloatSwap(l); }
 #endif
 
-#endif
-
 //=============================================================
+
+#else
+#	error "I do not know what platform this is"
+#endif
 
 typedef unsigned char 		byte;
 

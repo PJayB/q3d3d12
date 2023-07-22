@@ -24,7 +24,6 @@
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
 
-#include "pch.h"
 #include <memory>
 #include <algorithm>
 #include <d3d11.h>

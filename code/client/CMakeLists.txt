@@ -1,0 +1,23 @@
+add_library(client
+    STATIC
+    cl_cgame.c
+    cl_cin.c
+    cl_console.c
+    client.h
+    cl_input.c
+    cl_keys.c
+    cl_main.c
+    cl_net_chan.c
+    cl_parse.c
+    cl_scrn.c
+    cl_ui.c
+    keys.h
+    snd_adpcm.c
+    snd_api.c
+    snd_dma.c
+    snd_local.h
+    snd_mem.c
+    snd_mix.c
+    snd_public.h
+    snd_wavelet.c
+)

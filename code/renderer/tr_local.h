@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef TR_LOCAL_H
 #define TR_LOCAL_H
 
-#include "../game/q_shared.h"
+#include "../qshared/q_shared.h"
 #include "../qcommon/qfiles.h"
 #include "../qcommon/qcommon.h"
 #include "tr_public.h"
@@ -1208,7 +1208,7 @@ qboolean	R_GetEntityToken( char *buffer, int size );
 model_t		*R_AllocModel( void );
 
 void    	R_Init( void );
-image_t		*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmip, int glWrapClampMode );
+image_t		*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmip, wrapClampMode_t glWrapClampMode );
 
 // @pjb: need to make R_CreateImage's interface platform agnostic
 image_t		*R_CreateImage( const char *name, const byte *pic, int width, int height, qboolean mipmap

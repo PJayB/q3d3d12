@@ -1,5 +1,5 @@
 
-#include "../game/q_shared.h"
+#include "../qshared/q_shared.h"
 #include "../qcommon/qcommon.h"
 
 /*

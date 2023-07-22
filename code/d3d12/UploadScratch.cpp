@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "UploadScratch.h"
 
 namespace QD3D12

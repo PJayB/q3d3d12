@@ -11,7 +11,11 @@ SMP acceleration
 #include "tr_local.h"
 #include "tr_layer.h"
 
-#include <Windows.h>
+#include <windows.h>
+
+#if _WIN32_WINNT < _WIN32_WINNT_VISTA
+#	error Need to compile against a newer version of Windows for CreateEventEx
+#endif
 
 #if (!defined(WIN8) && !defined(WIN10)) || defined(Q_WINRT_FORCE_WIN32_THREAD_API)
 #   define NATIVE_THREAD_API 1

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "PipelineState.h"
 #include "BackBufferState.h" // TODO: move?
 #include "Frame.h" // TODO: move?

@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "SkyBox.h"
 #include "Resources.h"
 #include "RootSignature.h"

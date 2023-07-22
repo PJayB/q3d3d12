@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "D3D12Core.h"
 
 namespace QD3D12
 {

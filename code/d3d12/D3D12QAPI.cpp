@@ -1,5 +1,4 @@
 // D3D headers
-#include "pch.h"
 #include "D3D12QAPI.h"
 #include "Device.h"
 #include "SwapChain.h"

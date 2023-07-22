@@ -24,10 +24,3 @@ add_library(
     cg_view.c
     cg_weapons.c
 )
-
-target_include_directories(
-    cgame
-    PUBLIC
-    # todo: make this a variable
-    ${CMAKE_CURRENT_BUILD_DIR}/qabi/Q3_VS2015_Desktop/Debug
-)

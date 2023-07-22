@@ -1,7 +1,7 @@
 #ifndef __OGL_COMMON_H__
 #define __OGL_COMMON_H__
 
-#include "../game/q_shared.h"
+#include "../qshared/q_shared.h"
 #include "qgl.h"
 
 typedef struct image_s image_t;

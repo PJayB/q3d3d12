@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "D3D11Core.h"
 
 #ifndef D3D_DEFAULT_DEVICE_FLAGS
 #   define D3D_DEFAULT_DEVICE_FLAGS 0

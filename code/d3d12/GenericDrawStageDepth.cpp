@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "GenericDrawStageDepth.h"
 #include "RootSignature.h"
 #include "Image.h"

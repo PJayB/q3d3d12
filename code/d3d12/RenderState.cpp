@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Device.h"
 #include "SwapChain.h"
 #include "RenderState.h"

@@ -34,6 +34,11 @@ build_qabi() {
     return 1
 }
 
-for qabi in $input_dir/*.qabi; do
-    build_qabi "$qabi" "$output_dir/" "$@" || die "Failed to compile QABI"
-done
+build_qabi "$input_dir/engine.cgame.qabi" "$output_dir/" "$@" || die "Failed to compile QABI"
+build_qabi "$input_dir/engine.client.qabi" "$output_dir/" "$@" || die "Failed to compile QABI"
+build_qabi "$input_dir/engine.game.qabi" "$output_dir/" "$@" || die "Failed to compile QABI"
+build_qabi "$input_dir/engine.ui.qabi" "$output_dir/" "$@" || die "Failed to compile QABI"
+
+build_qabi "$input_dir/cgame.qabi" "$output_dir/" -vm cgvm "$@" || die "Failed to compile QABI"
+build_qabi "$input_dir/game.qabi" "$output_dir/" -vm gvm "$@" || die "Failed to compile QABI"
+build_qabi "$input_dir/ui.qabi" "$output_dir/" -vm uivm "$@" || die "Failed to compile QABI"

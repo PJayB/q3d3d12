@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "RootSignature.h"
 
 namespace QD3D12
