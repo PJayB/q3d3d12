@@ -59,7 +59,7 @@ namespace QAbiGen
                 for (int i = 0; i < args.Length; ++i)
                 {
                     string arg = args[i].Trim();
-                    if (arg.Length < 2 || (arg[0] != '-' && arg[0] != '/'))
+                    if (arg.Length < 2 || arg[0] != '-')
                     {
                         // Must be the input filename
                         if (InputFile != null)

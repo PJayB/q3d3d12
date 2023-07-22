@@ -17,12 +17,12 @@ exit 1
 
 :build
 mkdir %output% 2> nul
-%qabi% %input% /o %output% %extra%
+%qabi% %input% -o %output% %extra%
 goto end
 
 :rebuild
 mkdir %output% 2> nul
-%qabi% %input% /o %output% /f %extra%
+%qabi% %input% -o %output% /f %extra%
 goto end
 
 :clean
