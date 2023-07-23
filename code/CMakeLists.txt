@@ -10,6 +10,14 @@ target_link_libraries(q3_common PRIVATE cgame_public_qabi)
 target_link_libraries(q3_bgame PRIVATE q3_shared)
 
 #
+# Set globally for all libraries
+#
+if (WIN32)
+    add_compile_definitions(Q_HAS_D3D12)
+endif()
+
+
+#
 # VMs
 #
 add_subdirectory(game)
@@ -28,32 +36,22 @@ target_link_libraries(vm_ui_2 PRIVATE q3_shared ui_public_qabi q3_bgame)
 add_subdirectory(account)
 add_subdirectory(botlib)
 add_subdirectory(client)
-add_subdirectory(d3d)
-add_subdirectory(d3d12)
 add_subdirectory(gamethread)
 add_subdirectory(jpeg-6)
 add_subdirectory(renderer)
 add_subdirectory(server)
-add_subdirectory(win)
-add_subdirectory(xaudio)
-add_subdirectory(xinput)
 
 target_link_libraries(q3_account PRIVATE cgame_public_qabi)
 target_link_libraries(q3_botlib PRIVATE q3_common q3_shared q3_server q3_client)
 target_link_libraries(q3_client PRIVATE q3_bgame cgame_public_qabi q3_renderer q3_account q3_botlib)
-target_link_libraries(q3_d3d12 PRIVATE q3_d3d)
 target_link_libraries(q3_gamethread PRIVATE cgame_public_qabi)
-target_link_libraries(q3_renderer PRIVATE q3_d3d12)
 target_link_libraries(q3_server PRIVATE q3_bgame game_public_qabi)
-target_link_libraries(q3_win PRIVATE cgame_public_qabi)
-target_link_libraries(q3_xinput PRIVATE cgame_public_qabi)
 
 #
 # Main executable
 #
 add_subdirectory(win32)
 target_link_libraries(quake3 PRIVATE
-    # Internal
     cgame_public_qabi
     game_public_qabi
     ui_public_qabi
@@ -69,8 +67,24 @@ target_link_libraries(quake3 PRIVATE
     q3_xaudio
     q3_xinput
     jpeg
-)
+    )
 
-target_compile_definitions(quake3 PRIVATE
-    Q_HAS_D3D12
-)
+
+#
+# Platform specific libraries
+#
+if (WIN32)
+    add_subdirectory(d3d)
+    add_subdirectory(d3d12)
+    add_subdirectory(win)
+    add_subdirectory(xaudio)
+    add_subdirectory(xinput)
+
+    target_link_libraries(q3_d3d12 PRIVATE q3_d3d)
+    target_link_libraries(q3_renderer PRIVATE q3_d3d12)
+    target_link_libraries(q3_win PRIVATE cgame_public_qabi)
+    target_link_libraries(q3_xinput PRIVATE cgame_public_qabi)
+        target_compile_definitions(quake3 PRIVATE
+        Q_HAS_D3D12
+    )
+endif()
