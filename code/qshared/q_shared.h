@@ -157,7 +157,7 @@ float	FloatSwap (const float *f);
 #endif
 #endif
 
-#define ID_INLINE __inline 
+#define ID_INLINE __inline
 
 static ID_INLINE short BigShort( short l) { return ShortSwap(l); }
 #define LittleShort

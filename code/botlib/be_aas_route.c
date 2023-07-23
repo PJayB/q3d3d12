@@ -45,6 +45,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "be_interface.h"
 #include "be_aas_def.h"
 
+#ifdef __GNUC__
+#	define FORCE_INLINE __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#	define FORCE_INLINE __declspec(forceinline)
+#else
+#	define FORCE_INLINE inline
+#endif
+
 #define ROUTING_DEBUG
 
 //travel time in hundreths of a second = distance * 100 / speed
@@ -106,7 +114,7 @@ void AAS_RoutingInfo(void)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-__inline int AAS_ClusterAreaNum(int cluster, int areanum)
+FORCE_INLINE int AAS_ClusterAreaNum(int cluster, int areanum)
 {
 	int side, areacluster;
 
@@ -166,7 +174,7 @@ void AAS_InitTravelFlagFromType(void)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-ID_INLINE int AAS_TravelFlagForType_inline(int traveltype)
+FORCE_INLINE int AAS_TravelFlagForType_inline(int traveltype)
 {
 	int tfl;
 
@@ -339,7 +347,7 @@ int AAS_EnableRoutingArea(int areanum, int enable)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-__inline float AAS_RoutingTime(void)
+FORCE_INLINE float AAS_RoutingTime(void)
 {
 	return AAS_Time();
 } //end of the function AAS_RoutingTime
@@ -379,7 +387,7 @@ int AAS_GetAreaContentsTravelFlags(int areanum)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-__inline int AAS_AreaContentsTravelFlags_inline(int areanum)
+FORCE_INLINE int AAS_AreaContentsTravelFlags_inline(int areanum)
 {
 	return aasworld.areacontentstravelflags[areanum];
 } //end of the function AAS_AreaContentsTravelFlags
