@@ -15,6 +15,7 @@ add_library(q3_renderer
     tr_bsp.c
     tr_cmds.c
     tr_curve.c
+    tr_dds.cpp
     tr_flares.c
     tr_font.c
     tr_image.c

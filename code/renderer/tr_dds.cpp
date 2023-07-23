@@ -12,7 +12,7 @@ extern "C" {
 }
 
 // @pjb: DDS loading
-#include "../d3d/DirectXTK/DDS.h"
+#include "../d3d/DirectXTK/dds.h"
 
 using namespace DirectX;
 
