@@ -2816,9 +2816,6 @@ static qboolean OnRightOfPlane( const halfSpace_t* plane, const float p0[2], con
 // @pjb: returns positive results if the edge intersected or is on the right of the plane
 static float LineSegmentToPlaneDistance( const halfSpace_t* plane, const float p0[2], const float p1[2] )
 {
-#	define min(x, y) (x < y ? x : y)
-#	define max(x, y) (x > y ? x : y)
-
     float a = PointToPlaneDistance( plane, p0 );
     float b = PointToPlaneDistance( plane, p1 );
     if ( a >= 0 && b >= 0 )

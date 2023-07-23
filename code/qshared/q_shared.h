@@ -339,6 +339,14 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#ifndef __cplusplus
+#	ifndef min
+#		define min(x, y) (x < y ? x : y)
+#	endif
+#	ifndef max
+#		define max(x, y) (x > y ? x : y)
+#	endif
+#endif
 
 #ifndef NULL
 #define NULL ((void *)0)

@@ -39,14 +39,14 @@ add_subdirectory(xaudio)
 add_subdirectory(xinput)
 
 target_link_libraries(q3_account PRIVATE cgame_public_qabi)
+target_link_libraries(q3_botlib PRIVATE q3_common q3_shared q3_server q3_client)
+target_link_libraries(q3_client PRIVATE q3_bgame cgame_public_qabi q3_renderer q3_account q3_botlib)
 target_link_libraries(q3_d3d12 PRIVATE q3_d3d)
+target_link_libraries(q3_gamethread PRIVATE cgame_public_qabi)
 target_link_libraries(q3_renderer PRIVATE q3_d3d12)
 target_link_libraries(q3_server PRIVATE q3_bgame game_public_qabi)
-target_link_libraries(q3_client PRIVATE q3_bgame cgame_public_qabi q3_renderer)
-target_link_libraries(q3_botlib PRIVATE q3_common q3_shared q3_server q3_client)
-target_link_libraries(q3_gamethread PRIVATE cgame_public_qabi)
-target_link_libraries(q3_xinput PRIVATE cgame_public_qabi)
 target_link_libraries(q3_win PRIVATE cgame_public_qabi)
+target_link_libraries(q3_xinput PRIVATE cgame_public_qabi)
 
 #
 # Main executable

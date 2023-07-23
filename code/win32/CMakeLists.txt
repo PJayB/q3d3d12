@@ -13,9 +13,7 @@ add_executable(quake3 WIN32
 )
 
 target_link_libraries(quake3 PRIVATE
-    d3d12
-    dxgi
     ws2_32
-    xaudio2_8
+    winmm
     xinput
 )

@@ -78,3 +78,5 @@ add_library(q3_d3d12
     # XBO/EQAAResolve.cpp
     # XBO/EQAAResolve.h
 )
+
+target_link_libraries(q3_d3d12 PUBLIC dxgi d3d12)
