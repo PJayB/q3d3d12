@@ -1,4 +1,4 @@
-add_library(xaudio
+add_library(q3_xaudio
     STATIC
     xaudio_local.h
     xaudio_main.cpp

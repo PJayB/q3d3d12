@@ -1,4 +1,4 @@
-add_library(ui
+add_library(vm_ui
     SHARED
     keycodes.h
     ui_atoms.c

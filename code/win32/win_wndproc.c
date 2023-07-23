@@ -33,9 +33,9 @@ WinVars_t	g_wv;
 static UINT MSH_MOUSEWHEEL;
 
 // Console variables that we need to access from this module
-cvar_t		*vid_xpos;			// X coordinate of window position
-cvar_t		*vid_ypos;			// Y coordinate of window position
-cvar_t		*r_fullscreen;
+static cvar_t		*vid_xpos;			// X coordinate of window position
+static cvar_t		*vid_ypos;			// Y coordinate of window position
+static cvar_t		*r_fullscreen;
 
 #define VID_NUM_MODES ( sizeof( vid_modes ) / sizeof( vid_modes[0] ) )
 

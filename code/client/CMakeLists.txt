@@ -1,4 +1,4 @@
-add_library(client
+add_library(q3_client
     STATIC
     cl_cgame.c
     cl_cin.c

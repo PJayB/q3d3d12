@@ -127,7 +127,7 @@ struct vm_s {
     // DO NOT MOVE OR CHANGE THESE WITHOUT CHANGING THE VM_OFFSET_* DEFINES
     // USED BY THE ASM CODE
     int			programStack;		// the vm may be recursively entered
-    size_t		(*systemCall)( vmArg_t *parms );
+    size_t		(*systemCall)( vmArg_t *parms, ... );
 
 	//------------------------------------
    

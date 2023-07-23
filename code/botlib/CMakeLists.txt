@@ -1,5 +1,5 @@
 add_library(
-    botlib
+    q3_botlib
     STATIC
     aasfile.h
     be_aas_bsp.h
@@ -56,4 +56,4 @@ add_library(
     l_utils.h
 )
 
-target_compile_definitions(botlib PRIVATE BOTLIB)
+target_compile_definitions(q3_botlib PRIVATE BOTLIB)

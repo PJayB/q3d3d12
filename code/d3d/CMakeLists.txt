@@ -1,4 +1,4 @@
-add_library(d3d
+add_library(q3_d3d
     STATIC
     Direct3DCommon.cpp
     Direct3DCommon.h

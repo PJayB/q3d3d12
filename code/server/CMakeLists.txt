@@ -1,4 +1,4 @@
-add_library(server
+add_library(q3_server
     STATIC
     server.h
     sv_ccmds.c

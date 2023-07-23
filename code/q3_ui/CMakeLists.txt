@@ -1,5 +1,5 @@
-add_library(client_ui
-    STATIC
+add_library(vm_ui_2
+    SHARED
     keycodes.h
     ui_addbots.c
     ui_atoms.c
@@ -14,7 +14,7 @@ add_library(client_ui
     ui_ingame.c
     ui_loadconfig.c
     ui_local.h
-    ui_login.c
+    # ui_login.c
     ui_main.c
     ui_menu.c
     ui_mfield.c
@@ -36,7 +36,7 @@ add_library(client_ui
     # ui_signup.c
     ui_sound.c
     ui_sparena.c
-    ui_specifyleague.c
+    #ui_specifyleague.c
     ui_specifyserver.c
     ui_splevel.c
     ui_sppostgame.c
@@ -44,6 +44,7 @@ add_library(client_ui
     ui_spskill.c
     ui_start.c
     ui_startserver.c
+    ui_syscalls.c
     ui_team.c
     ui_teamorders.c
     ui_video.c

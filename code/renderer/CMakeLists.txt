@@ -1,4 +1,4 @@
-add_library(renderer
+add_library(q3_renderer
     STATIC
     # gl_common.c
     # gl_common.h
@@ -43,7 +43,7 @@ add_library(renderer
 
 # TODO: enable D3D11 using an option or something
 
-target_compile_definitions(renderer PRIVATE
+target_compile_definitions(q3_renderer PRIVATE
     # Q_HAS_D3D11
     Q_HAS_D3D12
     Q_SKIP_DLIGHT_PROJECTION

@@ -1,4 +1,4 @@
-add_library(gamethread
+add_library(q3_gamethread
     STATIC
     gt_msgq.cpp
     gt_msgq.h

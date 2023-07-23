@@ -1,4 +1,4 @@
-add_library(qcommon
+add_library(q3_common
     STATIC
     cm_load.c
     cm_patch.c

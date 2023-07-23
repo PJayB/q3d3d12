@@ -1,5 +1,5 @@
 add_library(
-    game
+    vm_game
     SHARED
     ai_chat.c
     ai_chat.h

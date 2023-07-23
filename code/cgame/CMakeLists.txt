@@ -1,5 +1,5 @@
 add_library(
-    cgame
+    vm_cgame
     SHARED
     cg_consolecmds.c
     cg_draw.c

@@ -1,4 +1,4 @@
-add_library(d3d12
+add_library(q3_d3d12
     STATIC
     BackBufferState.cpp
     BackBufferState.h

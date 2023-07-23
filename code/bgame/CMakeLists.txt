@@ -1,4 +1,4 @@
-add_library(bgame
+add_library(q3_bgame
     STATIC
     # bg_lib.c
     bg_lib.h
@@ -9,4 +9,4 @@ add_library(bgame
     bg_slidemove.c
 )
 
-target_include_directories(bgame PUBLIC .)
+target_include_directories(q3_bgame PUBLIC .)

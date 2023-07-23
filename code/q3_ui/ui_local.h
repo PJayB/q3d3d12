@@ -675,8 +675,8 @@ int				trap_Argc( void );
 void			trap_Argv( int n, char *buffer, int bufferLength );
 void			trap_Cmd_ExecuteText( int exec_when, const char *text );	// don't use EXEC_NOW!
 int				trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void			trap_FS_Read( void *buffer, int len, fileHandle_t f );
-void			trap_FS_Write( const void *buffer, int len, fileHandle_t f );
+int 			trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int 			trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void			trap_FS_FCloseFile( fileHandle_t f );
 int				trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 int				trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
@@ -730,7 +730,7 @@ void			trap_SetPbClStatus( int status );
 
 ===============================================================================
 */
-int             trap_Account_IsUserSignedIn( void );
+qboolean        trap_Account_IsUserSignedIn( void );
 void            trap_Account_SignIn( int controllerIndex );
 void            trap_Account_SignOut( void );
 qboolean        trap_Account_GetPlayerName( char* buf, int bufLen );
