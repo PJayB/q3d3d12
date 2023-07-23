@@ -34,7 +34,7 @@ abi (trap_GetVideoConfig) void CL_GetVideoConfig( vdconfig_t *glconfig );
 abi (trap_Account_IsUserSignedIn)    qboolean   Account_IsUserSignedIn   ( void );
 abi (trap_Account_SignIn)            void       Account_SignIn           ( int userIndex );
 abi (trap_Account_SignOut)           void       Account_SignOut          ( void );
-abi (trap_Account_GetPlayerName)     int        Account_GetPlayerName    ( char* buf, int bufLen );
+abi (trap_Account_GetPlayerName)     qboolean   Account_GetPlayerName    ( char* buf, int bufLen );
 abi (trap_Account_LoadConfiguration) void       Account_LoadConfiguration( void );
 abi (trap_Account_SaveConfiguration) void       Account_SaveConfiguration( void );
 

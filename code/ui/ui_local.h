@@ -1125,7 +1125,7 @@ void UI_RankStatusMenu( void );
 
 ===============================================================================
 */
-int             trap_Account_IsUserSignedIn( void );
+qboolean        trap_Account_IsUserSignedIn( void );
 void            trap_Account_SignIn( int controllerIndex );
 void            trap_Account_SignOut( void );
 qboolean        trap_Account_GetPlayerName( char* buf, int bufLen );

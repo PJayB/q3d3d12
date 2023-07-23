@@ -39,7 +39,7 @@ char	sys_cmdline[MAX_STRING_CHARS];
 #define ALT_SPANK
 #ifdef ALT_SPANK
 #include <stdio.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 
 int fh = 0;

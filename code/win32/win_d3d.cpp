@@ -1,15 +1,19 @@
 #include "../d3d/Direct3DCommon.h"
 
-#include "../d3d11/D3D11Core.h"
-#include "../d3d11/D3D11Driver.h"
-#include "../d3d11/D3D11Device.h"
+#ifdef Q_HAS_D3D11
+#   include "../d3d11/D3D11Core.h"
+#   include "../d3d11/D3D11Driver.h"
+#   include "../d3d11/D3D11Device.h"
+#endif
 
-#include "../d3d12/D3D12Core.h"
-#include "../d3d12/D3D12QAPI.h"
-#include "../d3d12/Device.h"
-#include "../d3d12/SwapChain.h"
-#include "../d3d12/DescriptorHeaps.h"
-#include "../d3d12/GlobalCommandList.h"
+#ifdef Q_HAS_D3D12
+#   include "../d3d12/D3D12Core.h"
+#   include "../d3d12/D3D12QAPI.h"
+#   include "../d3d12/Device.h"
+#   include "../d3d12/SwapChain.h"
+#   include "../d3d12/DescriptorHeaps.h"
+#   include "../d3d12/GlobalCommandList.h"
+#endif
 
 extern "C" {
 #   include "resource.h"

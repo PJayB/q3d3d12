@@ -1,4 +1,4 @@
-add_library(ui
+add_library(client_ui
     STATIC
     keycodes.h
     ui_addbots.c

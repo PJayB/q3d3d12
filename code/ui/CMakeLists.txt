@@ -1,0 +1,14 @@
+add_library(ui
+    SHARED
+    keycodes.h
+    ui_atoms.c
+    ui_gameinfo.c
+    ui_local.h
+    ui_main.c
+    ui_players.c
+    ui_public.h
+    ui_shared.c
+    ui_shared.h
+    ui_syscalls.c
+    ui_util.c
+)

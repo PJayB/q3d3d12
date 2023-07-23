@@ -91,13 +91,15 @@ qboolean XAudio_Init(void)
     xaudio_allowDrop = Cvar_Get( "xaudio_allowDrop", "1", CVAR_TEMP | CVAR_ARCHIVE );
     xaudio_maxQueueSize = Cvar_Get( "xaudio_maxQueueSize", "3", CVAR_TEMP | CVAR_ARCHIVE );
 
+#ifndef __MINGW32__
+#   pragma message("todo: Fix Xaudio2 LOG defines")
     cvar_t* xaudio_debugLevel = Cvar_Get( "xaudio_debugLevel", "0", CVAR_TEMP | CVAR_LATCH );
     if ( xaudio_debugLevel->integer > 0 )
     {
         XAUDIO2_DEBUG_CONFIGURATION dbgCfg;
         ZeroMemory( &dbgCfg, sizeof( dbgCfg ) );
         dbgCfg.TraceMask = XAUDIO2_LOG_ERRORS | XAUDIO2_LOG_WARNINGS;
-        
+
         if ( xaudio_debugLevel->integer > 1 )
             dbgCfg.TraceMask |= XAUDIO2_LOG_INFO;
         if ( xaudio_debugLevel->integer > 2 )
@@ -112,6 +114,7 @@ qboolean XAudio_Init(void)
 
         g_pXAudio2->SetDebugConfiguration( &dbgCfg );
     }
+#endif
 
     hr = g_pXAudio2->CreateMasteringVoice( &g_pMasterVoice );
     if ( FAILED( hr ) )
