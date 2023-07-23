@@ -11,3 +11,11 @@ add_executable(quake3 WIN32
     win_syscon.c
     win_wndproc.c
 )
+
+target_link_libraries(quake3 PRIVATE
+    d3d12
+    dxgi
+    ws2_32
+    xaudio2_8
+    xinput
+)

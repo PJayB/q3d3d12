@@ -31,6 +31,7 @@ add_subdirectory(client)
 add_subdirectory(d3d)
 add_subdirectory(d3d12)
 add_subdirectory(gamethread)
+add_subdirectory(jpeg-6)
 add_subdirectory(renderer)
 add_subdirectory(server)
 add_subdirectory(win)
@@ -67,11 +68,7 @@ target_link_libraries(quake3 PRIVATE
     q3_win
     q3_xaudio
     q3_xinput
-
-    # System
-    d3d12
-    dxgi
-    ws2_32
+    jpeg
 )
 
 target_compile_definitions(quake3 PRIVATE
