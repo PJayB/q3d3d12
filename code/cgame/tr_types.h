@@ -198,7 +198,6 @@ typedef struct {
 
 #define _3DFX_DRIVER_NAME	"3dfxvgl"
 #define OPENGL_DRIVER_NAME	"opengl32"
-#define D3D11_DRIVER_NAME   "d3d11" // @pjb
 #define PROXY_DRIVER_NAME   "proxy" // @pjb
 
 #else

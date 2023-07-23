@@ -42,10 +42,7 @@ add_library(q3_renderer
     tr_world.c
 )
 
-# TODO: enable D3D11 using an option or something
-
 target_compile_definitions(q3_renderer PRIVATE
-    # Q_HAS_D3D11
     Q_HAS_D3D12
     Q_SKIP_DLIGHT_PROJECTION
 )

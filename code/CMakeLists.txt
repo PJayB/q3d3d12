@@ -72,6 +72,5 @@ target_link_libraries(quake3 PRIVATE
 )
 
 target_compile_definitions(quake3 PRIVATE
-    # Q_HAS_D3D11
     Q_HAS_D3D12
 )

@@ -1,11 +1,5 @@
 #include "../d3d/Direct3DCommon.h"
 
-#ifdef Q_HAS_D3D11
-#   include "../d3d11/D3D11Core.h"
-#   include "../d3d11/D3D11Driver.h"
-#   include "../d3d11/D3D11Device.h"
-#endif
-
 #ifdef Q_HAS_D3D12
 #   include "../d3d12/D3D12Core.h"
 #   include "../d3d12/D3D12QAPI.h"
@@ -206,93 +200,6 @@ D3D_PUBLIC void D3D12_Window_Shutdown( void )
 {
     QD3D12::SwapChain::Destroy();
     QD3D12::Device::Destroy();
-
-    ::UnregisterClass( WINDOW_CLASS_NAME, g_wv.hInstance );
-    ::DestroyWindow( g_hWnd );
-
-    g_hWnd = NULL;
-}
-#endif
-
-#ifdef Q_HAS_D3D11
-//----------------------------------------------------------------------------
-// Creates a window, initializes the driver and sets up Direct3D 11 state.
-//----------------------------------------------------------------------------
-D3D_PUBLIC void D3D11_Window_Init( void )
-{
-    RI_Printf( PRINT_ALL, "Initializing D3D11 subsystem\n" );
-
-    if ( !RegisterWindowClass() )
-    {
-        //Com_Error( ERR_FATAL, "Failed to register DX12 window class.\n" );
-        //return;
-    }
-
-
-    // @pjb: todo: fullscreen stuff
-    bool fullscreen = r_fullscreen->integer != 0;
-
-    cvar_t* vid_xpos = Cvar_Get ("vid_xpos", "", 0);
-    cvar_t* vid_ypos = Cvar_Get ("vid_ypos", "", 0);
-
-    g_hWnd = CreateGameWindow( 
-        vid_xpos->integer,
-        vid_ypos->integer,
-        vdConfig.vidWidth, 
-        vdConfig.vidHeight,
-        fullscreen);
-    if ( !g_hWnd )
-    {
-        Com_Error( ERR_FATAL, "Failed to create Direct3D 11 window.\n" );
-        return;
-    }
-
-    QD3D11Device* device = QD3D11::InitDevice();
-
-    DXGI_SWAP_CHAIN_DESC1 scDesc;
-    ZeroMemory( &scDesc, sizeof(scDesc) );
-    scDesc.SwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL;
-    scDesc.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-    QD3D11::GetSwapChainDescFromConfig( &scDesc );
-
-    DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsd;
-    ZeroMemory( &fsd, sizeof(fsd) );
-    fsd.Windowed = r_fullscreen->integer <= 0;
-    fsd.Scaling = DXGI_MODE_SCALING_STRETCHED;
-
-    IDXGISwapChain1* swapChain = nullptr;
-    HRESULT hr = QD3D11::CreateSwapChain(
-        device,
-        g_hWnd, 
-        &scDesc, 
-        &fsd, 
-        &swapChain);
-    if (FAILED(hr))
-    {
-        // @pjb: todo: if swapchain desc is too fancy, fall back
-        Com_Error( ERR_FATAL, "Failed to create Direct3D 11 swapchain: %s.\n", QD3D::HResultToString(hr) );
-        return;
-    }
-
-    QD3D11::InitSwapChain(swapChain);
-
-    SAFE_RELEASE(swapChain);
-    SAFE_RELEASE(device);
-
-    ::ShowWindow( g_hWnd, SW_SHOW );
-    ::UpdateWindow( g_hWnd );
-    ::SetForegroundWindow( g_hWnd );
-    ::SetFocus( g_hWnd );
-}
-
-//----------------------------------------------------------------------------
-// Cleans up and stops D3D11, and closes the window.
-//----------------------------------------------------------------------------
-D3D_PUBLIC void D3D11_Window_Shutdown()
-{
-    QD3D11::DestroyDevice();
-    QD3D11::DestroySwapChain();
 
     ::UnregisterClass( WINDOW_CLASS_NAME, g_wv.hInstance );
     ::DestroyWindow( g_hWnd );

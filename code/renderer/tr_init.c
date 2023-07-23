@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 #include "tr_layer.h"
-#include "../d3d11/D3D11Driver.h"
 #include "../d3d12/D3D12QAPI.h"
 
 vdconfig_t	vdConfig;
@@ -152,9 +151,6 @@ int		max_polyverts;
 // @pjb: fixed hardware?
 cvar_t  *r_fixedhw;
 
-// @pjb: use d3d11 or 12?
-cvar_t  *r_d3dVersion;
-
 static void AssertCvarRange( cvar_t *cv, float minVal, float maxVal, qboolean shouldBeIntegral )
 {
 	if ( shouldBeIntegral )
@@ -185,30 +181,10 @@ void InitDriver( void )
 {
     R_ResetGraphicsLayer();
 
-#if defined(Q_HAS_D3D11) && defined(Q_HAS_D3D12)
-	if (r_d3dVersion->integer != 11 && r_d3dVersion->integer != 12) {
-		RI_Printf(PRINT_WARNING, "r_d3dVersion is invalid: %d. Valid options are 11 or 12.\n", r_d3dVersion->integer);
-		r_d3dVersion->integer = 11;
-		r_d3dVersion->modified = qfalse;
-	}
-
-    if (r_d3dVersion->integer == 12 && !D3D12_DriverIsSupported()) {
-        RI_Printf(PRINT_WARNING, "r_d3dVersion requests Direct3D 12, but it is not supported by the system. Defaulting to 11. Set dx12_warp 1 to use WARP 12.\n");
-		r_d3dVersion->integer = 11;
-		r_d3dVersion->modified = qfalse;
-    }
-
-	if (r_d3dVersion->integer == 11) {
-		D3D11_DriverInit(&tr_graphicsApi);
-	} else if (r_d3dVersion->integer == 12) {
-		D3D12_DriverInit(&tr_graphicsApi);
-	}
-#elif defined(Q_HAS_D3D11)
-	D3D11_DriverInit(&tr_graphicsApi);
-#elif defined(Q_HAS_D3D12)
+#if defined(Q_HAS_D3D12)
 	D3D12_DriverInit(&tr_graphicsApi);
 #else
-#   error Must define one or both of Q_HAS_D3D11 and Q_HAS_D3D12
+#   error Must define at least one renderer.
 #endif
 
     R_ValidateGraphicsLayer();
@@ -579,7 +555,6 @@ void R_Register( void )
 #else
     const char* defaultD3DVersion = "11";
 #endif
-	r_d3dVersion = Cvar_Get("r_d3dVersion", defaultD3DVersion, CVAR_LATCH);
 	r_glDriver = Cvar_Get( "r_glDriver", OPENGL_DRIVER_NAME, CVAR_ARCHIVE | CVAR_LATCH );
 	r_allowExtensions = Cvar_Get( "r_allowExtensions", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_ext_compressed_textures = Cvar_Get( "r_ext_compressed_textures", "0", CVAR_ARCHIVE | CVAR_LATCH );

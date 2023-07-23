@@ -2,22 +2,16 @@
 #include "tr_layer.h"
 #include "proxy_main.h"
 
+#define PROXY_OPENGL 1
+
 #ifdef Q_HAS_D3D12
-#	define PROXY_OPENGL 0
 #	define PROXY_D3D12 1
 #else
-#	define PROXY_OPENGL 1
 #	define PROXY_D3D12 0
 #endif
 
-#define PROXY_D3D11 1
-
 // D3D headers
-#if PROXY_D3D11
-#	include "../d3d11/d3d_qapi.h"
-#	include "../win32/win_d3d.h"
-#endif
-#if PROXY_D3D12 
+#if PROXY_D3D12
 #	include "../d3d12/QAPI.h"
 #	include "../win32/win_dx12.h"
 #endif
@@ -79,9 +73,6 @@ static qboolean gfx_initialized_configs = qfalse;
 static cvar_t* proxy_driverPriority = NULL;
 
 enum {
-#if PROXY_D3D11
-	gfx_driver_d3d11,
-#endif
 #if PROXY_D3D12
 	gfx_driver_d3d12,
 #endif
@@ -99,9 +90,6 @@ struct gfx_driver_info_s {
 
 static const struct gfx_driver_info_s gfx_driver_infos[] = 
 {
-#if PROXY_D3D11
-	{ "Direct3D 11", D3DDrv_DriverInit, D3D11_Window_GetWindowHandle },
-#endif
 #if PROXY_D3D12
 	{ "DirectX 12", DX12_DriverInit, D3D12_Window_GetWindowHandle },
 #endif
