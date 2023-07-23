@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #undef UI_API_VERSION
 #define UI_API_VERSION	4
 #include "keycodes.h"
-#include "../game/bg_public.h"
+#include "../bgame/bg_public.h"
 
 typedef void (*voidfunc_f)(void);
 

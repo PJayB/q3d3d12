@@ -23,13 +23,6 @@ add_library(
     be_ai_move.h
     be_ai_weap.h
     be_ea.h
-    # bg_lib.c
-    bg_lib.h
-    bg_local.h
-    bg_misc.c
-    bg_pmove.c
-    bg_public.h
-    bg_slidemove.c
     botlib.h
     chars.h
     g_active.c
@@ -60,9 +53,5 @@ add_library(
     g_weapon.c
     inv.h
     match.h
-    q_math.c
-    q_shared.c
-    q_shared.h
-    surfaceflags.h
     syn.h
 )

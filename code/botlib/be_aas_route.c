@@ -166,7 +166,7 @@ void AAS_InitTravelFlagFromType(void)
 // Returns:				-
 // Changes Globals:		-
 //===========================================================================
-__inline int AAS_TravelFlagForType_inline(int traveltype)
+ID_INLINE int AAS_TravelFlagForType_inline(int traveltype)
 {
 	int tfl;
 

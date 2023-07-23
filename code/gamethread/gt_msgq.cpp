@@ -11,11 +11,20 @@ namespace GameThread
     void MessageQueue::Post( const MSG* msg )
     {
         assert( msg->TimeStamp != 0 );
-        m_msgs.push( *msg );
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_queue.push( *msg );
     }
 
     bool MessageQueue::Pop( MSG* msg )
     {
-        return m_msgs.try_pop( *msg );
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_queue.empty())
+        {
+            *msg = m_queue.front();
+            m_queue.pop();
+            return true;
+        }
+        return false;
     }
 }

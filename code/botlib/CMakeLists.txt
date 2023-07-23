@@ -1,6 +1,6 @@
 add_library(
     botlib
-    SHARED
+    STATIC
     aasfile.h
     be_aas_bsp.h
     be_aas_bspq3.c

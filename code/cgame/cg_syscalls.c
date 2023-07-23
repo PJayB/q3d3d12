@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "cg_local.h"
 
-static int (QDECL *syscallA)( vmArg_t* args ) = (int (QDECL *)( vmArg_t*, ...)) (size_t) ~0ULL;
+static int (QDECL *syscallA)( vmArg_t* args, ... ) = (int (QDECL *)( vmArg_t*, ...)) (size_t) ~0ULL;
 
 void dllEntry( int (QDECL  *syscallptr)( vmArg_t* arg,... ) ) {
 	syscallA = syscallptr;

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include <concurrent_queue.h>
+
+#pragma message("TODO: gamethread concurrent_queue")
+#include <mutex>
+#include <queue>
 
 // Convenience macro for setting up a message
 #define INIT_MSG( msg )        { ZeroMemory( &(msg), sizeof( msg ) ); (msg).TimeStamp = Sys_Milliseconds(); }
@@ -25,8 +28,8 @@ public:
     bool Pop( MSG* msg );
 
 private:
-    
-    concurrency::concurrent_queue<MSG> m_msgs;
+    std::mutex m_mutex;
+    std::queue<MSG> m_queue;
 };
 
 }

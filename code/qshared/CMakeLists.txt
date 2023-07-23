@@ -4,3 +4,5 @@ add_library(qshared
     q_shared.h
     q_shared.c
 )
+
+target_include_directories(qshared PUBLIC .)

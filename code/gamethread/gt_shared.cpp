@@ -4,7 +4,7 @@ extern "C" {
 #   include "../win/win_shared.h"
 }
 
-#include <Windows.h>
+#include <windows.h>
 
 #include "gt_shared.h"
 
