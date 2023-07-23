@@ -219,7 +219,11 @@ namespace QD3D12
 				Com_Printf("^3WARNING: %s generated a PSO during run-time (hash 0x%llx)\n", caller, hash);
 
 				char tmp[512] = { 0 };
+#ifdef __MINGW32__
+#				pragma message("TODO: R_GetGLStateMaskString")
+#else
 				R_GetGLStateMaskString(tmp, sizeof(tmp), pDrawState->StateBits);
+#endif
 				Com_Printf("^3   StateBits: %s\n", tmp);
 				Com_Printf("^3   CullMode: 0x%u, PolyOffset: 0x%u, Outline: 0x%u\n",
 					pDrawState->CullMode, pDrawState->PolyOffset, pDrawState->Outline);
@@ -227,8 +231,12 @@ namespace QD3D12
 
 #ifdef _DEBUG
             char stateCode[2048] = {0};
+#ifdef __MINGW32__
+#				pragma message("TODO: R_GetGLStateMaskString")
+#else
             R_GetGLStateMaskString(stateCode, _countof(stateCode), pDrawState->StateBits);
-            char cullMode[256];
+#endif
+			char cullMode[256];
             switch (pDrawState->CullMode)
             {
             case CT_FRONT_SIDED: Com_sprintf(cullMode, _countof(cullMode), "CT_FRONT_SIDED"); break;
